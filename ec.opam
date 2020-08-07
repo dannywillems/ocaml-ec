@@ -1,0 +1,25 @@
+opam-version: "2.0"
+name: "ocaml-ec"
+version: "0.0.1"
+authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
+maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
+synopsis: "OCaml implementation of basic elliptic curve operations"
+description: "OCaml implementation of basic elliptic curve operations"
+homepage: "https://gitlab.com/dannywillems/ocaml-ec"
+dev-repo: "git+https://gitlab.com/dannywillems/ocaml-ec.git"
+bug-reports: "https://gitlab.com/dannywillems/ocaml-ec/issues"
+license: "MIT"
+depends: [
+  "dune" {build & >= "2.0"}
+  # Has not been tested with other Zarith versions.
+  # The CI should verify it and it can then be extent
+  "zarith" {build & = "1.9.1"}
+  "ff" {build & = "0.2.0" }
+  "alcotest" {with-test}
+]
+build: [[ "dune" "build" "-j" jobs "-p" name "@install" ]]
+run-test: [[ "dune" "runtest" "-p" name "-j" jobs ]]
+pin-depends: [
+  ["ff.0.2.0" "git+https://gitlab.com/dannywillems/ocaml-ff.git#0.2.0"]
+]
+

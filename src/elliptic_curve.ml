@@ -36,7 +36,7 @@ module type T = sig
   val is_zero : t -> bool
   (** Return true if the given element is zero *)
 
-  val random : unit -> t
+  val random : ?(state:Random.State.t) -> unit -> t
   (** Generate a random element *)
 
   val add : t -> t -> t

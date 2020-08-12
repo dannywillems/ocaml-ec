@@ -42,6 +42,9 @@ module type T = sig
   val add : t -> t -> t
   (** Return the addition of two element *)
 
+  val double : t -> t
+  (** Double the element *)
+
   val negate : t -> t
   (** Return the opposite of the element *)
 

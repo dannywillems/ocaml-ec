@@ -57,3 +57,25 @@ module type T = sig
   (** Return a string representation of the point *)
   val to_string : t -> string
 end
+
+module type AffineTwistedEdwardsT = sig
+  include T
+
+  module BaseField : Ff.T
+
+  (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
+  val get_u_coordinate : t -> BaseField.t
+
+  (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
+  val get_v_coordinate : t -> BaseField.t
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, returns [None]
+  *)
+  val from_coordinates_opt : u:BaseField.t -> v:BaseField.t -> t option
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, raise [Not_on_curve].
+  *)
+  val from_coordinates_exn : u:BaseField.t -> v:BaseField.t -> t
+end

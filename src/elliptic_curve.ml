@@ -4,53 +4,56 @@ module type T = sig
   (** The type of the element in the elliptic curve *)
   type t
 
-  val size_in_bytes : int
   (** The size of a point representation, in bytes *)
+  val size_in_bytes : int
 
   module Scalar : Ff.T
 
-  val empty : unit -> t
   (** Create an empty value to store an element of the curve. DO NOT USE THIS TO
       DO COMPUTATIONS WITH, UNDEFINED BEHAVIORS MAY HAPPEN *)
+  val empty : unit -> t
 
-  val check_bytes : Bytes.t -> bool
   (** Check if a point, represented as a byte array, is on the curve **)
+  val check_bytes : Bytes.t -> bool
 
-  val of_bytes_opt : Bytes.t -> t option
   (** Attempt to construct a point from a byte array *)
+  val of_bytes_opt : Bytes.t -> t option
 
-  val of_bytes_exn : Bytes.t -> t
   (** Attempt to construct a point from a byte array.
       Raise [Not_on_curve] if the point is not on the curve
   *)
+  val of_bytes_exn : Bytes.t -> t
 
-  val to_bytes : t -> Bytes.t
   (** Return a representation in bytes *)
+  val to_bytes : t -> Bytes.t
 
-  val zero : t
   (** Zero of the elliptic curve *)
+  val zero : t
 
-  val one : t
   (** A fixed generator of the elliptic curve *)
+  val one : t
 
-  val is_zero : t -> bool
   (** Return true if the given element is zero *)
+  val is_zero : t -> bool
 
-  val random : ?state:Random.State.t -> unit -> t
   (** Generate a random element *)
+  val random : ?state:Random.State.t -> unit -> t
 
-  val add : t -> t -> t
   (** Return the addition of two element *)
+  val add : t -> t -> t
 
-  val double : t -> t
   (** Double the element *)
+  val double : t -> t
 
-  val negate : t -> t
   (** Return the opposite of the element *)
+  val negate : t -> t
 
-  val eq : t -> t -> bool
   (** Return true if the two elements are algebraically the same *)
+  val eq : t -> t -> bool
 
-  val mul : t -> Scalar.t -> t
   (** Multiply an element by a scalar *)
+  val mul : t -> Scalar.t -> t
+
+  (** Return a string representation of the point *)
+  val to_string : t -> string
 end

@@ -60,8 +60,7 @@ module MakeIsZero (G : Ec.Elliptic_curve.T) = struct
     let open Alcotest in
     ( "is_zero",
       [ test_case "with zero value" `Quick (repeat 100 with_zero_value);
-        test_case "with random value" `Quick (repeat 100 with_random_value) ]
-    )
+        test_case "with random value" `Quick (repeat 100 with_random_value) ] )
 end
 
 module MakeECProperties (G : Ec.Elliptic_curve.T) = struct

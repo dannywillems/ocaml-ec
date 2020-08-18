@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "ocaml-ec"
-version: "0.0.1"
+version: "0.0.2"
 authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 synopsis: "OCaml implementation of basic elliptic curve operations"

@@ -53,9 +53,6 @@ module type T = sig
 
   (** Multiply an element by a scalar *)
   val mul : t -> Scalar.t -> t
-
-  (** Return a string representation of the point *)
-  val to_string : t -> string
 end
 
 module type AffineTwistedEdwardsT = sig

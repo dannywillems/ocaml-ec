@@ -11,8 +11,6 @@ bug-reports: "https://gitlab.com/dannywillems/ocaml-ec/issues"
 license: "MIT"
 depends: [
   "dune" {>= "2.0"}
-  # Has not been tested with other Zarith versions.
-  # The CI should verify it and it can then be extent
   "zarith" {= "1.9.1"}
   "ff" {>= "0.3.0" & < "0.4.0"}
   "alcotest" {with-test}

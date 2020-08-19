@@ -33,7 +33,7 @@ module type T = sig
   (** A fixed generator of the elliptic curve *)
   val one : t
 
-  (** Return true if the given element is zero *)
+  (** Return [true] if the given element is zero *)
   val is_zero : t -> bool
 
   (** Generate a random element *)
@@ -48,7 +48,7 @@ module type T = sig
   (** Return the opposite of the element *)
   val negate : t -> t
 
-  (** Return true if the two elements are algebraically the same *)
+  (** Return [true] if the two elements are algebraically the same *)
   val eq : t -> t -> bool
 
   (** Multiply an element by a scalar *)

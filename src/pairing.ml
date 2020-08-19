@@ -13,7 +13,7 @@ module type T = sig
   val miller_loop_simple : G1.t -> G2.t -> GT.t
 
   (** Compute a pairing result of a list of points *)
-  val pairing : (G1.t * G2.t) list -> GT.t
+  val pairing : G1.t -> G2.t -> GT.t
 
   (** Compute the final exponentiation of the given point. Returns a [None] if
       the point is null *)

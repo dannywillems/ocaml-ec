@@ -10,7 +10,7 @@ module type T = sig
   val miller_loop : (G1.t * G2.t) list -> GT.t
 
   (** Compute the miller loop on a single tuple of point *)
-  val miller_loop_simple : G1.t * G2.t -> GT.t
+  val miller_loop_simple : G1.t -> G2.t -> GT.t
 
   (** Compute a pairing result of a list of points *)
   val pairing : (G1.t * G2.t) list -> GT.t

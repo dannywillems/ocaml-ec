@@ -3,7 +3,7 @@ module type T = sig
 
   module G2 : Elliptic_curve.T
 
-  module GT : Ff.T
+  module GT : Ff.BASE
 
   exception FailToComputeFinalExponentiation of GT.t
 

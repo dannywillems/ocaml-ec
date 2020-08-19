@@ -7,7 +7,7 @@ module type T = sig
   (** The size of a point representation, in bytes *)
   val size_in_bytes : int
 
-  module Scalar : Ff.T
+  module Scalar : Ff.BASE
 
   (** Create an empty value to store an element of the curve. DO NOT USE THIS TO
       DO COMPUTATIONS WITH, UNDEFINED BEHAVIORS MAY HAPPEN *)
@@ -61,7 +61,7 @@ end
 module type AffineTwistedEdwardsT = sig
   include T
 
-  module BaseField : Ff.T
+  module BaseField : Ff.BASE
 
   (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> BaseField.t

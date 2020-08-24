@@ -55,10 +55,16 @@ module type T = sig
   val mul : t -> Scalar.t -> t
 end
 
-module type AffineTwistedEdwardsT = sig
+module type TwistedEdwardsT = sig
   include T
 
   module BaseField : Ff.BASE
+
+  val d : BaseField.t
+end
+
+module type AffineTwistedEdwardsT = sig
+  include TwistedEdwardsT
 
   (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> BaseField.t

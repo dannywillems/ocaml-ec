@@ -1,3 +1,4 @@
+(** Basic interface for elliptic curves *)
 module type T = sig
   exception Not_on_curve of Bytes.t
 
@@ -53,6 +54,36 @@ module type T = sig
 
   (** Multiply an element by a scalar *)
   val mul : t -> Scalar.t -> t
+end
+
+(** Curve in Weierstrass form with a and b. In affine, the curve has the
+    equation form y² = x³ + ax + b *)
+module type WeierstrassT = sig
+  include T
+
+  module BaseField : Ff.BASE
+
+  val a : BaseField.t
+
+  val b : BaseField.t
+end
+
+module type AffineWeierstrassT = sig
+  include WeierstrassT
+
+  val get_x_coordinate : t -> BaseField.t
+
+  val get_y_coordinate : t -> BaseField.t
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, returns [None]
+  *)
+  val from_coordinates_opt : x:BaseField.t -> y:BaseField.t -> t option
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, raise [Not_on_curve].
+  *)
+  val from_coordinates_exn : x:BaseField.t -> y:BaseField.t -> t
 end
 
 module type TwistedEdwardsT = sig

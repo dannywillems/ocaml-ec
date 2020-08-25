@@ -206,6 +206,13 @@ module MakeECProperties (G : Ec.Elliptic_curve.T) = struct
     let s = G.random () in
     assert (G.(eq (double s) (add s s)))
 
+  let inverse_on_scalar () =
+    let g = G.random () in
+    let a = G.Scalar.random () in
+    assert (G.(eq (mul g (Scalar.mul (Scalar.inverse_exn a) a)) g)) ;
+    assert (G.(eq (mul (mul g (Scalar.inverse_exn a)) a) g)) ;
+    assert (G.(eq (mul (mul g a) (Scalar.inverse_exn a)) g))
+
   (** Returns the tests to be used with Alcotest *)
   let get_tests () =
     let open Alcotest in
@@ -284,6 +291,7 @@ module MakeECProperties (G : Ec.Elliptic_curve.T) = struct
           "additive_associativity_with_scalar"
           `Quick
           (repeat 100 additive_associativity_with_scalar);
+        test_case "inverse on scalar" `Quick (repeat 100 inverse_on_scalar);
         test_case
           "additive_associativity"
           `Quick

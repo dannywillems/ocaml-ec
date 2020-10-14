@@ -12,12 +12,9 @@ license: "MIT"
 depends: [
   "dune" {>= "2.0"}
   "zarith" {= "1.9.1"}
-  "ff" {>= "0.3.0" & < "0.4.0"}
+  "ff" {>= "0.4.0" & < "0.5.0"}
   "alcotest" {with-test}
   "odoc" {with-doc}
 ]
 build: [[ "dune" "build" "-j" jobs "-p" name "@install" ]]
 run-test: [[ "dune" "runtest" "-p" name "-j" jobs ]]
-pin-depends: [
-  ["ff.0.3.0" "git+https://gitlab.com/dannywillems/ocaml-ff.git#0.3.0"]
-]

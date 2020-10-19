@@ -1,0 +1,1 @@
+(tests (names test_secp256k1) (libraries ec-secp256k1 alcotest ec-pbt) (package ec-secp256k1))

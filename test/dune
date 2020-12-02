@@ -1,1 +1,4 @@
-(tests (names test_secp256k1) (libraries ec-secp256k1 alcotest ec-pbt) (package ec-secp256k1))
+(test (name test_secp256k1) (modules test_secp256k1) (libraries ec-secp256k1 alcotest ec-pbt) (package ec-secp256k1))
+
+(test (name test_secp256r1) (modules test_secp256r1) (libraries ec-secp256r1 alcotest ec-pbt) (package ec-secp256r1))
+

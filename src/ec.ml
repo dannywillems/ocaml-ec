@@ -79,7 +79,7 @@ module MakeProjectiveWeierstrass
     aux ()
 
   let add t1 t2 =
-    (* See mina *)
+    (* See https://github.com/o1-labs/snarky/blob/master/snarkette/elliptic_curve.ml *)
     let open Fq in
     let x1z2 = t1.x * t2.z in
     let x2z1 = t1.z * t2.x in

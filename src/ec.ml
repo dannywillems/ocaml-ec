@@ -141,8 +141,8 @@ module MakeProjectiveWeierstrass
       else
         let (a, r) = Z.ediv_rem n two_z in
         let acc = aux x a in
-        let acc_square = add acc acc in
-        if Z.equal r Z.zero then acc_square else add acc_square x
+        let acc_add = add acc acc in
+        if Z.equal r Z.zero then acc_add else add acc_add x
     in
     let n = ScalarField.to_z n in
     if Z.equal n Z.zero then zero else if is_zero x then zero else aux x n

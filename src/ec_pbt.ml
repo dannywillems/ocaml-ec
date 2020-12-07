@@ -6,7 +6,7 @@ let rec repeat n f =
     f () ;
     repeat (n - 1) f )
 
-module MakeEquality (G : Ec.Elliptic_curve.T) = struct
+module MakeEquality (G : Ec_sig.BASE) = struct
   (** Verify the equality is correct with the value zero *)
   let zero () = assert (G.eq G.zero G.zero)
 
@@ -28,7 +28,7 @@ module MakeEquality (G : Ec.Elliptic_curve.T) = struct
       ] )
 end
 
-module MakeValueGeneration (G : Ec.Elliptic_curve.T) = struct
+module MakeValueGeneration (G : Ec_sig.BASE) = struct
   let random () = ignore @@ G.random ()
 
   let negation_with_random () =
@@ -60,7 +60,7 @@ module MakeValueGeneration (G : Ec.Elliptic_curve.T) = struct
         test_case "double_with_zero" `Quick (repeat 100 double_with_zero) ] )
 end
 
-module MakeIsZero (G : Ec.Elliptic_curve.T) = struct
+module MakeIsZero (G : Ec_sig.BASE) = struct
   let with_zero_value () = assert (G.is_zero G.zero = true)
 
   let with_one_value () = assert (G.is_zero G.one = false)
@@ -76,7 +76,7 @@ module MakeIsZero (G : Ec.Elliptic_curve.T) = struct
         test_case "with random value" `Quick (repeat 100 with_random_value) ] )
 end
 
-module MakeECProperties (G : Ec.Elliptic_curve.T) = struct
+module MakeECProperties (G : Ec_sig.BASE) = struct
   (** Verify that a random point is valid *)
   let check_bytes_random () = assert (G.(check_bytes @@ to_bytes @@ random ()))
 
@@ -96,27 +96,28 @@ module MakeECProperties (G : Ec.Elliptic_curve.T) = struct
 
   (** Verify that multiplying a random point by a scalar gives a valid point *)
   let check_bytes_random_multiplication () =
-    assert (G.(check_bytes @@ to_bytes @@ mul (random ()) (Scalar.random ())))
+    assert (
+      G.(check_bytes @@ to_bytes @@ mul (random ()) (ScalarField.random ())) )
 
   (** Verify 0_S * g_EC = 0_EC where 0_S is the zero of the scalar field, 0_EC
   is the point at infinity and g_EC is an element of the EC *)
   let zero_scalar_nullifier_random () =
     let random = G.random () in
-    assert (G.is_zero (G.mul random G.Scalar.zero))
+    assert (G.is_zero (G.mul random G.ScalarField.zero))
 
   (** Verify 0_S * 0_EC = 0_EC where 0_S is the zero of the scalar field and
   0_EC is the point at infinity of the EC *)
   let zero_scalar_nullifier_zero () =
-    assert (G.is_zero (G.mul G.zero G.Scalar.zero))
+    assert (G.is_zero (G.mul G.zero G.ScalarField.zero))
 
   (** Verify 0_S * 1_EC = 0_EC where 0_S is the 0 of the scalar field, 1_EC is a
   fixed generator and 0_EC is the point at infinity of the EC *)
   let zero_scalar_nullifier_one () =
-    assert (G.is_zero (G.mul G.one G.Scalar.zero))
+    assert (G.is_zero (G.mul G.one G.ScalarField.zero))
 
   let multiply_by_one_does_nothing () =
     let g = G.random () in
-    assert (G.(eq (mul g Scalar.one) g))
+    assert (G.(eq (mul g ScalarField.one) g))
 
   (** Verify -(-g) = g where g is an element of the EC *)
   let opposite_of_opposite () =
@@ -125,7 +126,9 @@ module MakeECProperties (G : Ec.Elliptic_curve.T) = struct
 
   let opposite_of_opposite_using_scalar () =
     let r = G.random () in
-    assert (G.(eq r (mul r (Scalar.negate (Scalar.negate Scalar.one)))))
+    assert (
+      G.(eq r (mul r (ScalarField.negate (ScalarField.negate ScalarField.one))))
+    )
 
   (** Verify -(-0_EC) = 0_EC where 0_EC is the point at infinity of the EC *)
   let opposite_of_zero_is_zero () = assert (G.eq (G.negate G.zero) G.zero)
@@ -153,53 +156,54 @@ module MakeECProperties (G : Ec.Elliptic_curve.T) = struct
   (** Verify a (g1 + g2) = a * g1 + a * g2 where a is a scalar, g1, g2 two
   elements of the EC *)
   let distributivity () =
-    let s = G.Scalar.random () in
+    let s = G.ScalarField.random () in
     let g1 = G.random () in
     let g2 = G.random () in
     assert (G.eq (G.mul (G.add g1 g2) s) (G.add (G.mul g1 s) (G.mul g2 s)))
 
   (** Verify (a + -a) * g = a * g - a * g = 0 *)
   let opposite_equality () =
-    let a = G.Scalar.random () in
+    let a = G.ScalarField.random () in
     let g = G.random () in
-    assert (G.(eq (mul g (Scalar.add a (Scalar.negate a))) zero)) ;
-    assert (G.(eq zero (add (mul g a) (mul g (Scalar.negate a))))) ;
+    assert (G.(eq (mul g (ScalarField.add a (ScalarField.negate a))) zero)) ;
+    assert (G.(eq zero (add (mul g a) (mul g (ScalarField.negate a))))) ;
     assert (
       G.(
         eq
-          (mul g (Scalar.add a (Scalar.negate a)))
-          (add (mul g a) (mul g (Scalar.negate a)))) )
+          (mul g (ScalarField.add a (ScalarField.negate a)))
+          (add (mul g a) (mul g (ScalarField.negate a)))) )
 
   (** a g + b + g = (a + b) g*)
   let additive_associativity_with_scalar () =
-    let a = G.Scalar.random () in
-    let b = G.Scalar.random () in
+    let a = G.ScalarField.random () in
+    let b = G.ScalarField.random () in
     let g = G.random () in
     let left = G.(add (mul g a) (mul g b)) in
-    let right = G.(mul g (Scalar.add a b)) in
+    let right = G.(mul g (ScalarField.add a b)) in
     assert (G.(eq left right))
 
   (** (a * b) g = a (b g) = b (a g) *)
   let multiplication_properties_on_base_field_element () =
-    let a = G.Scalar.random () in
-    let b = G.Scalar.random () in
+    let a = G.ScalarField.random () in
+    let b = G.ScalarField.random () in
     let g = G.random () in
-    assert (G.(eq (mul g (Scalar.mul a b)) (mul (mul g a) b))) ;
-    assert (G.(eq (mul g (Scalar.mul a b)) (mul (mul g b) a)))
+    assert (G.(eq (mul g (ScalarField.mul a b)) (mul (mul g a) b))) ;
+    assert (G.(eq (mul g (ScalarField.mul a b)) (mul (mul g b) a)))
 
   (** Verify (-s) * g = s * (-g) *)
   let opposite_of_scalar_is_opposite_of_ec () =
-    let s = G.Scalar.random () in
+    let s = G.ScalarField.random () in
     let g = G.random () in
-    let left = G.mul g (G.Scalar.negate s) in
+    let left = G.mul g (G.ScalarField.negate s) in
     let right = G.mul (G.negate g) s in
     assert (G.eq left right)
 
   let mul_by_order_of_scalar_field_equals_zero () =
-    let s = G.Scalar.random () in
+    let s = G.ScalarField.random () in
     let g = G.random () in
-    assert (G.(eq (mul (mul g s) (G.Scalar.of_z G.Scalar.order)) zero)) ;
-    assert (G.(eq (mul (mul one s) (G.Scalar.of_z G.Scalar.order)) zero))
+    assert (G.(eq (mul (mul g s) (G.ScalarField.of_z G.ScalarField.order)) zero)) ;
+    assert (
+      G.(eq (mul (mul one s) (G.ScalarField.of_z G.ScalarField.order)) zero) )
 
   (** Verify 2*g = g + g *)
   let double () =
@@ -208,15 +212,15 @@ module MakeECProperties (G : Ec.Elliptic_curve.T) = struct
 
   let inverse_on_scalar () =
     let g = G.random () in
-    let a = G.Scalar.random () in
-    assert (G.(eq (mul g (Scalar.mul (Scalar.inverse_exn a) a)) g)) ;
-    assert (G.(eq (mul (mul g (Scalar.inverse_exn a)) a) g)) ;
-    assert (G.(eq (mul (mul g a) (Scalar.inverse_exn a)) g))
+    let a = G.ScalarField.random () in
+    assert (G.(eq (mul g (ScalarField.mul (ScalarField.inverse_exn a) a)) g)) ;
+    assert (G.(eq (mul (mul g (ScalarField.inverse_exn a)) a) g)) ;
+    assert (G.(eq (mul (mul g a) (ScalarField.inverse_exn a)) g))
 
   (** Returns the tests to be used with Alcotest *)
   let get_tests () =
     let open Alcotest in
-    ( "Field properties",
+    ( "Group properties",
       [ test_case "check_bytes_random" `Quick (repeat 100 check_bytes_random);
         test_case "check_bytes_zero" `Quick (repeat 1 check_bytes_zero);
         test_case "check_bytes_one" `Quick (repeat 1 check_bytes_one);

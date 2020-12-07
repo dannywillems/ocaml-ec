@@ -1,9 +1,9 @@
 opam-version: "2.0"
-name: "ec"
+name: "ec-secp256r1"
 authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
-synopsis: "OCaml implementation of elliptic curve operations"
-description: "OCaml implementation of elliptic curve operations"
+synopsis: "Implementation of secp256r1 using library ec"
+description: "Implementation of secp256r1 using library ec"
 homepage: "https://gitlab.com/dannywillems/ocaml-ec"
 dev-repo: "git+https://gitlab.com/dannywillems/ocaml-ec.git"
 bug-reports: "https://gitlab.com/dannywillems/ocaml-ec/issues"
@@ -12,13 +12,11 @@ depends: [
   "dune" {>= "2.7"}
   "zarith" {>= "1.9.1" & < "2.0.0"}
   "ff"
-  "ec-sig" {= version}
+  "ec" {= version}
   "alcotest" {with-test}
+  "ec-pbt" {with-test}
   "odoc" {with-doc}
   "bisect_ppx" { with-test & >= "2.5" }
 ]
 build: [[ "dune" "build" "-j" jobs "-p" name "@install" ]]
 run-test: [[ "dune" "runtest" "-p" name "-j" jobs ]]
-pin-depends: [
-  ["ff.dev" "git+https://gitlab.com/dannywillems/ocaml-ff.git#10fdcc9796a3d620375b98a2fd473a1dd70bb35d"]
-]

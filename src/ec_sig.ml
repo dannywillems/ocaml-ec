@@ -1,5 +1,5 @@
 (** Basic interface for elliptic curves *)
-module type T = sig
+module type BASE = sig
   exception Not_on_curve of Bytes.t
 
   (** The type of the element in the elliptic curve *)
@@ -8,11 +8,9 @@ module type T = sig
   (** The size of a point representation, in bytes *)
   val size_in_bytes : int
 
-  module Scalar : Ff.BASE
+  module ScalarField : Ff_sig.PRIME
 
-  (** Create an empty value to store an element of the curve. DO NOT USE THIS TO
-      DO COMPUTATIONS WITH, UNDEFINED BEHAVIORS MAY HAPPEN *)
-  val empty : unit -> t
+  module BaseField : Ff_sig.BASE
 
   (** Check if a point, represented as a byte array, is on the curve **)
   val check_bytes : Bytes.t -> bool
@@ -53,15 +51,13 @@ module type T = sig
   val eq : t -> t -> bool
 
   (** Multiply an element by a scalar *)
-  val mul : t -> Scalar.t -> t
+  val mul : t -> ScalarField.t -> t
 end
 
 (** Curve in Weierstrass form with a and b. In affine, the curve has the
     equation form y² = x³ + ax + b *)
 module type WeierstrassT = sig
-  include T
-
-  module BaseField : Ff.BASE
+  include BASE
 
   val a : BaseField.t
 
@@ -86,10 +82,32 @@ module type AffineWeierstrassT = sig
   val from_coordinates_exn : x:BaseField.t -> y:BaseField.t -> t
 end
 
-module type TwistedEdwardsT = sig
-  include T
+module type ProjectiveWeierstrassT = sig
+  include WeierstrassT
 
-  module BaseField : Ff.BASE
+  val get_x_coordinate : t -> BaseField.t
+
+  val get_y_coordinate : t -> BaseField.t
+
+  val get_z_coordinate : t -> BaseField.t
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, returns [None]
+  *)
+  val from_coordinates_opt :
+    x:BaseField.t -> y:BaseField.t -> z:BaseField.t -> t option
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, raise [Not_on_curve].
+  *)
+  val from_coordinates_exn :
+    x:BaseField.t -> y:BaseField.t -> z:BaseField.t -> t
+end
+
+module type TwistedEdwardsT = sig
+  include BASE
+
+  module BaseField : Ff_sig.BASE
 
   val d : BaseField.t
 end
@@ -112,4 +130,30 @@ module type AffineTwistedEdwardsT = sig
       and in the subgroup, raise [Not_on_curve].
   *)
   val from_coordinates_exn : u:BaseField.t -> v:BaseField.t -> t
+end
+
+module type PAIRING = sig
+  module G1 : BASE
+
+  module G2 : BASE
+
+  module GT : Ff_sig.BASE
+
+  exception FailToComputeFinalExponentiation of GT.t
+
+  val miller_loop : (G1.t * G2.t) list -> GT.t
+
+  (** Compute the miller loop on a single tuple of point *)
+  val miller_loop_simple : G1.t -> G2.t -> GT.t
+
+  (** Compute a pairing result of a list of points *)
+  val pairing : G1.t -> G2.t -> GT.t
+
+  (** Compute the final exponentiation of the given point. Returns a [None] if
+      the point is null *)
+  val final_exponentiation_opt : GT.t -> GT.t option
+
+  (** Compute the final exponentiation of the given point. Raise
+      [FailToComputeFinalExponentiation] if the point is null *)
+  val final_exponentiation_exn : GT.t -> GT.t
 end

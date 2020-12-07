@@ -4,7 +4,7 @@ let rec repeat n f =
     f
   else (
     f () ;
-    repeat (n - 1) f)
+    repeat (n - 1) f )
 
 module MakeEquality (G : Ec_sig.BASE) = struct
   (** Verify the equality is correct with the value zero *)
@@ -97,7 +97,7 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
   (** Verify that multiplying a random point by a scalar gives a valid point *)
   let check_bytes_random_multiplication () =
     assert (
-      G.(check_bytes @@ to_bytes @@ mul (random ()) (ScalarField.random ())))
+      G.(check_bytes @@ to_bytes @@ mul (random ()) (ScalarField.random ())) )
 
   (** Verify 0_S * g_EC = 0_EC where 0_S is the zero of the scalar field, 0_EC
   is the point at infinity and g_EC is an element of the EC *)
@@ -127,7 +127,8 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
   let opposite_of_opposite_using_scalar () =
     let r = G.random () in
     assert (
-      G.(eq r (mul r (ScalarField.negate (ScalarField.negate ScalarField.one)))))
+      G.(eq r (mul r (ScalarField.negate (ScalarField.negate ScalarField.one))))
+    )
 
   (** Verify -(-0_EC) = 0_EC where 0_EC is the point at infinity of the EC *)
   let opposite_of_zero_is_zero () = assert (G.eq (G.negate G.zero) G.zero)
@@ -170,7 +171,7 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
       G.(
         eq
           (mul g (ScalarField.add a (ScalarField.negate a)))
-          (add (mul g a) (mul g (ScalarField.negate a)))))
+          (add (mul g a) (mul g (ScalarField.negate a)))) )
 
   (** a g + b + g = (a + b) g*)
   let additive_associativity_with_scalar () =
@@ -202,7 +203,7 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
     let g = G.random () in
     assert (G.(eq (mul (mul g s) (G.ScalarField.of_z G.ScalarField.order)) zero)) ;
     assert (
-      G.(eq (mul (mul one s) (G.ScalarField.of_z G.ScalarField.order)) zero))
+      G.(eq (mul (mul one s) (G.ScalarField.of_z G.ScalarField.order)) zero) )
 
   (** Verify 2*g = g + g *)
   let double () =

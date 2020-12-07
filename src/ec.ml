@@ -137,9 +137,7 @@ module MakeProjectiveWeierstrass
 
   let mul x n =
     let rec aux x n =
-      if Z.equal n Z.zero then zero
-      else if is_zero x then zero
-      else if Z.equal n Z.one then x
+      if Z.equal n Z.one then x
       else
         let n = Z.erem n (Z.pred Fq.order) in
         let (a, r) = Z.ediv_rem n two_z in
@@ -147,7 +145,8 @@ module MakeProjectiveWeierstrass
         let acc_square = add acc acc in
         if Z.equal r Z.zero then acc_square else add acc_square x
     in
-    aux x (ScalarField.to_z n)
+    let n = ScalarField.to_z n in
+    if Z.equal n Z.zero then zero else if is_zero x then zero else aux x n
 
   let get_x_coordinate t = t.x
 

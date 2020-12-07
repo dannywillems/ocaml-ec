@@ -10,6 +10,8 @@ module MakeProjectiveWeierstrass
   Ec_sig.ProjectiveWeierstrassT
     with type ScalarField.t = Fp.t
      and type BaseField.t = Fq.t = struct
+  let () = assert (not (Fq.is_zero Params.b))
+
   exception Not_on_curve of Bytes.t
 
   module BaseField = Fq

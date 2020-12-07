@@ -139,7 +139,6 @@ module MakeProjectiveWeierstrass
     let rec aux x n =
       if Z.equal n Z.one then x
       else
-        let n = Z.erem n (Z.pred Fq.order) in
         let (a, r) = Z.ediv_rem n two_z in
         let acc = aux x a in
         let acc_square = add acc acc in

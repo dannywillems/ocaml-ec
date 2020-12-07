@@ -2,8 +2,8 @@ opam-version: "2.0"
 name: "ec-pbt"
 authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
-synopsis: "Property based teseting for elliptic curves"
-description: "Property based teseting for elliptic curves"
+synopsis: "Property based testing for elliptic curves"
+description: "Property based testing for elliptic curves"
 homepage: "https://gitlab.com/dannywillems/ocaml-ec"
 dev-repo: "git+https://gitlab.com/dannywillems/ocaml-ec.git"
 bug-reports: "https://gitlab.com/dannywillems/ocaml-ec/issues"

@@ -35,3 +35,20 @@
  (modules ec_secp256r1)
  (instrumentation (backend bisect_ppx))
 )
+
+(library
+ (public_name ec-babyjubjub)
+ (libraries ff ec-sig ec)
+ (name ec_babyjubjub)
+ (modules ec_babyjubjub)
+ (instrumentation (backend bisect_ppx))
+)
+
+(library
+ (public_name ec-jubjub)
+ (libraries ff ec-sig ec)
+ (name ec_jubjub)
+ (modules ec_jubjub)
+ (instrumentation (backend bisect_ppx))
+)
+

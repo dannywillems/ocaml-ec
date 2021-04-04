@@ -10,7 +10,7 @@ module type BASE = sig
 
   module ScalarField : Ff_sig.PRIME
 
-  module BaseField : Ff_sig.BASE
+  module BaseField : Ff_sig.PRIME
 
   (** Check if a point, represented as a byte array, is on the curve **)
   val check_bytes : Bytes.t -> bool
@@ -105,15 +105,12 @@ module type ProjectiveWeierstrassT = sig
 end
 
 module type TwistedEdwardsT = sig
+  (** ax^2 + y^2 = 1 + dx^2y^2 *)
   include BASE
 
-  module BaseField : Ff_sig.BASE
+  val a : BaseField.t
 
   val d : BaseField.t
-end
-
-module type AffineTwistedEdwardsT = sig
-  include TwistedEdwardsT
 
   (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> BaseField.t

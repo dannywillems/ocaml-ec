@@ -157,3 +157,127 @@ module MakeProjectiveWeierstrass
 
   let from_coordinates_opt ~x ~y ~z = Some { x; y; z }
 end
+
+module MakeTwistedEdwards
+    (Base : Ff_sig.PRIME)
+    (Scalar : Ff_sig.PRIME) (Params : sig
+      val a : Base.t
+
+      val d : Base.t
+
+      val bytes_generator : Bytes.t
+    end) : Ec_sig.TwistedEdwardsT = struct
+  (* https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html *)
+  (* https://en.wikipedia.org/wiki/Twisted_Edwards_curve *)
+  exception Not_on_curve of Bytes.t
+
+  module ScalarField = Scalar
+  module BaseField = Base
+  include Params
+
+  let size_in_bytes = Base.size_in_bytes * 2
+
+  type t = { u : Base.t; v : Base.t }
+
+  let check_bytes b =
+    if Bytes.length b != size_in_bytes then false
+    else
+      let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
+      let v_opt =
+        Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
+      in
+      match (u_opt, v_opt) with (Some _u, Some _v) -> true | _ -> false
+
+  let of_bytes_opt b =
+    if Bytes.length b != size_in_bytes then raise (Not_on_curve b)
+    else
+      let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
+      let v_opt =
+        Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
+      in
+      match (u_opt, v_opt) with (Some u, Some v) -> Some { u; v } | _ -> None
+
+  let of_bytes_exn b =
+    match of_bytes_opt b with None -> raise (Not_on_curve b) | Some p -> p
+
+  let to_bytes { u; v } =
+    Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]
+
+  let zero = { u = BaseField.zero; v = BaseField.one }
+
+  let one = of_bytes_exn bytes_generator
+
+  let is_zero { u; v } = Base.(u = zero) && Base.(v = one)
+
+  let add { u = x1; v = y1 } { u = x2; v = y2 } =
+    let x1y2 = Base.(x1 * y2) in
+    let y1x2 = Base.(y1 * x2) in
+    let x1x2y1y2 = Base.(x1y2 * y1x2) in
+    let y1y2 = Base.(y1 * y2) in
+    let x1x2 = Base.(x1 * x2) in
+    let u = Base.((x1y2 + y1x2) / (Base.one + (d * x1x2y1y2))) in
+    let v =
+      Base.(
+        (y1y2 + Base.negate (a * x1x2)) / (Base.one + Base.negate (d * x1x2y1y2)))
+    in
+    { u; v }
+
+  let double p = add p p
+
+  (* let u_plus_v = Base.(u + v) in
+   * let u_plus_v_square = Base.square u_plus_v in
+   * let uu = Base.square u in
+   * let vv = Base.square v in
+   * let neg_uu = Base.negate uu in
+   * let neg_vv = Base.negate vv in
+   * let u' = Base.((u_plus_v_square + neg_uu + neg_vv) / (uu + vv)) in
+   * let v' = Base.((vv + neg_uu) / (Base.(one + one) + neg_uu + neg_vv)) in
+   * { u = u'; v = v' } *)
+
+  let rec random ?state () =
+    let u = Base.random ?state () in
+    let uu = Base.(double u) in
+    let auu = Base.(a * uu) in
+    let duu = Base.(d * uu) in
+    if Base.(is_one duu) then random ?state ()
+    else
+      (* y^2 = (1 - a * x^2) / (1 - d * x ^ 2) *)
+      let tmp = Base.((one + negate auu) / (one + negate duu)) in
+      let v_sqrt = Base.(sqrt_opt ~opposite:(Random.bool ()) tmp) in
+      match v_sqrt with None -> random ?state () | Some v -> { u; v }
+
+  let negate { u; v } = { u = Base.negate u; v }
+
+  let eq { u = u1; v = v1 } { u = u2; v = v2 } = BaseField.(u1 = u2 && v1 = v2)
+
+  let mul x n =
+    let two_z = Z.succ Z.one in
+    let rec aux x n =
+      if Z.equal n Z.one then x
+      else
+        let (a, r) = Z.ediv_rem n two_z in
+        let acc = aux x a in
+        let acc_add = double acc in
+        if Z.equal r Z.zero then acc_add else add acc_add x
+    in
+    let n = ScalarField.to_z n in
+    if Z.equal n Z.zero then zero else if is_zero x then zero else aux x n
+
+  let get_u_coordinate p = p.u
+
+  let get_v_coordinate p = p.v
+
+  let from_coordinates_opt ~u ~v =
+    let uu = Base.square u in
+    let vv = Base.square v in
+    let uuvv = Base.(uu * vv) in
+    if Base.((a * uu) + vv = one + (d * uuvv)) then Some { u; v } else None
+
+  let from_coordinates_exn ~u ~v =
+    match from_coordinates_opt ~u ~v with
+    | None ->
+        raise
+          (Not_on_curve
+             (Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]))
+    | Some p -> p
+end

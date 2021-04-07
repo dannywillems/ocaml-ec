@@ -256,7 +256,7 @@ module MakeTwistedEdwards
     let duu = Base.(d * uu) in
     if Base.(is_one duu) then random ?state ()
     else
-      (* y^2 = (1 - a * x^2) / (1 - d * x ^ 2) *)
+      (* v^2 = (1 - a * u^2) / (1 - d * u^2) *)
       let tmp = Base.((one + negate auu) / (one + negate duu)) in
       let v_sqrt = Base.(sqrt_opt tmp) in
       match v_sqrt with None -> random ?state () | Some v -> { u; v }

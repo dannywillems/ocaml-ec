@@ -105,17 +105,17 @@ module type ProjectiveWeierstrassT = sig
 end
 
 module type TwistedEdwardsT = sig
-  (** ax^2 + y^2 = 1 + dx^2y^2 *)
+  (** au^2 + v^2 = 1 + du^2v^2 *)
   include BASE
 
   val a : BaseField.t
 
   val d : BaseField.t
 
-  (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
+  (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> BaseField.t
 
-  (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
+  (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_v_coordinate : t -> BaseField.t
 
   (** Build a point from the affine coordinates. If the point is not on the curve

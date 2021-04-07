@@ -243,7 +243,7 @@ module MakeTwistedEdwards
     else
       (* y^2 = (1 - a * x^2) / (1 - d * x ^ 2) *)
       let tmp = Base.((one + negate auu) / (one + negate duu)) in
-      let v_sqrt = Base.(sqrt_opt ~opposite:(Random.bool ()) tmp) in
+      let v_sqrt = Base.(sqrt_opt tmp) in
       match v_sqrt with None -> random ?state () | Some v -> { u; v }
 
   let negate { u; v } = { u = Base.negate u; v }

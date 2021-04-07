@@ -179,6 +179,12 @@ module MakeTwistedEdwards
 
   type t = { u : Base.t; v : Base.t }
 
+  let is_on_curve u v =
+    let uu = Base.square u in
+    let vv = Base.square v in
+    let uuvv = Base.(uu * vv) in
+    Base.((a * uu) + vv = one + (d * uuvv))
+
   let check_bytes b =
     if Bytes.length b != size_in_bytes then false
     else

@@ -47,9 +47,22 @@ module MakeValueGeneration (G : Ec_sig.BASE) = struct
     let g = G.random () in
     ignore @@ G.double g
 
+  let addition_generates_valid_point () =
+    assert (G.(check_bytes (to_bytes (add (random ()) (random ())))))
+
+  let double_generates_valid_point () =
+    assert (G.(check_bytes (to_bytes (double (random ())))))
+
+  let scalar_multiplication_generates_valid_point () =
+    assert (G.(check_bytes (to_bytes (mul (random ()) (ScalarField.random ())))))
+
   let check_bytes_random_with_to_bytes () =
     let g = G.random () in
     assert (G.(check_bytes (to_bytes g)))
+
+  let negate_generates_a_valid_point () =
+    let g = G.random () in
+    assert (G.(check_bytes (to_bytes (negate g))))
 
   let of_bytes_with_to_bytes_are_inverse_functions () =
     let g = G.random () in
@@ -64,6 +77,22 @@ module MakeValueGeneration (G : Ec_sig.BASE) = struct
         test_case "negate_with_zero" `Quick (repeat 1 negation_with_zero);
         test_case "negate_with_random" `Quick (repeat 100 negation_with_random);
         test_case "double_with_random" `Quick (repeat 100 double_with_random);
+        test_case
+          "negate generates a valid point"
+          `Quick
+          (repeat 100 negate_generates_a_valid_point);
+        test_case
+          "addition generates a valid point"
+          `Quick
+          (repeat 100 addition_generates_valid_point);
+        test_case
+          "double generates a valid point"
+          `Quick
+          (repeat 100 double_generates_valid_point);
+        test_case
+          "scalar multiplication generates a valid point"
+          `Quick
+          (repeat 100 scalar_multiplication_generates_valid_point);
         test_case
           "of_bytes_exn and to_bytes are inverse functions"
           `Quick
@@ -220,6 +249,9 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
     let right = G.mul (G.negate g) s in
     assert (G.eq left right)
 
+  let generator_is_of_prime_order () =
+    assert (G.(eq (mul one (G.ScalarField.of_z G.ScalarField.order)) zero))
+
   let mul_by_order_of_scalar_field_equals_zero () =
     let s = G.ScalarField.random () in
     let g = G.random () in
@@ -235,9 +267,19 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
   let inverse_on_scalar () =
     let g = G.random () in
     let a = G.ScalarField.random () in
-    assert (G.(eq (mul g (ScalarField.mul (ScalarField.inverse_exn a) a)) g)) ;
-    assert (G.(eq (mul (mul g (ScalarField.inverse_exn a)) a) g)) ;
-    assert (G.(eq (mul (mul g a) (ScalarField.inverse_exn a)) g))
+    let inv_a = G.ScalarField.inverse_exn a in
+    let ga = G.mul g a in
+    let ga_inv = G.mul g inv_a in
+    let res1 = G.mul g (G.ScalarField.mul inv_a a) in
+    let res2 = G.mul ga_inv a in
+    let res3 = G.mul ga inv_a in
+    assert (G.(eq res2 res3)) ;
+    (* g * (a * a^(-1)) = g *)
+    assert (G.(eq res1 g)) ;
+    (* (g * a^(-1)) * a = g *)
+    assert (G.(eq res2 g)) ;
+    (* (g * a) * a^(-1) = g *)
+    assert (G.(eq res3 g))
 
   (** Returns the tests to be used with Alcotest *)
   let get_tests () =
@@ -325,5 +367,57 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
         test_case
           "additive_commutativity"
           `Quick
-          (repeat 100 additive_commutativity) ] )
+          (repeat 100 additive_commutativity);
+        test_case
+          "Generator is of prime order"
+          `Quick
+          (repeat 1 generator_is_of_prime_order) ] )
+end
+
+module MakeEdwardsCurveProperties (G : Ec_sig.TwistedEdwardsT) = struct
+  let test_elements_of_order_small_order () =
+    let p1 =
+      G.from_coordinates_exn
+        ~u:(G.BaseField.of_string "0")
+        ~v:(G.BaseField.of_string "1")
+    in
+    (* (0, -1) *)
+    let p2 =
+      G.from_coordinates_exn
+        ~u:(G.BaseField.of_string "0")
+        ~v:G.BaseField.(negate (of_string "1"))
+    in
+
+    let a_sqrt =
+      Option.value ~default:G.BaseField.zero (G.BaseField.sqrt_opt G.a)
+    in
+    (* (a^-1/2, 0) *)
+    let p3 =
+      G.from_coordinates_exn
+        ~u:G.BaseField.(inverse_exn a_sqrt)
+        ~v:G.BaseField.(of_string "0")
+    in
+
+    (* ((-a)^-1/2, 0) *)
+    let p4 =
+      G.from_coordinates_exn
+        ~u:G.BaseField.(negate (inverse_exn a_sqrt))
+        ~v:G.BaseField.(of_string "0")
+    in
+    assert (G.(check_bytes (to_bytes p1))) ;
+    assert (G.(check_bytes (to_bytes p2))) ;
+    assert (G.(check_bytes (to_bytes p3))) ;
+    assert (G.(check_bytes (to_bytes p4))) ;
+    assert (G.(eq (mul p1 (ScalarField.of_string "1")) zero)) ;
+    assert (G.(eq (mul p2 (ScalarField.of_string "2")) zero)) ;
+    assert (G.(eq (mul p3 (ScalarField.of_string "4")) zero)) ;
+    assert (G.(eq (mul p4 (ScalarField.of_string "4")) zero))
+
+  let get_tests () =
+    let open Alcotest in
+    ( "Group properties",
+      [ test_case
+          "check elements of small orders"
+          `Quick
+          (repeat 1 test_elements_of_order_small_order) ] )
 end

@@ -251,7 +251,7 @@ module MakeTwistedEdwards
 
   let rec random ?state () =
     let u = Base.random ?state () in
-    let uu = Base.(double u) in
+    let uu = Base.(square u) in
     let auu = Base.(a * uu) in
     let duu = Base.(d * uu) in
     if Base.(is_one duu) then random ?state ()

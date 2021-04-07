@@ -47,6 +47,14 @@ module MakeValueGeneration (G : Ec_sig.BASE) = struct
     let g = G.random () in
     ignore @@ G.double g
 
+  let check_bytes_random_with_to_bytes () =
+    let g = G.random () in
+    assert (G.(check_bytes (to_bytes g)))
+
+  let of_bytes_with_to_bytes_are_inverse_functions () =
+    let g = G.random () in
+    assert (G.(eq (of_bytes_exn (to_bytes g)) g))
+
   (** Returns the tests to be used with Alcotest *)
   let get_tests () =
     let open Alcotest in
@@ -56,6 +64,14 @@ module MakeValueGeneration (G : Ec_sig.BASE) = struct
         test_case "negate_with_zero" `Quick (repeat 1 negation_with_zero);
         test_case "negate_with_random" `Quick (repeat 100 negation_with_random);
         test_case "double_with_random" `Quick (repeat 100 double_with_random);
+        test_case
+          "of_bytes_exn and to_bytes are inverse functions"
+          `Quick
+          (repeat 100 of_bytes_with_to_bytes_are_inverse_functions);
+        test_case
+          "check bytes on random with to_bytes"
+          `Quick
+          (repeat 100 check_bytes_random_with_to_bytes);
         test_case "double_with_one" `Quick (repeat 1 double_with_one);
         test_case "double_with_zero" `Quick (repeat 100 double_with_zero) ] )
 end

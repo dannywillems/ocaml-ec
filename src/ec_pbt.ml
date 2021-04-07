@@ -157,7 +157,7 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
   let opposite_of_opposite_of_one_is_one () =
     assert (G.eq (G.negate (G.negate G.one)) G.one)
 
-  (** Verify g1 + (g2 + g3) = (g1 + g2) + g3 where g1, g2 and g3 are elements of the EC *)
+  (** Verify g1 + (g2 + g3) = (g1 + g2) + g3 *)
   let additive_associativity () =
     let g1 = G.random () in
     let g2 = G.random () in

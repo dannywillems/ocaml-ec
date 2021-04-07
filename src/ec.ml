@@ -175,6 +175,11 @@ module MakeTwistedEdwards
   module BaseField = Base
   include Params
 
+  let () =
+    (* Addition formula is complete if d is a non square and if a is a square *)
+    assert (Option.is_none (BaseField.sqrt_opt d)) ;
+    assert (Option.is_some (BaseField.sqrt_opt a))
+
   let size_in_bytes = Base.size_in_bytes * 2
 
   type t = { u : Base.t; v : Base.t }

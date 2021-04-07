@@ -133,19 +133,16 @@ module MakeProjectiveWeierstrass
       let y2 = Fq.(t2.y / t2.z) in
       Fq.(x1 = x2 && y1 = y2)
 
-  let two_z = Z.succ Z.one
-
   let mul x n =
     let rec aux x n =
-      if Z.equal n Z.one then x
+      let two_z = Z.succ Z.one in
+      if Z.equal n Z.zero then zero
+      else if Z.equal n Z.one then x
       else
         let (a, r) = Z.ediv_rem n two_z in
-        let acc = aux x a in
-        let acc_add = add acc acc in
-        if Z.equal r Z.zero then acc_add else add acc_add x
+        if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
-    let n = ScalarField.to_z n in
-    if Z.equal n Z.zero then zero else if is_zero x then zero else aux x n
+    aux x (ScalarField.to_z n)
 
   let get_x_coordinate t = t.x
 
@@ -266,17 +263,16 @@ module MakeTwistedEdwards
   let eq { u = u1; v = v1 } { u = u2; v = v2 } = BaseField.(u1 = u2 && v1 = v2)
 
   let mul x n =
-    let two_z = Z.succ Z.one in
     let rec aux x n =
-      if Z.equal n Z.one then x
+      let two_z = Z.succ Z.one in
+      if Z.equal n Z.zero then zero
+      else if Z.equal n Z.one then x
       else
-        let (a, r) = Z.ediv_rem n two_z in
-        let acc = aux x a in
-        let acc_add = double acc in
-        if Z.equal r Z.zero then acc_add else add acc_add x
+        let (q, r) = Z.ediv_rem n two_z in
+        let x_plus_x = double x in
+        if Z.equal r Z.zero then aux x_plus_x q else add x (aux x_plus_x q)
     in
-    let n = ScalarField.to_z n in
-    if Z.equal n Z.zero then zero else if is_zero x then zero else aux x n
+    aux x (ScalarField.to_z n)
 
   let get_u_coordinate p = p.u
 

@@ -279,10 +279,7 @@ module MakeTwistedEdwards
   let get_v_coordinate p = p.v
 
   let from_coordinates_opt ~u ~v =
-    let uu = Base.square u in
-    let vv = Base.square v in
-    let uuvv = Base.(uu * vv) in
-    if Base.((a * uu) + vv = one + (d * uuvv)) then Some { u; v } else None
+    if is_on_curve u v then Some { u; v } else None
 
   let from_coordinates_exn ~u ~v =
     match from_coordinates_opt ~u ~v with

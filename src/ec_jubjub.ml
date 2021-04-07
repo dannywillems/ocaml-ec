@@ -13,25 +13,38 @@ module Scalar = Ff.MakeFp (struct
       "6554484396890773809930967563523245729705921265872317281365359162392183254199"
 end)
 
-module TwistedEdwards =
-  Ec.MakeTwistedEdwards (Base) (Scalar)
-    (struct
-      let a = Base.(one)
+module TwistedEdwards : sig
+  include Ec_sig.TwistedEdwardsT
 
-      let d =
-        Base.of_string
-          "19257038036680949359750312669786877991949435402254120286184196891950884077233"
+  val is_small_order : t -> bool
+end = struct
+  include Ec.MakeTwistedEdwards (Base) (Scalar)
+            (struct
+              let a = Base.(negate one)
 
-      let bytes_generator =
-        Bytes.concat
-          Bytes.empty
-          [ Base.(
-              to_bytes
-                (of_string
-                   "8076246640662884909881801758704306714034609987455869804520522091855516602923"));
-            Base.(
-              to_bytes
-                (of_string
-                   "13262374693698910701929044844600465831413122818447359594527400194675274060458"))
-          ]
-    end)
+              let d =
+                Base.of_string
+                  "19257038036680949359750312669786877991949435402254120286184196891950884077233"
+
+              let bytes_generator =
+                Bytes.concat
+                  Bytes.empty
+                  [ Base.(
+                      to_bytes
+                        (of_string
+                           "8076246640662884909881801758704306714034609987455869804520522091855516602923"));
+                    Base.(
+                      to_bytes
+                        (of_string
+                           "13262374693698910701929044844600465831413122818447359594527400194675274060458"))
+                  ]
+            end)
+
+  let is_small_order p = is_zero (double (double (double p)))
+
+  let random_tmp = random
+
+  let rec random ?state () =
+    let p = random_tmp ?state () in
+    if is_small_order p then random ?state () else p
+end

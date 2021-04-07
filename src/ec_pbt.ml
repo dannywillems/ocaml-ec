@@ -146,7 +146,13 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
     let g1 = G.random () in
     let g2 = G.random () in
     let g3 = G.random () in
-    assert (G.eq (G.add (G.add g1 g2) g3) (G.add (G.add g2 g3) g1))
+    assert (G.eq (G.add (G.add g1 g2) g3) (G.add g1 (G.add g2 g3)))
+
+  (** Verify (g1 + g2) = (g2 + g1) *)
+  let additive_commutativity () =
+    let g1 = G.random () in
+    let g2 = G.random () in
+    assert (G.eq (G.add g1 g2) (G.add g2 g1))
 
   (** Verify that g + (-g) = 0 *)
   let opposite_existential_property () =
@@ -299,5 +305,9 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
         test_case
           "additive_associativity"
           `Quick
-          (repeat 100 additive_associativity) ] )
+          (repeat 100 additive_associativity);
+        test_case
+          "additive_commutativity"
+          `Quick
+          (repeat 100 additive_commutativity) ] )
 end

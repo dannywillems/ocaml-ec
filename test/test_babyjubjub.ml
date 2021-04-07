@@ -2,6 +2,8 @@ module ValueGeneration =
   Ec_pbt.MakeValueGeneration (Ec_babyjubjub.TwistedEdwards)
 module Equality = Ec_pbt.MakeEquality (Ec_babyjubjub.TwistedEdwards)
 module Properties = Ec_pbt.MakeECProperties (Ec_babyjubjub.TwistedEdwards)
+module EdwardsCurveProperties =
+  Ec_pbt.MakeEdwardsCurveProperties (Ec_babyjubjub.TwistedEdwards)
 
 let test_addition_vectors =
   [ ( ( "17777552123799933955779906779655732241715742912184938656739573121738514868268",
@@ -38,4 +40,5 @@ let () =
     [ ("Vectors", [Alcotest.test_case "test vectors" `Quick test_addition]);
       ValueGeneration.get_tests ();
       Properties.get_tests ();
+      EdwardsCurveProperties.get_tests ();
       Equality.get_tests () ]

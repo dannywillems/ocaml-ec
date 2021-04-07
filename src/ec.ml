@@ -221,30 +221,30 @@ module MakeTwistedEdwards
 
   let is_zero { u; v } = Base.(u = zero) && Base.(v = one)
 
-  let add { u = x1; v = y1 } { u = x2; v = y2 } =
-    let x1y2 = Base.(x1 * y2) in
-    let y1x2 = Base.(y1 * x2) in
-    let x1x2y1y2 = Base.(x1y2 * y1x2) in
-    let y1y2 = Base.(y1 * y2) in
-    let x1x2 = Base.(x1 * x2) in
-    let u = Base.((x1y2 + y1x2) / (Base.one + (d * x1x2y1y2))) in
+  let add { u = u1; v = v1 } { u = u2; v = v2 } =
+    let u1v2 = Base.(u1 * v2) in
+    let v1u2 = Base.(v1 * u2) in
+    let u1u2v1v2 = Base.(u1v2 * v1u2) in
+    let v1v2 = Base.(v1 * v2) in
+    let u1u2 = Base.(u1 * u2) in
+    let u = Base.((u1v2 + v1u2) / (Base.one + (d * u1u2v1v2))) in
     let v =
       Base.(
-        (y1y2 + Base.negate (a * x1x2)) / (Base.one + Base.negate (d * x1x2y1y2)))
+        (v1v2 + Base.negate (a * u1u2)) / (Base.one + Base.negate (d * u1u2v1v2)))
     in
     { u; v }
 
-  let double p = add p p
-
-  (* let u_plus_v = Base.(u + v) in
-   * let u_plus_v_square = Base.square u_plus_v in
-   * let uu = Base.square u in
-   * let vv = Base.square v in
-   * let neg_uu = Base.negate uu in
-   * let neg_vv = Base.negate vv in
-   * let u' = Base.((u_plus_v_square + neg_uu + neg_vv) / (uu + vv)) in
-   * let v' = Base.((vv + neg_uu) / (Base.(one + one) + neg_uu + neg_vv)) in
-   * { u = u'; v = v' } *)
+  let double { u; v } =
+    let uv = Base.(u * v) in
+    let uu = Base.square u in
+    let vv = Base.square v in
+    let neg_uu = Base.negate uu in
+    let neg_vv = Base.negate vv in
+    let u' = Base.(double uv / ((a * uu) + vv)) in
+    let v' =
+      Base.((vv + (a * neg_uu)) / (double one + (a * neg_uu) + neg_vv))
+    in
+    { u = u'; v = v' }
 
   let rec random ?state () =
     let u = Base.random ?state () in

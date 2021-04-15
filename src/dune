@@ -45,6 +45,22 @@
 )
 
 (library
+ (public_name ec-vesta)
+ (libraries ff ec-sig ec)
+ (name ec_vesta)
+ (modules ec_vesta)
+ (instrumentation (backend bisect_ppx))
+)
+
+(library
+ (public_name ec-pallas)
+ (libraries ff ec-sig ec)
+ (name ec_pallas)
+ (modules ec_pallas)
+ (instrumentation (backend bisect_ppx))
+)
+
+(library
  (public_name ec-tweedledee)
  (libraries ff ec-sig ec)
  (name ec_tweedledee)
@@ -81,5 +97,4 @@
  (public_name pedersen-hash)
  (modules pedersen_hash iterator)
  (libraries ec-jubjub)
- (instrumentation (backend bisect_ppx))
 )

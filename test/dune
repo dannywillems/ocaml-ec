@@ -62,3 +62,17 @@
  (libraries ec-tweedledee alcotest ec-pbt)
  (package ec-tweedledee)
 )
+
+(test
+ (name test_vesta)
+ (modules test_vesta)
+ (libraries ec-vesta alcotest ec-pbt)
+ (package ec-vesta)
+)
+
+(test
+ (name test_pallas)
+ (modules test_pallas)
+ (libraries ec-pallas alcotest ec-pbt)
+ (package ec-pallas)
+)

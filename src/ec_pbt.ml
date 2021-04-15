@@ -415,7 +415,7 @@ module MakeEdwardsCurveProperties (G : Ec_sig.TwistedEdwardsT) = struct
 
   let get_tests () =
     let open Alcotest in
-    ( "Group properties",
+    ( "Group properties of Edwards curve",
       [ test_case
           "check elements of small orders"
           `Quick

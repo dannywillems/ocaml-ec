@@ -174,8 +174,8 @@ module MakeTwistedEdwards
 
   let () =
     (* Addition formula is complete if d is a non square and if a is a square *)
-    assert (Option.is_none (BaseField.sqrt_opt d)) ;
-    assert (Option.is_some (BaseField.sqrt_opt a))
+    assert (Option.is_none (Base.sqrt_opt d)) ;
+    assert (Option.is_some (Base.sqrt_opt a))
 
   let size_in_bytes = Base.size_in_bytes * 2
 

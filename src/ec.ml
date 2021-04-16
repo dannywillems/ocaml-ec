@@ -182,6 +182,7 @@ module MakeTwistedEdwards
   type t = { u : Base.t; v : Base.t }
 
   let is_on_curve u v =
+    (* a * u^2 + v^2 = 1 + d u^2 v^2 *)
     let uu = Base.square u in
     let vv = Base.square v in
     let uuvv = Base.(uu * vv) in
@@ -240,6 +241,7 @@ module MakeTwistedEdwards
     let vv = Base.square v in
     let neg_uu = Base.negate uu in
     let neg_vv = Base.negate vv in
+    (* a u^2 v^2 = 1 + d u^2 v^2 --> we can skip one multiplication *)
     let u' = Base.(double uv / ((a * uu) + vv)) in
     let v' =
       Base.((vv + (a * neg_uu)) / (double one + (a * neg_uu) + neg_vv))

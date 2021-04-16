@@ -255,7 +255,9 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
   let mul_by_order_of_scalar_field_equals_zero () =
     let s = G.ScalarField.random () in
     let g = G.random () in
+    (* (g * s) * order = zero *)
     assert (G.(eq (mul (mul g s) (G.ScalarField.of_z G.ScalarField.order)) zero)) ;
+    (* (one * s) * order = zero *)
     assert (
       G.(eq (mul (mul one s) (G.ScalarField.of_z G.ScalarField.order)) zero) )
 
@@ -270,8 +272,11 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
     let inv_a = G.ScalarField.inverse_exn a in
     let ga = G.mul g a in
     let ga_inv = G.mul g inv_a in
+    (* g * (a * a^(-1)) *)
     let res1 = G.mul g (G.ScalarField.mul inv_a a) in
+    (* (g * a^(-1)) * a *)
     let res2 = G.mul ga_inv a in
+    (* (g * a) * a^(-1) *)
     let res3 = G.mul ga inv_a in
     assert (G.(eq res2 res3)) ;
     (* g * (a * a^(-1)) = g *)

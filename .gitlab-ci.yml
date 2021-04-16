@@ -78,7 +78,7 @@ coverage:
   rules:
     - when: always
   before_script:
-    - sudo apt-get install m4 -y
+    - sudo apt-get install m4 jq curl -y
     - eval $(opam env)
     - opam repository set-url default https://opam.ocaml.org
     - opam update
@@ -86,28 +86,9 @@ coverage:
     - opam install -y --with-test .
   script:
     - dune runtest --instrument-with bisect_ppx --force
-    - bisect-ppx-report html
-  rules:
-    - when: always
-
-# FIXME: does not seem to work. Getting `Build processing error`.
-# coveralls:
-#   stage: deploy
-#   image: ocaml/opam2:4.10
-#   before_script:
-#     - sudo apt-get install m4 -y
-#     - eval $(opam env)
-#     - opam repository set-url default https://opam.ocaml.org
-#     - opam update
-#     - opam depext -i -y zarith
-#     - opam install -y --with-test .
-#   script:
-#     # Generate the coverage.json file. It is simply a JSON file used to post.
-#     - bisect-ppx-report coveralls coverage.json --service-name gitlab-ci --service-job-id $CI_JOB_ID --repo-token ${COVERALLS_REPO_TOKEN}
-#     - curl -L -F json_file=@./coverage.json https://coveralls.io/api/v1/jobs
-#   only:
-#     - merge_requests
-#     - master
+    - bisect-ppx-report coveralls coverage-raw.json --coverage-path _build/default/
+    - ./_ci/coverage_metadata_glci.sh coverage-raw.json > coverage_glci.json
+    - curl --location --request POST 'https://coveralls.io/api/v1/jobs' --form 'json_file=@coverage_glci.json'
 
 pages:
   stage: deploy

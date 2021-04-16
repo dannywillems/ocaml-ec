@@ -243,9 +243,7 @@ module MakeTwistedEdwards
     let neg_vv = Base.negate vv in
     (* a u^2 v^2 = 1 + d u^2 v^2 --> we can skip one multiplication *)
     let u' = Base.(double uv / ((a * uu) + vv)) in
-    let v' =
-      Base.((vv + (a * neg_uu)) / (double one + (a * neg_uu) + neg_vv))
-    in
+    let v' = Base.((vv + (a * neg_uu)) / (one + one + (a * neg_uu) + neg_vv)) in
     { u = u'; v = v' }
 
   let rec random ?state () =

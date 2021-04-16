@@ -108,12 +108,18 @@ module type TwistedEdwardsT = sig
   (** au^2 + v^2 = 1 + du^2v^2 *)
   include BASE
 
+  (** The parameter [a] of the curve, from the equation a * u^2 + v^2 = 1 + d * u^2 * v^2  *)
   val a : BaseField.t
 
+  (** The parameter [d] of the curve, from the equation a * u^2 + v^2 = 1 + d * u^2 * v^2  *)
   val d : BaseField.t
 
+  (** The cofactor of the curve. The parameter is used in [is_small_order] and
+      in the random point generator.
+  *)
   val cofactor : Z.t
 
+  (** [is_small_order p] returns [true] if [p] is of order [cofactor] *)
   val is_small_order : t -> bool
 
   (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)

@@ -1,5 +1,4 @@
 opam-version: "2.0"
-name: "ec"
 authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 synopsis: "OCaml implementation of elliptic curve operations"

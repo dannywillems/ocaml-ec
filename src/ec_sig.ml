@@ -112,6 +112,10 @@ module type TwistedEdwardsT = sig
 
   val d : BaseField.t
 
+  val cofactor : Z.t
+
+  val is_small_order : t -> bool
+
   (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> BaseField.t
 

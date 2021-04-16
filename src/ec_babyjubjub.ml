@@ -24,6 +24,8 @@ end = struct
 
               let d = Base.of_string "168696"
 
+              let cofactor = Z.of_string "8"
+
               let bytes_generator =
                 Bytes.concat
                   Bytes.empty
@@ -39,12 +41,6 @@ end = struct
             end)
 
   let is_small_order p = is_zero (double (double (double p)))
-
-  let random_tmp = random
-
-  let rec random ?state () =
-    let p = random_tmp ?state () in
-    if is_small_order p then random ?state () else p
 end
 
 module ReducedTwistedEdwards : sig
@@ -59,6 +55,8 @@ end = struct
               let d =
                 Base.of_string
                   "12181644023421730124874158521699555681764249180949974110617291017600649128846"
+
+              let cofactor = Z.of_string "8"
 
               let bytes_generator =
                 Bytes.concat
@@ -75,10 +73,4 @@ end = struct
             end)
 
   let is_small_order p = is_zero (double (double (double p)))
-
-  let random_tmp = random
-
-  let rec random ?state () =
-    let p = random_tmp ?state () in
-    if is_small_order p then random ?state () else p
 end

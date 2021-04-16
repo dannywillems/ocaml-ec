@@ -162,6 +162,8 @@ module MakeTwistedEdwards
 
       val d : Base.t
 
+      val cofactor : Z.t
+
       val bytes_generator : Bytes.t
     end) : Ec_sig.TwistedEdwardsT = struct
   (* https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html *)
@@ -246,18 +248,6 @@ module MakeTwistedEdwards
     let v' = Base.((vv + (a * neg_uu)) / (one + one + (a * neg_uu) + neg_vv)) in
     { u = u'; v = v' }
 
-  let rec random ?state () =
-    let u = Base.random ?state () in
-    let uu = Base.(square u) in
-    let auu = Base.(a * uu) in
-    let duu = Base.(d * uu) in
-    if Base.(is_one duu) then random ?state ()
-    else
-      (* v^2 = (1 - a * u^2) / (1 - d * u^2) *)
-      let tmp = Base.((one + negate auu) / (one + negate duu)) in
-      let v_sqrt = Base.(sqrt_opt tmp) in
-      match v_sqrt with None -> random ?state () | Some v -> { u; v }
-
   let negate { u; v } = { u = Base.negate u; v }
 
   let eq { u = u1; v = v1 } { u = u2; v = v2 } = BaseField.(u1 = u2 && v1 = v2)
@@ -273,6 +263,29 @@ module MakeTwistedEdwards
         if Z.equal r Z.zero then aux x_plus_x q else add x (aux x_plus_x q)
     in
     aux x (ScalarField.to_z n)
+
+  let is_small_order p = eq (mul p (ScalarField.of_z cofactor)) zero
+
+  let rec random ?state () =
+    let () = match state with Some s -> Random.set_state s | None -> () in
+    let u = Base.random ?state:None () in
+    let uu = Base.(square u) in
+    let auu = Base.(a * uu) in
+    let duu = Base.(d * uu) in
+    if Base.(is_one duu) then random ?state:None ()
+    else
+      (*      a u^2 + v^2 = 1 + d u^2 v^2 *)
+      (* <==> a u^2 + v^2 - d u^2 v^2 = 1 *)
+      (* <==> v^2 - d u^2 v^2 = 1 - a u^2 *)
+      (* <==> v^2 * (1 - d u^2) = 1 - a u^2 *)
+      (* <==> v^2 = (1 - a * u^2) / (1 - d * u^2) *)
+      let tmp = Base.((one + negate auu) / (one + negate duu)) in
+      let v_sqrt = Base.(sqrt_opt tmp) in
+      match v_sqrt with
+      | None -> random ?state:None ()
+      | Some v ->
+          let p = mul { u; v } (ScalarField.of_z cofactor) in
+          if eq p zero then random ?state:None () else p
 
   let get_u_coordinate p = p.u
 

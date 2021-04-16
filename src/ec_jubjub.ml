@@ -15,8 +15,6 @@ end)
 
 module TwistedEdwards : sig
   include Ec_sig.TwistedEdwardsT
-
-  val is_small_order : t -> bool
 end = struct
   include Ec.MakeTwistedEdwards (Base) (Scalar)
             (struct
@@ -25,6 +23,8 @@ end = struct
               let d =
                 Base.of_string
                   "19257038036680949359750312669786877991949435402254120286184196891950884077233"
+
+              let cofactor = Z.of_string "8"
 
               let bytes_generator =
                 Bytes.concat
@@ -39,12 +39,4 @@ end = struct
                            "13262374693698910701929044844600465831413122818447359594527400194675274060458"))
                   ]
             end)
-
-  let is_small_order p = is_zero (double (double (double p)))
-
-  let random_tmp = random
-
-  let rec random ?state () =
-    let p = random_tmp ?state () in
-    if is_small_order p then random ?state () else p
 end

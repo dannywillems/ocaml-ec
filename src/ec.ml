@@ -230,10 +230,11 @@ module MakeTwistedEdwards
     let u1u2v1v2 = Base.(u1v2 * v1u2) in
     let v1v2 = Base.(v1 * v2) in
     let u1u2 = Base.(u1 * u2) in
-    let u = Base.((u1v2 + v1u2) / (Base.one + (d * u1u2v1v2))) in
+    let du1u2v1v2 = Base.(d * u1u2v1v2) in
+    let u = Base.((u1v2 + v1u2) / (Base.one + du1u2v1v2)) in
     let v =
       Base.(
-        (v1v2 + Base.negate (a * u1u2)) / (Base.one + Base.negate (d * u1u2v1v2)))
+        (v1v2 + Base.negate (a * u1u2)) / (Base.one + Base.negate du1u2v1v2))
     in
     { u; v }
 

@@ -155,7 +155,7 @@ module MakeProjectiveWeierstrass
   let from_coordinates_opt ~x ~y ~z = Some { x; y; z }
 end
 
-module MakeTwistedEdwards
+module MakeAffineEdwards
     (Base : Ff_sig.PRIME)
     (Scalar : Ff_sig.PRIME) (Params : sig
       val a : Base.t
@@ -165,7 +165,7 @@ module MakeTwistedEdwards
       val cofactor : Z.t
 
       val bytes_generator : Bytes.t
-    end) : Ec_sig.TwistedEdwardsT = struct
+    end) : Ec_sig.AffineEdwardsT = struct
   (* https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html *)
   (* https://en.wikipedia.org/wiki/Twisted_Edwards_curve *)
   exception Not_on_curve of Bytes.t

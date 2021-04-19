@@ -104,7 +104,7 @@ module type ProjectiveWeierstrassT = sig
     x:BaseField.t -> y:BaseField.t -> z:BaseField.t -> t
 end
 
-module type TwistedEdwardsT = sig
+module type AffineEdwardsT = sig
   (** au^2 + v^2 = 1 + du^2v^2 *)
   include BASE
 

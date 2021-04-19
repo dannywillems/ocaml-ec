@@ -11,7 +11,7 @@ module Scalar = Ff.MakeFp (struct
 end)
 
 module Affine =
-  Ec.MakeTwistedEdwards (Base) (Scalar)
+  Ec.MakeAffineEdwards (Base) (Scalar)
     (struct
       let a = Base.(negate one)
 

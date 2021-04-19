@@ -379,7 +379,7 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
           (repeat 1 generator_is_of_prime_order) ] )
 end
 
-module MakeEdwardsCurveProperties (G : Ec_sig.TwistedEdwardsT) = struct
+module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
   let test_elements_of_order_small_order () =
     let p1 =
       G.from_coordinates_exn

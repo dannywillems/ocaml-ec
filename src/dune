@@ -52,3 +52,10 @@
  (instrumentation (backend bisect_ppx))
 )
 
+(library
+ (public_name ec-babyjubjub-reduced)
+ (libraries ff ec-sig ec)
+ (name ec_babyjubjub_reduced)
+ (modules ec_babyjubjub_reduced)
+ (instrumentation (backend bisect_ppx))
+)

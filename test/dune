@@ -20,10 +20,17 @@
 )
 
 (tests
- (names test_babyjubjub test_babyjubjub_reduced)
- (modules test_babyjubjub test_babyjubjub_reduced)
+ (names test_babyjubjub)
+ (modules test_babyjubjub)
  (libraries ec-babyjubjub alcotest ec-pbt)
  (package ec-babyjubjub)
+)
+
+(tests
+ (names test_babyjubjub_reduced)
+ (modules test_babyjubjub_reduced)
+ (libraries ec-babyjubjub-reduced alcotest ec-pbt)
+ (package ec-babyjubjub-reduced)
 )
 
 (tests

@@ -1,9 +1,8 @@
-module ValueGeneration =
-  Ec_pbt.MakeValueGeneration (Ec_babyjubjub.TwistedEdwards)
-module Equality = Ec_pbt.MakeEquality (Ec_babyjubjub.TwistedEdwards)
-module Properties = Ec_pbt.MakeECProperties (Ec_babyjubjub.TwistedEdwards)
+module ValueGeneration = Ec_pbt.MakeValueGeneration (Ec_babyjubjub.Affine)
+module Equality = Ec_pbt.MakeEquality (Ec_babyjubjub.Affine)
+module Properties = Ec_pbt.MakeECProperties (Ec_babyjubjub.Affine)
 module EdwardsCurveProperties =
-  Ec_pbt.MakeEdwardsCurveProperties (Ec_babyjubjub.TwistedEdwards)
+  Ec_pbt.MakeEdwardsCurveProperties (Ec_babyjubjub.Affine)
 
 let test_doubling () =
   let vectors =
@@ -16,13 +15,13 @@ let test_doubling () =
   in
   List.iter
     (fun ((x1, y1), (x2, y2)) ->
-      let x1 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string x1 in
-      let y1 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string y1 in
-      let x2 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string x2 in
-      let y2 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string y2 in
-      let p1 = Ec_babyjubjub.TwistedEdwards.from_coordinates_exn ~u:x1 ~v:y1 in
-      let p2 = Ec_babyjubjub.TwistedEdwards.from_coordinates_exn ~u:x2 ~v:y2 in
-      assert (Ec_babyjubjub.TwistedEdwards.(eq (double p1) p2)))
+      let x1 = Ec_babyjubjub.Affine.BaseField.of_string x1 in
+      let y1 = Ec_babyjubjub.Affine.BaseField.of_string y1 in
+      let x2 = Ec_babyjubjub.Affine.BaseField.of_string x2 in
+      let y2 = Ec_babyjubjub.Affine.BaseField.of_string y2 in
+      let p1 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
+      let p2 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
+      assert (Ec_babyjubjub.Affine.(eq (double p1) p2)))
     vectors
 
 let test_addition () =
@@ -39,18 +38,18 @@ let test_addition () =
   in
   List.iter
     (fun ((x1, y1), (x2, y2), (x3, y3)) ->
-      let x1 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string x1 in
-      let y1 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string y1 in
-      let x2 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string x2 in
-      let y2 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string y2 in
-      let x3 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string x3 in
-      let y3 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string y3 in
-      let p1 = Ec_babyjubjub.TwistedEdwards.from_coordinates_exn ~u:x1 ~v:y1 in
-      let p2 = Ec_babyjubjub.TwistedEdwards.from_coordinates_exn ~u:x2 ~v:y2 in
-      let p3 = Ec_babyjubjub.TwistedEdwards.from_coordinates_exn ~u:x3 ~v:y3 in
-      assert (Ec_babyjubjub.TwistedEdwards.(eq (add p1 p2) p3)) ;
-      assert (Ec_babyjubjub.TwistedEdwards.(eq (add p2 p1) p3)) ;
-      assert (Ec_babyjubjub.TwistedEdwards.(not (eq (add p1 p2) p1))))
+      let x1 = Ec_babyjubjub.Affine.BaseField.of_string x1 in
+      let y1 = Ec_babyjubjub.Affine.BaseField.of_string y1 in
+      let x2 = Ec_babyjubjub.Affine.BaseField.of_string x2 in
+      let y2 = Ec_babyjubjub.Affine.BaseField.of_string y2 in
+      let x3 = Ec_babyjubjub.Affine.BaseField.of_string x3 in
+      let y3 = Ec_babyjubjub.Affine.BaseField.of_string y3 in
+      let p1 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
+      let p2 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
+      let p3 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x3 ~v:y3 in
+      assert (Ec_babyjubjub.Affine.(eq (add p1 p2) p3)) ;
+      assert (Ec_babyjubjub.Affine.(eq (add p2 p1) p3)) ;
+      assert (Ec_babyjubjub.Affine.(not (eq (add p1 p2) p1))))
     vectors
 
 let test_mul_scalar () =
@@ -65,19 +64,19 @@ let test_mul_scalar () =
   in
   List.iter
     (fun ((x1, y1), n, (x2, y2)) ->
-      let x1 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string x1 in
-      let y1 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string y1 in
-      let x2 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string x2 in
-      let y2 = Ec_babyjubjub.TwistedEdwards.BaseField.of_string y2 in
-      let n = Ec_babyjubjub.TwistedEdwards.ScalarField.of_string n in
-      let p1 = Ec_babyjubjub.TwistedEdwards.from_coordinates_exn ~u:x1 ~v:y1 in
-      let p2 = Ec_babyjubjub.TwistedEdwards.from_coordinates_exn ~u:x2 ~v:y2 in
-      assert (Ec_babyjubjub.TwistedEdwards.(eq (mul p1 n) p2)))
+      let x1 = Ec_babyjubjub.Affine.BaseField.of_string x1 in
+      let y1 = Ec_babyjubjub.Affine.BaseField.of_string y1 in
+      let x2 = Ec_babyjubjub.Affine.BaseField.of_string x2 in
+      let y2 = Ec_babyjubjub.Affine.BaseField.of_string y2 in
+      let n = Ec_babyjubjub.Affine.ScalarField.of_string n in
+      let p1 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
+      let p2 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
+      assert (Ec_babyjubjub.Affine.(eq (mul p1 n) p2)))
     vectors
 
 let test_random_is_not_small_order () =
   Ec_pbt.repeat 1000 (fun () ->
-      assert (not Ec_babyjubjub.TwistedEdwards.(is_small_order (random ()))))
+      assert (not Ec_babyjubjub.Affine.(is_small_order (random ()))))
 
 let () =
   let open Alcotest in

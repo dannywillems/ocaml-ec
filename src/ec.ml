@@ -183,35 +183,7 @@ module MakeTwistedEdwards
 
   type t = { u : Base.t; v : Base.t }
 
-  let is_on_curve u v =
-    (* a * u^2 + v^2 = 1 + d u^2 v^2 *)
-    let uu = Base.square u in
-    let vv = Base.square v in
-    let uuvv = Base.(uu * vv) in
-    Base.((a * uu) + vv = one + (d * uuvv))
-
-  let of_bytes_opt b =
-    if Bytes.length b != size_in_bytes then raise (Not_on_curve b)
-    else
-      let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
-      let v_opt =
-        Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
-      in
-      match (u_opt, v_opt) with
-      | (Some u, Some v) -> if is_on_curve u v then Some { u; v } else None
-      | _ -> None
-
-  let of_bytes_exn b =
-    match of_bytes_opt b with None -> raise (Not_on_curve b) | Some p -> p
-
-  let check_bytes b = match of_bytes_opt b with None -> false | Some _ -> true
-
-  let to_bytes { u; v } =
-    Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]
-
   let zero = { u = BaseField.zero; v = BaseField.one }
-
-  let one = of_bytes_exn bytes_generator
 
   let is_zero { u; v } = Base.(u = zero) && Base.(v = one)
 
@@ -258,6 +230,40 @@ module MakeTwistedEdwards
 
   let is_small_order p = eq (mul p (ScalarField.of_z cofactor)) zero
 
+  let is_torsion_free p = eq (mul p ScalarField.(of_z order)) zero
+
+  let is_prime_order p = is_torsion_free p && not (is_zero p)
+
+  let is_on_curve u v =
+    (* a * u^2 + v^2 = 1 + d u^2 v^2 *)
+    let uu = Base.square u in
+    let vv = Base.square v in
+    let uuvv = Base.(uu * vv) in
+    Base.((a * uu) + vv = one + (d * uuvv))
+
+  let of_bytes_opt b =
+    if Bytes.length b != size_in_bytes then raise (Not_on_curve b)
+    else
+      let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
+      let v_opt =
+        Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
+      in
+      match (u_opt, v_opt) with
+      | (Some u, Some v) ->
+          if is_on_curve u v && is_torsion_free { u; v } then Some { u; v }
+          else None
+      | _ -> None
+
+  let of_bytes_exn b =
+    match of_bytes_opt b with None -> raise (Not_on_curve b) | Some p -> p
+
+  let check_bytes b = match of_bytes_opt b with None -> false | Some _ -> true
+
+  let to_bytes { u; v } =
+    Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]
+
+  let one = of_bytes_exn bytes_generator
+
   let rec random ?state () =
     let () = match state with Some s -> Random.set_state s | None -> () in
     let u = Base.random ?state:None () in
@@ -284,7 +290,8 @@ module MakeTwistedEdwards
   let get_v_coordinate p = p.v
 
   let from_coordinates_opt ~u ~v =
-    if is_on_curve u v then Some { u; v } else None
+    let p = { u; v } in
+    if is_on_curve u v && is_torsion_free p then Some { u; v } else None
 
   let from_coordinates_exn ~u ~v =
     match from_coordinates_opt ~u ~v with

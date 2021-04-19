@@ -122,6 +122,14 @@ module type TwistedEdwardsT = sig
   (** [is_small_order p] returns [true] if [p] is of order [cofactor] *)
   val is_small_order : t -> bool
 
+  (** Returns [true] if the element is torsion free, i.e. is in the prime subgroup *)
+  val is_torsion_free : t -> bool
+
+  (** Returns [true] if the element is of prime order, i.e. is torsion free and
+      is not the identity
+   *)
+  val is_prime_order : t -> bool
+
   (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> BaseField.t
 

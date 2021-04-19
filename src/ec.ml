@@ -190,17 +190,6 @@ module MakeTwistedEdwards
     let uuvv = Base.(uu * vv) in
     Base.((a * uu) + vv = one + (d * uuvv))
 
-  let check_bytes b =
-    if Bytes.length b != size_in_bytes then false
-    else
-      let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
-      let v_opt =
-        Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
-      in
-      match (u_opt, v_opt) with
-      | (Some u, Some v) -> is_on_curve u v
-      | _ -> false
-
   let of_bytes_opt b =
     if Bytes.length b != size_in_bytes then raise (Not_on_curve b)
     else
@@ -214,6 +203,8 @@ module MakeTwistedEdwards
 
   let of_bytes_exn b =
     match of_bytes_opt b with None -> raise (Not_on_curve b) | Some p -> p
+
+  let check_bytes b = match of_bytes_opt b with None -> false | Some _ -> true
 
   let to_bytes { u; v } =
     Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]

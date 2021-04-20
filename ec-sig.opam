@@ -16,6 +16,3 @@ depends: [
 ]
 build: [[ "dune" "build" "-j" jobs "-p" name "@install" ]]
 run-test: [[ "dune" "runtest" "-p" name "-j" jobs ]]
-pin-depends: [
-  ["ff-sig.dev" "git+https://gitlab.com/dannywillems/ocaml-ff.git#10fdcc9796a3d620375b98a2fd473a1dd70bb35d"]
-]

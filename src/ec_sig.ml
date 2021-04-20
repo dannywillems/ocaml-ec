@@ -10,7 +10,7 @@ module type BASE = sig
 
   module ScalarField : Ff_sig.PRIME
 
-  module BaseField : Ff_sig.BASE
+  module BaseField : Ff_sig.PRIME
 
   (** Check if a point, represented as a byte array, is on the curve **)
   val check_bytes : Bytes.t -> bool
@@ -104,21 +104,36 @@ module type ProjectiveWeierstrassT = sig
     x:BaseField.t -> y:BaseField.t -> z:BaseField.t -> t
 end
 
-module type TwistedEdwardsT = sig
+module type AffineEdwardsT = sig
+  (** au^2 + v^2 = 1 + du^2v^2 *)
   include BASE
 
-  module BaseField : Ff_sig.BASE
+  (** The parameter [a] of the curve, from the equation a * u^2 + v^2 = 1 + d * u^2 * v^2  *)
+  val a : BaseField.t
 
+  (** The parameter [d] of the curve, from the equation a * u^2 + v^2 = 1 + d * u^2 * v^2  *)
   val d : BaseField.t
-end
 
-module type AffineTwistedEdwardsT = sig
-  include TwistedEdwardsT
+  (** The cofactor of the curve. The parameter is used in [is_small_order] and
+      in the random point generator.
+  *)
+  val cofactor : Z.t
 
-  (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
+  (** [is_small_order p] returns [true] if [p] is of order [cofactor] *)
+  val is_small_order : t -> bool
+
+  (** Returns [true] if the element is torsion free, i.e. is in the prime subgroup *)
+  val is_torsion_free : t -> bool
+
+  (** Returns [true] if the element is of prime order, i.e. is torsion free and
+      is not the identity
+   *)
+  val is_prime_order : t -> bool
+
+  (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> BaseField.t
 
-  (** Return the affine coordinate u (such that -u^2 + v^2 = 1 + d u^2 v^2 *)
+  (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_v_coordinate : t -> BaseField.t
 
   (** Build a point from the affine coordinates. If the point is not on the curve

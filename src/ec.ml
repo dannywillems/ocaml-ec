@@ -133,19 +133,16 @@ module MakeProjectiveWeierstrass
       let y2 = Fq.(t2.y / t2.z) in
       Fq.(x1 = x2 && y1 = y2)
 
-  let two_z = Z.succ Z.one
-
   let mul x n =
     let rec aux x n =
-      if Z.equal n Z.one then x
+      let two_z = Z.succ Z.one in
+      if Z.equal n Z.zero then zero
+      else if Z.equal n Z.one then x
       else
         let (a, r) = Z.ediv_rem n two_z in
-        let acc = aux x a in
-        let acc_add = add acc acc in
-        if Z.equal r Z.zero then acc_add else add acc_add x
+        if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
-    let n = ScalarField.to_z n in
-    if Z.equal n Z.zero then zero else if is_zero x then zero else aux x n
+    aux x (ScalarField.to_z n)
 
   let get_x_coordinate t = t.x
 
@@ -156,4 +153,151 @@ module MakeProjectiveWeierstrass
   let from_coordinates_exn ~x ~y ~z = { x; y; z }
 
   let from_coordinates_opt ~x ~y ~z = Some { x; y; z }
+end
+
+module MakeAffineEdwards
+    (Base : Ff_sig.PRIME)
+    (Scalar : Ff_sig.PRIME) (Params : sig
+      val a : Base.t
+
+      val d : Base.t
+
+      val cofactor : Z.t
+
+      val bytes_generator : Bytes.t
+    end) : Ec_sig.AffineEdwardsT = struct
+  (* https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html *)
+  (* https://en.wikipedia.org/wiki/Twisted_Edwards_curve *)
+  exception Not_on_curve of Bytes.t
+
+  module ScalarField = Scalar
+  module BaseField = Base
+  include Params
+
+  let () =
+    (* Addition formula is complete if d is a non square and if a is a square *)
+    assert (Option.is_none (Base.sqrt_opt d)) ;
+    assert (Option.is_some (Base.sqrt_opt a))
+
+  let size_in_bytes = Base.size_in_bytes * 2
+
+  type t = { u : Base.t; v : Base.t }
+
+  let zero = { u = BaseField.zero; v = BaseField.one }
+
+  let is_zero { u; v } = Base.(u = zero) && Base.(v = one)
+
+  let add { u = u1; v = v1 } { u = u2; v = v2 } =
+    let u1v2 = Base.(u1 * v2) in
+    let v1u2 = Base.(v1 * u2) in
+    let u1u2v1v2 = Base.(u1v2 * v1u2) in
+    let v1v2 = Base.(v1 * v2) in
+    let u1u2 = Base.(u1 * u2) in
+    let du1u2v1v2 = Base.(d * u1u2v1v2) in
+    let u = Base.((u1v2 + v1u2) / (Base.one + du1u2v1v2)) in
+    let v =
+      Base.(
+        (v1v2 + Base.negate (a * u1u2)) / (Base.one + Base.negate du1u2v1v2))
+    in
+    { u; v }
+
+  let double { u; v } =
+    let uv = Base.(u * v) in
+    let uu = Base.square u in
+    let vv = Base.square v in
+    let neg_uu = Base.negate uu in
+    let neg_vv = Base.negate vv in
+    (* a u^2 v^2 = 1 + d u^2 v^2 --> we can skip one multiplication *)
+    let u' = Base.(double uv / ((a * uu) + vv)) in
+    let v' = Base.((vv + (a * neg_uu)) / (one + one + (a * neg_uu) + neg_vv)) in
+    { u = u'; v = v' }
+
+  let negate { u; v } = { u = Base.negate u; v }
+
+  let eq { u = u1; v = v1 } { u = u2; v = v2 } = BaseField.(u1 = u2 && v1 = v2)
+
+  let mul x n =
+    let rec aux x n =
+      let two_z = Z.succ Z.one in
+      if Z.equal n Z.zero then zero
+      else if Z.equal n Z.one then x
+      else
+        let (q, r) = Z.ediv_rem n two_z in
+        let x_plus_x = double x in
+        if Z.equal r Z.zero then aux x_plus_x q else add x (aux x_plus_x q)
+    in
+    aux x (ScalarField.to_z n)
+
+  let is_small_order p = eq (mul p (ScalarField.of_z cofactor)) zero
+
+  let is_torsion_free p = eq (mul p ScalarField.(of_z order)) zero
+
+  let is_prime_order p = is_torsion_free p && not (is_zero p)
+
+  let is_on_curve u v =
+    (* a * u^2 + v^2 = 1 + d u^2 v^2 *)
+    let uu = Base.square u in
+    let vv = Base.square v in
+    let uuvv = Base.(uu * vv) in
+    Base.((a * uu) + vv = one + (d * uuvv))
+
+  let of_bytes_opt b =
+    if Bytes.length b != size_in_bytes then raise (Not_on_curve b)
+    else
+      let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
+      let v_opt =
+        Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
+      in
+      match (u_opt, v_opt) with
+      | (Some u, Some v) ->
+          if is_on_curve u v && is_torsion_free { u; v } then Some { u; v }
+          else None
+      | _ -> None
+
+  let of_bytes_exn b =
+    match of_bytes_opt b with None -> raise (Not_on_curve b) | Some p -> p
+
+  let check_bytes b = match of_bytes_opt b with None -> false | Some _ -> true
+
+  let to_bytes { u; v } =
+    Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]
+
+  let one = of_bytes_exn bytes_generator
+
+  let rec random ?state () =
+    let () = match state with Some s -> Random.set_state s | None -> () in
+    let u = Base.random ?state:None () in
+    let uu = Base.(square u) in
+    let auu = Base.(a * uu) in
+    let duu = Base.(d * uu) in
+    if Base.(is_one duu) then random ?state:None ()
+    else
+      (*      a u^2 + v^2 = 1 + d u^2 v^2 *)
+      (* <==> a u^2 + v^2 - d u^2 v^2 = 1 *)
+      (* <==> v^2 - d u^2 v^2 = 1 - a u^2 *)
+      (* <==> v^2 * (1 - d u^2) = 1 - a u^2 *)
+      (* <==> v^2 = (1 - a * u^2) / (1 - d * u^2) *)
+      let tmp = Base.((one + negate auu) / (one + negate duu)) in
+      let v_sqrt = Base.(sqrt_opt tmp) in
+      match v_sqrt with
+      | None -> random ?state:None ()
+      | Some v ->
+          let p = mul { u; v } (ScalarField.of_z cofactor) in
+          if eq p zero then random ?state:None () else p
+
+  let get_u_coordinate p = p.u
+
+  let get_v_coordinate p = p.v
+
+  let from_coordinates_opt ~u ~v =
+    let p = { u; v } in
+    if is_on_curve u v && is_torsion_free p then Some { u; v } else None
+
+  let from_coordinates_exn ~u ~v =
+    match from_coordinates_opt ~u ~v with
+    | None ->
+        raise
+          (Not_on_curve
+             (Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]))
+    | Some p -> p
 end

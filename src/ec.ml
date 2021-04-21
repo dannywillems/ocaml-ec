@@ -252,9 +252,7 @@ module MakeAffineEdwards
         Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
       in
       match (u_opt, v_opt) with
-      | (Some u, Some v) ->
-          if is_on_curve u v && is_torsion_free { u; v } then Some { u; v }
-          else None
+      | (Some u, Some v) -> if is_on_curve u v then Some { u; v } else None
       | _ -> None
 
   let of_bytes_exn b =
@@ -294,7 +292,7 @@ module MakeAffineEdwards
 
   let from_coordinates_opt ~u ~v =
     let p = { u; v } in
-    if is_on_curve u v && is_torsion_free p then Some { u; v } else None
+    if is_on_curve u v then Some p else None
 
   let from_coordinates_exn ~u ~v =
     match from_coordinates_opt ~u ~v with

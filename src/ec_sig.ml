@@ -2,7 +2,9 @@
 module type BASE = sig
   exception Not_on_curve of Bytes.t
 
-  (** The type of the element in the elliptic curve *)
+  (** Represents an element on the curve. In the case of a curve with a
+      cofactor, the element is not necessarily in the prime subgroup.
+  *)
   type t
 
   (** The size of a point representation, in bytes *)

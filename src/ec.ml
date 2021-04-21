@@ -165,7 +165,10 @@ module MakeAffineEdwards
       val cofactor : Z.t
 
       val bytes_generator : Bytes.t
-    end) : Ec_sig.AffineEdwardsT = struct
+    end) :
+  Ec_sig.AffineEdwardsT
+    with type BaseField.t = Base.t
+     and type ScalarField.t = Scalar.t = struct
   (* https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html *)
   (* https://en.wikipedia.org/wiki/Twisted_Edwards_curve *)
   exception Not_on_curve of Bytes.t

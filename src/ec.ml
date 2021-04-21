@@ -233,7 +233,7 @@ module MakeAffineEdwards
 
   let is_small_order p = eq (mul p (ScalarField.of_z cofactor)) zero
 
-  let is_torsion_free p = eq (mul p ScalarField.(of_z order)) zero
+  let is_torsion_free p = eq (mul p ScalarField.(of_z order)) p
 
   let is_prime_order p = is_torsion_free p && not (is_zero p)
 

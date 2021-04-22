@@ -380,6 +380,24 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
 end
 
 module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
+  let rec test_of_bytes_and_check_bytes_with_different_size_of_bytes () =
+    (* Generate a random number of bytes between 0 and 10 * G.size_in_bytes. If
+       the random value is the correct number of bytes, we ignore
+    *)
+    let b_size = Random.int (G.size_in_bytes * 10) in
+    if b_size = G.size_in_bytes then
+      test_of_bytes_and_check_bytes_with_different_size_of_bytes ()
+    else
+      let b = Bytes.create b_size in
+      assert (not (G.check_bytes b)) ;
+      assert (Option.is_none (G.of_bytes_opt b)) ;
+      try
+        ignore @@ G.of_bytes_exn b ;
+        assert false
+      with
+      | G.Not_on_curve exn_bytes -> assert (Bytes.equal exn_bytes b)
+      | _ -> assert false
+
   let test_elements_of_order_small_order () =
     (* We check some properties of small order elements. At the same time, we
        verify the type t represents any point on the curve (or, at least,
@@ -473,5 +491,10 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
         test_case
           "Get coordinates of small order elements"
           `Quick
-          test_get_coordinates ] )
+          test_get_coordinates;
+        test_case
+          "Test check_bytes and of_bytes_[exn/opt] with a different number of \
+           bytes than expected"
+          `Quick
+          test_of_bytes_and_check_bytes_with_different_size_of_bytes ] )
 end

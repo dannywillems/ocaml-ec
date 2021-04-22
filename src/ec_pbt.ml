@@ -386,16 +386,10 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
        from_coordinates_exn builds a type t with this property), not only the
        elements in the subgroup.
     *)
-    let p1 =
-      G.from_coordinates_exn
-        ~u:(G.BaseField.of_string "0")
-        ~v:(G.BaseField.of_string "1")
-    in
+    let p1 = G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.one in
     (* (0, -1) *)
     let p2 =
-      G.from_coordinates_exn
-        ~u:(G.BaseField.of_string "0")
-        ~v:G.BaseField.(negate (of_string "1"))
+      G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.(negate one)
     in
     let a_sqrt =
       Option.value ~default:G.BaseField.zero (G.BaseField.sqrt_opt G.a)
@@ -404,17 +398,17 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
     let p3 =
       G.from_coordinates_exn
         ~u:G.BaseField.(inverse_exn a_sqrt)
-        ~v:G.BaseField.(of_string "0")
+        ~v:G.BaseField.zero
     in
 
     (* ((-a)^-1/2, 0) *)
     let p4 =
       G.from_coordinates_exn
         ~u:G.BaseField.(negate (inverse_exn a_sqrt))
-        ~v:G.BaseField.(of_string "0")
+        ~v:G.BaseField.zero
     in
     (* We check the order of the small order elements *)
-    assert (G.(eq (mul p1 (ScalarField.of_string "1")) zero)) ;
+    assert (G.(eq (mul p1 ScalarField.one) zero)) ;
     assert (G.(eq (mul p2 (ScalarField.of_string "2")) zero)) ;
     (* We check p3 and p4 are not of order 2 *)
     assert (G.(not (eq (mul p3 (ScalarField.of_string "2")) zero))) ;
@@ -434,11 +428,50 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
     assert (G.(not (is_torsion_free p3))) ;
     assert (G.(not (is_torsion_free p4)))
 
+  let test_get_coordinates () =
+    (* Test get_u_coordinate and get_v_coordinate on small order elements *)
+    let p1 = G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.one in
+    (* (0, -1) *)
+    let p2 =
+      G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.(negate one)
+    in
+    let a_sqrt =
+      Option.value ~default:G.BaseField.zero (G.BaseField.sqrt_opt G.a)
+    in
+    (* (a^-1/2, 0) *)
+    let p3 =
+      G.from_coordinates_exn
+        ~u:G.BaseField.(inverse_exn a_sqrt)
+        ~v:G.BaseField.zero
+    in
+
+    (* ((-a)^-1/2, 0) *)
+    let p4 =
+      G.from_coordinates_exn
+        ~u:G.BaseField.(negate (inverse_exn a_sqrt))
+        ~v:G.BaseField.zero
+    in
+    assert (G.get_u_coordinate p1 = G.BaseField.zero) ;
+    assert (G.get_v_coordinate p1 = G.BaseField.one) ;
+
+    assert (G.get_u_coordinate p2 = G.BaseField.zero) ;
+    assert (G.get_v_coordinate p2 = G.BaseField.(negate one)) ;
+
+    assert (G.get_u_coordinate p3 = G.BaseField.(inverse_exn a_sqrt)) ;
+    assert (G.get_v_coordinate p3 = G.BaseField.zero) ;
+
+    assert (G.get_u_coordinate p4 = G.BaseField.(negate (inverse_exn a_sqrt))) ;
+    assert (G.get_v_coordinate p4 = G.BaseField.zero)
+
   let get_tests () =
     let open Alcotest in
     ( "Group properties of Edwards curve",
       [ test_case
           "check elements of small orders"
           `Quick
-          (repeat 1 test_elements_of_order_small_order) ] )
+          test_elements_of_order_small_order;
+        test_case
+          "Get coordinates of small order elements"
+          `Quick
+          test_get_coordinates ] )
 end

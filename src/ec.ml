@@ -245,7 +245,7 @@ module MakeAffineEdwards
     Base.((a * uu) + vv = one + (d * uuvv))
 
   let of_bytes_opt b =
-    if Bytes.length b != size_in_bytes then raise (Not_on_curve b)
+    if Bytes.length b != size_in_bytes then None
     else
       let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
       let v_opt =

@@ -380,19 +380,35 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
 end
 
 module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
+  let rec test_of_bytes_and_check_bytes_with_different_size_of_bytes () =
+    (* Generate a random number of bytes between 0 and 10 * G.size_in_bytes. If
+       the random value is the correct number of bytes, we ignore
+    *)
+    let b_size = Random.int (G.size_in_bytes * 10) in
+    if b_size = G.size_in_bytes then
+      test_of_bytes_and_check_bytes_with_different_size_of_bytes ()
+    else
+      let b = Bytes.create b_size in
+      assert (not (G.check_bytes b)) ;
+      assert (Option.is_none (G.of_bytes_opt b)) ;
+      try
+        ignore @@ G.of_bytes_exn b ;
+        assert false
+      with
+      | G.Not_on_curve exn_bytes -> assert (Bytes.equal exn_bytes b)
+      | _ -> assert false
+
   let test_elements_of_order_small_order () =
-    let p1 =
-      G.from_coordinates_exn
-        ~u:(G.BaseField.of_string "0")
-        ~v:(G.BaseField.of_string "1")
-    in
+    (* We check some properties of small order elements. At the same time, we
+       verify the type t represents any point on the curve (or, at least,
+       from_coordinates_exn builds a type t with this property), not only the
+       elements in the subgroup.
+    *)
+    let p1 = G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.one in
     (* (0, -1) *)
     let p2 =
-      G.from_coordinates_exn
-        ~u:(G.BaseField.of_string "0")
-        ~v:G.BaseField.(negate (of_string "1"))
+      G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.(negate one)
     in
-
     let a_sqrt =
       Option.value ~default:G.BaseField.zero (G.BaseField.sqrt_opt G.a)
     in
@@ -400,23 +416,70 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
     let p3 =
       G.from_coordinates_exn
         ~u:G.BaseField.(inverse_exn a_sqrt)
-        ~v:G.BaseField.(of_string "0")
+        ~v:G.BaseField.zero
     in
 
     (* ((-a)^-1/2, 0) *)
     let p4 =
       G.from_coordinates_exn
         ~u:G.BaseField.(negate (inverse_exn a_sqrt))
-        ~v:G.BaseField.(of_string "0")
+        ~v:G.BaseField.zero
     in
-    assert (G.(check_bytes (to_bytes p1))) ;
-    assert (G.(check_bytes (to_bytes p2))) ;
-    assert (G.(check_bytes (to_bytes p3))) ;
-    assert (G.(check_bytes (to_bytes p4))) ;
-    assert (G.(eq (mul p1 (ScalarField.of_string "1")) zero)) ;
+    (* We check the order of the small order elements *)
+    assert (G.(eq (mul p1 ScalarField.one) zero)) ;
     assert (G.(eq (mul p2 (ScalarField.of_string "2")) zero)) ;
+    (* We check p3 and p4 are not of order 2 *)
+    assert (G.(not (eq (mul p3 (ScalarField.of_string "2")) zero))) ;
+    assert (G.(not (eq (mul p4 (ScalarField.of_string "2")) zero))) ;
+    (* But of order 4 *)
     assert (G.(eq (mul p3 (ScalarField.of_string "4")) zero)) ;
-    assert (G.(eq (mul p4 (ScalarField.of_string "4")) zero))
+    assert (G.(eq (mul p4 (ScalarField.of_string "4")) zero)) ;
+    (* They are all of small order *)
+    assert (G.(is_small_order p1)) ;
+    assert (G.(is_small_order p2)) ;
+    assert (G.(is_small_order p3)) ;
+    assert (G.(is_small_order p4)) ;
+    (* The neutral element is torsion free *)
+    assert (G.(is_torsion_free p1)) ;
+    (* The other special points are not torsion free *)
+    assert (G.(not (is_torsion_free p2))) ;
+    assert (G.(not (is_torsion_free p3))) ;
+    assert (G.(not (is_torsion_free p4)))
+
+  let test_get_coordinates () =
+    (* Test get_u_coordinate and get_v_coordinate on small order elements *)
+    let p1 = G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.one in
+    (* (0, -1) *)
+    let p2 =
+      G.from_coordinates_exn ~u:G.BaseField.zero ~v:G.BaseField.(negate one)
+    in
+    let a_sqrt =
+      Option.value ~default:G.BaseField.zero (G.BaseField.sqrt_opt G.a)
+    in
+    (* (a^-1/2, 0) *)
+    let p3 =
+      G.from_coordinates_exn
+        ~u:G.BaseField.(inverse_exn a_sqrt)
+        ~v:G.BaseField.zero
+    in
+
+    (* ((-a)^-1/2, 0) *)
+    let p4 =
+      G.from_coordinates_exn
+        ~u:G.BaseField.(negate (inverse_exn a_sqrt))
+        ~v:G.BaseField.zero
+    in
+    assert (G.get_u_coordinate p1 = G.BaseField.zero) ;
+    assert (G.get_v_coordinate p1 = G.BaseField.one) ;
+
+    assert (G.get_u_coordinate p2 = G.BaseField.zero) ;
+    assert (G.get_v_coordinate p2 = G.BaseField.(negate one)) ;
+
+    assert (G.get_u_coordinate p3 = G.BaseField.(inverse_exn a_sqrt)) ;
+    assert (G.get_v_coordinate p3 = G.BaseField.zero) ;
+
+    assert (G.get_u_coordinate p4 = G.BaseField.(negate (inverse_exn a_sqrt))) ;
+    assert (G.get_v_coordinate p4 = G.BaseField.zero)
 
   let get_tests () =
     let open Alcotest in
@@ -424,5 +487,14 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
       [ test_case
           "check elements of small orders"
           `Quick
-          (repeat 1 test_elements_of_order_small_order) ] )
+          test_elements_of_order_small_order;
+        test_case
+          "Get coordinates of small order elements"
+          `Quick
+          test_get_coordinates;
+        test_case
+          "Test check_bytes and of_bytes_[exn/opt] with a different number of \
+           bytes than expected"
+          `Quick
+          test_of_bytes_and_check_bytes_with_different_size_of_bytes ] )
 end

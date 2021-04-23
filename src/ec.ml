@@ -233,7 +233,7 @@ module MakeAffineEdwards
 
   let is_small_order p = eq (mul p (ScalarField.of_z cofactor)) zero
 
-  let is_torsion_free p = eq (mul p ScalarField.(of_z order)) zero
+  let is_torsion_free p = eq (mul p ScalarField.(of_z order)) p
 
   let is_prime_order p = is_torsion_free p && not (is_zero p)
 
@@ -245,16 +245,14 @@ module MakeAffineEdwards
     Base.((a * uu) + vv = one + (d * uuvv))
 
   let of_bytes_opt b =
-    if Bytes.length b != size_in_bytes then raise (Not_on_curve b)
+    if Bytes.length b != size_in_bytes then None
     else
       let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
       let v_opt =
         Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
       in
       match (u_opt, v_opt) with
-      | (Some u, Some v) ->
-          if is_on_curve u v && is_torsion_free { u; v } then Some { u; v }
-          else None
+      | (Some u, Some v) -> if is_on_curve u v then Some { u; v } else None
       | _ -> None
 
   let of_bytes_exn b =
@@ -294,7 +292,7 @@ module MakeAffineEdwards
 
   let from_coordinates_opt ~u ~v =
     let p = { u; v } in
-    if is_on_curve u v && is_torsion_free p then Some { u; v } else None
+    if is_on_curve u v then Some p else None
 
   let from_coordinates_exn ~u ~v =
     match from_coordinates_opt ~u ~v with

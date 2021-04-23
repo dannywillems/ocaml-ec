@@ -84,6 +84,48 @@ let test_random_points_not_on_curve () =
   | Ec_jubjub.Affine.Not_on_curve _ -> ()
   | _ -> assert false
 
+let test_compressed_uncompressed_zero () =
+  let expected_encoding_of_zero =
+    Bytes.sub Ec_jubjub.Affine.(to_bytes zero) 32 32
+  in
+  assert (
+    Ec_jubjub.Affine.(
+      Bytes.equal (to_compressed zero) expected_encoding_of_zero) ) ;
+  assert (
+    Ec_jubjub.Affine.(eq zero (of_compressed_exn expected_encoding_of_zero)) ) ;
+  assert (
+    Ec_jubjub.Affine.(
+      eq zero (Option.get @@ of_compressed_opt expected_encoding_of_zero)) )
+
+let test_compressed_and_uncompressed_exn () =
+  let p = Ec_jubjub.Affine.random () in
+  let compressed_p = Ec_jubjub.Affine.to_compressed p in
+  let uncompressed_p = Ec_jubjub.Affine.of_compressed_exn compressed_p in
+  assert (Ec_jubjub.Affine.eq p uncompressed_p)
+
+let test_compressed_gives_32_bytes () =
+  let compressed_p = Ec_jubjub.Affine.(to_compressed (random ())) in
+  assert (Bytes.length compressed_p = 32)
+
+let test_compressed_and_uncompressed_opt () =
+  let p = Ec_jubjub.Affine.random () in
+  let compressed_p = Ec_jubjub.Affine.to_compressed p in
+  let uncompressed_p =
+    Option.get @@ Ec_jubjub.Affine.of_compressed_opt compressed_p
+  in
+  assert (Ec_jubjub.Affine.eq p uncompressed_p)
+
+let rec test_uncompressed_fail_on_random_values () =
+  let nb_bytes = Random.int (Ec_jubjub.Affine.size_in_bytes * 10) in
+  if nb_bytes = Ec_jubjub.Affine.size_in_bytes then
+    test_uncompressed_fail_on_random_values ()
+  else
+    let b = Bytes.create nb_bytes in
+    assert (Option.is_none (Ec_jubjub.Affine.of_compressed_opt b)) ;
+    try ignore @@ Ec_jubjub.Affine.of_compressed_exn b with
+    | Ec_jubjub.Affine.Not_on_curve exn_b -> assert (Bytes.equal b exn_b)
+    | _ -> assert false
+
 let () =
   let open Alcotest in
   run
@@ -95,6 +137,27 @@ let () =
             `Quick
             (Ec_pbt.repeat 1000 test_random_is_not_small_order);
           Alcotest.test_case "test vectors elements" `Quick test_vectors ] );
+      ( "Compressed/Uncompressed",
+        [ Alcotest.test_case
+            "Correct point, uncompressed_exn"
+            `Quick
+            test_compressed_and_uncompressed_exn;
+          Alcotest.test_case
+            "Random values must not be accepted"
+            `Quick
+            test_uncompressed_fail_on_random_values;
+          Alcotest.test_case
+            "Compressed gives 32 bytes"
+            `Quick
+            test_compressed_gives_32_bytes;
+          Alcotest.test_case
+            "Correct point, uncompressed_opt"
+            `Quick
+            test_compressed_and_uncompressed_opt;
+          Alcotest.test_case
+            "Encoding of zero"
+            `Quick
+            test_compressed_uncompressed_zero ] );
       ( "Tests random",
         [ Alcotest.test_case
             "test random coordinates do not give a point on the curve"

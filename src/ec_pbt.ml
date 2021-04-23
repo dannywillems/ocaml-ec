@@ -481,6 +481,11 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
     assert (G.get_u_coordinate p4 = G.BaseField.(negate (inverse_exn a_sqrt))) ;
     assert (G.get_v_coordinate p4 = G.BaseField.zero)
 
+  let test_unsafe_from_coordinates_do_not_check () =
+    let u = G.BaseField.random () in
+    let v = G.BaseField.random () in
+    ignore @@ G.unsafe_from_coordinates ~u ~v
+
   let get_tests () =
     let open Alcotest in
     ( "Group properties of Edwards curve",
@@ -492,6 +497,10 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
           "Get coordinates of small order elements"
           `Quick
           test_get_coordinates;
+        test_case
+          "unsafe_from_coordinates do not check the point is on the curve"
+          `Quick
+          test_unsafe_from_coordinates_do_not_check;
         test_case
           "Test check_bytes and of_bytes_[exn/opt] with a different number of \
            bytes than expected"

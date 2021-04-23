@@ -309,4 +309,6 @@ module MakeAffineEdwards
           (Not_on_curve
              (Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]))
     | Some p -> p
+
+  let unsafe_from_coordinates ~u ~v = { u; v }
 end

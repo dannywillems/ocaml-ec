@@ -30,6 +30,8 @@ module MakeProjectiveWeierstrass
   let is_zero t = Fq.(t.x = zero) && Fq.(t.z = zero)
 
   let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
     if Bytes.length bytes <> size_in_bytes then None
     else
       let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
@@ -54,6 +56,8 @@ module MakeProjectiveWeierstrass
     match of_bytes_opt bytes with Some _ -> true | None -> false
 
   let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
     match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
 
   let to_bytes g =
@@ -245,6 +249,8 @@ module MakeAffineEdwards
     Base.((a * uu) + vv = one + (d * uuvv))
 
   let of_bytes_opt b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
     if Bytes.length b != size_in_bytes then None
     else
       let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
@@ -256,6 +262,8 @@ module MakeAffineEdwards
       | _ -> None
 
   let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used in
+       [of_bytes_opt] and [Bytes.sub] creates a new buffer *)
     match of_bytes_opt b with None -> raise (Not_on_curve b) | Some p -> p
 
   let check_bytes b = match of_bytes_opt b with None -> false | Some _ -> true

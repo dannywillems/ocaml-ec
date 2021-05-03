@@ -1,3 +1,5 @@
+(copy_files res/test_vector_pedersen_hash.ml)
+
 (test
  (name test_secp256k1)
  (modules test_secp256k1)
@@ -40,3 +42,9 @@
  (package ec-jubjub)
 )
 
+(tests
+ (names test_pedersen_hash test_iterator)
+ (libraries ec-jubjub pedersen-hash alcotest hex)
+ (modules test_pedersen_hash test_iterator test_vector_pedersen_hash)
+ (package pedersen-hash)
+)

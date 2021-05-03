@@ -3,9 +3,9 @@ authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 synopsis: "Pedersen Hash implementation"
 description: "Pedersen Hash implementation"
-homepage: "https://gitlab.com/dannywillems/ocaml-pedersen-hash"
-dev-repo: "git+https://gitlab.com/dannywillems/ocaml-pedersen-hash"
-bug-reports: "https://gitlab.com/dannywillems/ocaml-pedersen-hash/issues"
+homepage: "https://gitlab.com/dannywillems/ocaml-ec"
+dev-repo: "git+https://gitlab.com/dannywillems/ocaml-ec"
+bug-reports: "https://gitlab.com/dannywillems/ocaml-ec/issues"
 license: "MIT"
 depends: [
   "dune" {>= "2.7"}

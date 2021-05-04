@@ -1,3 +1,6 @@
+; Digestif fork
+(copy_files digestif/{*.ml*})
+
 (library
  (public_name ec-sig)
  (name ec_sig)
@@ -65,5 +68,41 @@
  (public_name pedersen-hash)
  (modules pedersen_hash iterator)
  (libraries ec-jubjub)
+ (instrumentation (backend bisect_ppx))
+)
+
+(library
+ (name reddsa)
+ (public_name reddsa)
+ (modules
+   reddsa
+   ; Digestif fork, copied from the directory digestif
+   digestif
+   digestif_conv
+   digestif_eq
+   xor
+   digestif_bi
+   digestif_by
+   baijiu_blake2s
+   baijiu_blake2b
+ )
+ (private_modules
+   ; Digestif fork, copied from the directory digestif
+   digestif
+   digestif_conv
+   digestif_eq
+   xor
+   digestif_bi
+   digestif_by
+   baijiu_blake2s
+   baijiu_blake2b
+ )
+ (libraries
+   ec-jubjub
+   hex
+   ; For digestif, see https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44
+   eqaf
+   bigarray-compat
+ )
  (instrumentation (backend bisect_ppx))
 )

@@ -103,3 +103,9 @@
  (libraries digestif_fork alcotest hex)
  (modules test_digestif)
 )
+
+(tests
+ (names test_find_group_hash)
+ (libraries ec-jubjub group_hash alcotest)
+ (modules test_find_group_hash)
+)

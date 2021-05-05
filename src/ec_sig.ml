@@ -147,6 +147,11 @@ module type AffineEdwardsT = sig
       and in the subgroup, raise [Not_on_curve].
   *)
   val from_coordinates_exn : u:BaseField.t -> v:BaseField.t -> t
+
+  (** Build a point from the affine coordinates, without verifying the point is
+      on the curve. Use with precaution.
+  *)
+  val unsafe_from_coordinates : u:BaseField.t -> v:BaseField.t -> t
 end
 
 module type PAIRING = sig

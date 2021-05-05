@@ -84,6 +84,598 @@ let test_random_points_not_on_curve () =
   | Ec_jubjub.Affine.Not_on_curve _ -> ()
   | _ -> assert false
 
+let test_compressed_uncompressed_zero () =
+  let expected_encoding_of_zero =
+    Bytes.sub Ec_jubjub.Affine.(to_bytes zero) 32 32
+  in
+  assert (
+    Ec_jubjub.Affine.(
+      Bytes.equal (to_compressed zero) expected_encoding_of_zero) ) ;
+  assert (
+    Ec_jubjub.Affine.(eq zero (of_compressed_exn expected_encoding_of_zero)) ) ;
+  assert (
+    Ec_jubjub.Affine.(
+      eq zero (Option.get @@ of_compressed_opt expected_encoding_of_zero)) )
+
+let test_compressed_and_uncompressed_exn () =
+  let p = Ec_jubjub.Affine.random () in
+  let compressed_p = Ec_jubjub.Affine.to_compressed p in
+  let uncompressed_p = Ec_jubjub.Affine.of_compressed_exn compressed_p in
+  assert (Ec_jubjub.Affine.eq p uncompressed_p)
+
+let test_compressed_gives_32_bytes () =
+  let compressed_p = Ec_jubjub.Affine.(to_compressed (random ())) in
+  assert (Bytes.length compressed_p = 32)
+
+let test_compressed_and_uncompressed_opt () =
+  let p = Ec_jubjub.Affine.random () in
+  let compressed_p = Ec_jubjub.Affine.to_compressed p in
+  let uncompressed_p =
+    Option.get @@ Ec_jubjub.Affine.of_compressed_opt compressed_p
+  in
+  assert (Ec_jubjub.Affine.eq p uncompressed_p)
+
+let rec test_uncompressed_fail_on_random_values () =
+  let nb_bytes = Random.int (Ec_jubjub.Affine.size_in_bytes * 10) in
+  if nb_bytes = Ec_jubjub.Affine.size_in_bytes then
+    test_uncompressed_fail_on_random_values ()
+  else
+    let b = Bytes.create nb_bytes in
+    assert (Option.is_none (Ec_jubjub.Affine.of_compressed_opt b)) ;
+    try ignore @@ Ec_jubjub.Affine.of_compressed_exn b with
+    | Ec_jubjub.Affine.Not_on_curve exn_b -> assert (Bytes.equal b exn_b)
+    | _ -> assert false
+
+let test_vector_compressed_and_uncompressed () =
+  let (u_bytes, v_bytes) =
+    ( "0x62edcbb8bf3787c88b0f03ddd60a8187caf55d1b29bf81afe4b3d35df1a7adfe",
+      "0x000000000000000000000000000000000000000000000000000000000000000b" )
+  in
+  let full_generator =
+    Ec_jubjub.Affine.from_coordinates_exn
+      ~u:(Ec_jubjub.Affine.BaseField.of_string u_bytes)
+      ~v:(Ec_jubjub.Affine.BaseField.of_string v_bytes)
+  in
+  let gen =
+    Ec_jubjub.Affine.mul
+      full_generator
+      (Ec_jubjub.Affine.ScalarField.of_z Ec_jubjub.Affine.cofactor)
+  in
+  let vectors_as_int =
+    [ [ 203;
+        85;
+        12;
+        213;
+        56;
+        234;
+        12;
+        193;
+        19;
+        132;
+        128;
+        64;
+        142;
+        110;
+        170;
+        185;
+        179;
+        108;
+        97;
+        63;
+        13;
+        211;
+        247;
+        120;
+        79;
+        219;
+        110;
+        234;
+        131;
+        123;
+        19;
+        215 ];
+      [ 113;
+        154;
+        240;
+        230;
+        224;
+        198;
+        208;
+        170;
+        104;
+        15;
+        59;
+        126;
+        151;
+        222;
+        233;
+        195;
+        203;
+        195;
+        167;
+        129;
+        89;
+        121;
+        240;
+        142;
+        51;
+        166;
+        64;
+        250;
+        184;
+        202;
+        154;
+        177 ];
+      [ 197;
+        41;
+        93;
+        209;
+        203;
+        55;
+        164;
+        174;
+        88;
+        0;
+        90;
+        199;
+        1;
+        156;
+        149;
+        141;
+        240;
+        29;
+        14;
+        82;
+        86;
+        225;
+        126;
+        129;
+        186;
+        157;
+        148;
+        162;
+        219;
+        51;
+        156;
+        199 ];
+      [ 182;
+        117;
+        250;
+        241;
+        81;
+        196;
+        199;
+        227;
+        151;
+        74;
+        243;
+        17;
+        221;
+        97;
+        200;
+        139;
+        192;
+        83;
+        231;
+        35;
+        214;
+        14;
+        95;
+        69;
+        130;
+        201;
+        4;
+        116;
+        177;
+        19;
+        179;
+        0 ];
+      [ 118;
+        41;
+        29;
+        200;
+        60;
+        189;
+        119;
+        252;
+        78;
+        40;
+        230;
+        18;
+        208;
+        221;
+        38;
+        214;
+        176;
+        250;
+        4;
+        10;
+        77;
+        101;
+        26;
+        216;
+        193;
+        198;
+        226;
+        84;
+        25;
+        177;
+        230;
+        185 ];
+      [ 226;
+        189;
+        227;
+        208;
+        112;
+        117;
+        136;
+        98;
+        72;
+        38;
+        211;
+        167;
+        254;
+        82;
+        174;
+        113;
+        112;
+        166;
+        138;
+        171;
+        166;
+        113;
+        52;
+        251;
+        129;
+        197;
+        138;
+        45;
+        195;
+        7;
+        61;
+        140 ];
+      [ 38;
+        198;
+        156;
+        196;
+        146;
+        225;
+        55;
+        163;
+        138;
+        178;
+        157;
+        128;
+        115;
+        135;
+        204;
+        215;
+        0;
+        33;
+        171;
+        20;
+        60;
+        32;
+        142;
+        209;
+        33;
+        233;
+        125;
+        146;
+        207;
+        12;
+        16;
+        24 ];
+      [ 17;
+        187;
+        231;
+        83;
+        165;
+        36;
+        232;
+        184;
+        140;
+        205;
+        195;
+        252;
+        166;
+        85;
+        59;
+        86;
+        3;
+        226;
+        211;
+        67;
+        179;
+        29;
+        238;
+        181;
+        102;
+        142;
+        58;
+        63;
+        57;
+        89;
+        174;
+        138 ];
+      [ 210;
+        159;
+        80;
+        16;
+        181;
+        39;
+        221;
+        204;
+        224;
+        144;
+        145;
+        79;
+        54;
+        231;
+        8;
+        140;
+        142;
+        216;
+        93;
+        190;
+        183;
+        116;
+        174;
+        63;
+        33;
+        242;
+        177;
+        118;
+        148;
+        40;
+        241;
+        203 ];
+      [ 0;
+        143;
+        107;
+        102;
+        149;
+        187;
+        27;
+        124;
+        18;
+        10;
+        98;
+        28;
+        113;
+        123;
+        121;
+        185;
+        29;
+        152;
+        14;
+        130;
+        149;
+        28;
+        87;
+        35;
+        135;
+        135;
+        153;
+        54;
+        112;
+        53;
+        54;
+        68 ];
+      [ 178;
+        131;
+        85;
+        160;
+        214;
+        51;
+        208;
+        157;
+        196;
+        152;
+        247;
+        93;
+        202;
+        56;
+        81;
+        239;
+        155;
+        122;
+        59;
+        188;
+        237;
+        253;
+        11;
+        169;
+        208;
+        236;
+        12;
+        4;
+        163;
+        211;
+        88;
+        97 ];
+      [ 246;
+        194;
+        231;
+        195;
+        159;
+        101;
+        180;
+        133;
+        80;
+        21;
+        185;
+        220;
+        195;
+        115;
+        144;
+        12;
+        90;
+        150;
+        44;
+        117;
+        8;
+        156;
+        168;
+        248;
+        206;
+        41;
+        60;
+        82;
+        67;
+        75;
+        57;
+        67 ];
+      [ 212;
+        205;
+        171;
+        153;
+        113;
+        16;
+        194;
+        241;
+        224;
+        43;
+        177;
+        110;
+        190;
+        248;
+        22;
+        201;
+        208;
+        166;
+        2;
+        83;
+        134;
+        130;
+        85;
+        129;
+        166;
+        136;
+        185;
+        191;
+        163;
+        38;
+        54;
+        10 ];
+      [ 8;
+        60;
+        190;
+        39;
+        153;
+        222;
+        119;
+        23;
+        142;
+        237;
+        12;
+        110;
+        146;
+        9;
+        19;
+        219;
+        143;
+        64;
+        161;
+        99;
+        199;
+        77;
+        39;
+        148;
+        70;
+        213;
+        246;
+        227;
+        150;
+        178;
+        237;
+        178 ];
+      [ 11;
+        114;
+        217;
+        160;
+        101;
+        37;
+        100;
+        220;
+        56;
+        114;
+        42;
+        31;
+        138;
+        33;
+        84;
+        157;
+        214;
+        167;
+        73;
+        233;
+        115;
+        81;
+        124;
+        134;
+        15;
+        31;
+        181;
+        60;
+        184;
+        130;
+        175;
+        159 ];
+      [ 141;
+        238;
+        235;
+        202;
+        241;
+        32;
+        210;
+        10;
+        127;
+        230;
+        54;
+        31;
+        146;
+        80;
+        247;
+        9;
+        107;
+        124;
+        0;
+        26;
+        203;
+        16;
+        237;
+        34;
+        214;
+        147;
+        133;
+        15;
+        29;
+        236;
+        37;
+        88 ] ]
+  in
+  let serialised_vectors =
+    List.map (fun int_list -> List.map char_of_int int_list) vectors_as_int
+  in
+  let serialised_vectors =
+    List.map
+      (fun int_list -> Bytes.init 32 (List.nth int_list))
+      serialised_vectors
+  in
+  ignore
+  @@ List.fold_left
+       (fun p expected_bytes ->
+         (* Test of_compressed *)
+         let expected_p = Ec_jubjub.Affine.of_compressed_exn expected_bytes in
+         assert (Ec_jubjub.Affine.eq p expected_p) ;
+         (* Test to_compressed *)
+         let serialised_p = Ec_jubjub.Affine.to_compressed p in
+         assert (Bytes.equal serialised_p expected_bytes) ;
+         Ec_jubjub.Affine.add p gen)
+       gen
+       serialised_vectors
+
 let () =
   let open Alcotest in
   run
@@ -95,6 +687,31 @@ let () =
             `Quick
             (Ec_pbt.repeat 1000 test_random_is_not_small_order);
           Alcotest.test_case "test vectors elements" `Quick test_vectors ] );
+      ( "Compressed/Uncompressed",
+        [ Alcotest.test_case
+            "Correct point; uncompressed_exn"
+            `Quick
+            test_compressed_and_uncompressed_exn;
+          Alcotest.test_case
+            "Random values must not be accepted"
+            `Quick
+            test_uncompressed_fail_on_random_values;
+          Alcotest.test_case
+            "Compressed gives 32 bytes"
+            `Quick
+            test_compressed_gives_32_bytes;
+          Alcotest.test_case
+            "Correct point; uncompressed_opt"
+            `Quick
+            test_compressed_and_uncompressed_opt;
+          Alcotest.test_case
+            "Test vectors"
+            `Quick
+            test_vector_compressed_and_uncompressed;
+          Alcotest.test_case
+            "Encoding of zero"
+            `Quick
+            test_compressed_uncompressed_zero ] );
       ( "Tests random",
         [ Alcotest.test_case
             "test random coordinates do not give a point on the curve"

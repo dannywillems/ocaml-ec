@@ -251,7 +251,7 @@ module MakeAffineEdwards
   let of_bytes_opt b =
     (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
        creates a new buffer *)
-    if Bytes.length b != size_in_bytes then None
+    if Bytes.length b <> size_in_bytes then None
     else
       let u_opt = Base.of_bytes_opt (Bytes.sub b 0 Base.size_in_bytes) in
       let v_opt =
@@ -309,4 +309,6 @@ module MakeAffineEdwards
           (Not_on_curve
              (Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]))
     | Some p -> p
+
+  let unsafe_from_coordinates ~u ~v = { u; v }
 end

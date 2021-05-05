@@ -108,4 +108,12 @@
  (names test_find_group_hash)
  (libraries ec-jubjub group_hash alcotest)
  (modules test_find_group_hash)
+ (package reddsa)
+)
+
+(tests
+ (names test_redjubjub)
+ (libraries ec-jubjub redjubjub alcotest)
+ (modules test_redjubjub)
+ (package redjubjub)
 )

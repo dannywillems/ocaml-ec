@@ -1,0 +1,17 @@
+opam-version: "2.0"
+authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
+maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
+synopsis: "RedJubjub implementation"
+description: "RedJubjub implementation"
+homepage: "https://gitlab.com/dannywillems/ocaml-ec"
+dev-repo: "git+https://gitlab.com/dannywillems/ocaml-ec"
+bug-reports: "https://gitlab.com/dannywillems/ocaml-ec/issues"
+license: "MIT"
+depends: [
+  "dune" {>= "2.7"}
+  "ec-jubjub" {= version}
+  "reddsa" {= version}
+  "alcotest" { with-test }
+  "bisect_ppx" { with-test & = "2.5.0" }
+]
+build: [[ "dune" "build" "-j" jobs "-p" name "@install" ]]

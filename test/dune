@@ -97,3 +97,9 @@
  (libraries poseidon alcotest hex)
  (package poseidon)
 )
+
+(tests
+ (names test_digestif)
+ (libraries digestif_fork alcotest hex)
+ (modules test_digestif)
+)

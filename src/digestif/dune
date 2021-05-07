@@ -1,0 +1,19 @@
+(library
+ (name digestif_fork)
+ (modules
+   ; Digestif fork, copied from the directory digestif
+   digestif
+   digestif_conv
+   digestif_eq
+   xor
+   digestif_bi
+   digestif_by
+   baijiu_blake2s
+   baijiu_blake2b
+ )
+ (libraries
+   ; For digestif, see https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44
+   eqaf
+   bigarray-compat
+ )
+)

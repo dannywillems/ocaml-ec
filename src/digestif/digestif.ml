@@ -28,7 +28,7 @@ module type S = sig
 
   val empty : ctx
 
-  val init : unit -> ctx
+  val init : ?personalisation:Bytes.t -> unit -> ctx
 
   val feed_bytes : ctx -> ?off:int -> ?len:int -> Bytes.t -> ctx
 
@@ -94,7 +94,7 @@ end
 module type Hash = sig
   type ctx
 
-  val init : unit -> ctx
+  val init : ?personalisation:Bytes.t -> unit -> ctx
 
   val unsafe_feed_bytes : ctx -> By.t -> int -> int -> unit
 
@@ -216,7 +216,8 @@ end
 module type Hash_BLAKE2 = sig
   type ctx
 
-  val with_outlen_and_bytes_key : int -> By.t -> int -> int -> ctx
+  val with_outlen_and_bytes_key :
+    ?personalisation:Bytes.t -> int -> By.t -> int -> int -> ctx
 
   val unsafe_feed_bytes : ctx -> By.t -> int -> int -> unit
 
@@ -236,27 +237,29 @@ module Make_BLAKE2 (H : Hash_BLAKE2) (D : Desc) = struct
         "Invalid digest_size:%d to make a BLAKE2{S,B} implementation"
         D.digest_size
 
-  include
-    Make
-      (struct
-        type ctx = H.ctx
+  include Make
+            (struct
+              type ctx = H.ctx
 
-        let init () = H.with_outlen_and_bytes_key D.digest_size By.empty 0 0
+              let init ?personalisation () =
+                H.with_outlen_and_bytes_key
+                (* XXX(dannywillems): adding personalisation *)
+                  ?personalisation
+                  D.digest_size
+                  By.empty
+                  0
+                  0
 
-        let unsafe_feed_bytes = H.unsafe_feed_bytes
+              let unsafe_feed_bytes = H.unsafe_feed_bytes
 
-        let unsafe_feed_bigstring = H.unsafe_feed_bigstring
+              let unsafe_feed_bigstring = H.unsafe_feed_bigstring
 
-        let unsafe_get = H.unsafe_get
+              let unsafe_get = H.unsafe_get
 
-        let dup = H.dup
-      end)
-      (D)
-
-
-
-
-
+              let dup = H.dup
+            end)
+            (D)
+end
 
 module BLAKE2B : sig
   include S

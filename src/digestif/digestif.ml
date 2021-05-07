@@ -115,28 +115,30 @@ module Unsafe (Hash : Hash) (D : Desc) = struct
   let init = init
 
   let unsafe_feed_bytes ctx ?off ?len buf =
-    let off, len =
+    let (off, len) =
       match (off, len) with
-      | Some off, Some len -> (off, len)
-      | Some off, None -> (off, By.length buf - off)
-      | None, Some len -> (0, len)
-      | None, None -> (0, By.length buf) in
-    if off < 0 || len < 0 || off > By.length buf - len
-    then invalid_arg "offset out of bounds"
+      | (Some off, Some len) -> (off, len)
+      | (Some off, None) -> (off, By.length buf - off)
+      | (None, Some len) -> (0, len)
+      | (None, None) -> (0, By.length buf)
+    in
+    if off < 0 || len < 0 || off > By.length buf - len then
+      invalid_arg "offset out of bounds"
     else unsafe_feed_bytes ctx buf off len
 
   let unsafe_feed_string ctx ?off ?len buf =
     unsafe_feed_bytes ctx ?off ?len (By.unsafe_of_string buf)
 
   let unsafe_feed_bigstring ctx ?off ?len buf =
-    let off, len =
+    let (off, len) =
       match (off, len) with
-      | Some off, Some len -> (off, len)
-      | Some off, None -> (off, Bi.length buf - off)
-      | None, Some len -> (0, len)
-      | None, None -> (0, Bi.length buf) in
-    if off < 0 || len < 0 || off > Bi.length buf - len
-    then invalid_arg "offset out of bounds"
+      | (Some off, Some len) -> (off, len)
+      | (Some off, None) -> (off, Bi.length buf - off)
+      | (None, Some len) -> (0, len)
+      | (None, None) -> (0, Bi.length buf)
+    in
+    if off < 0 || len < 0 || off > Bi.length buf - len then
+      invalid_arg "offset out of bounds"
     else unsafe_feed_bigstring ctx buf off len
 
   let unsafe_get = unsafe_get
@@ -229,9 +231,9 @@ end
 
 module Make_BLAKE2 (H : Hash_BLAKE2) (D : Desc) = struct
   let () =
-    if D.digest_size > H.max_outlen
-    then
-      failwith "Invalid digest_size:%d to make a BLAKE2{S,B} implementation"
+    if D.digest_size > H.max_outlen then
+      failwith
+        "Invalid digest_size:%d to make a BLAKE2{S,B} implementation"
         D.digest_size
 
   include
@@ -262,7 +264,7 @@ end =
   Make_BLAKE2
     (Baijiu_blake2b.Unsafe)
     (struct
-      let digest_size, block_size = (64, 128)
+      let (digest_size, block_size) = (64, 128)
     end)
 
 module BLAKE2S : sig
@@ -271,29 +273,27 @@ end =
   Make_BLAKE2
     (Baijiu_blake2s.Unsafe)
     (struct
-      let digest_size, block_size = (32, 64)
+      let (digest_size, block_size) = (32, 64)
     end)
 
 module Make_BLAKE2B (D : sig
   val digest_size : int
 end) : S = struct
-  include
-    Make_BLAKE2
-      (Baijiu_blake2b.Unsafe)
-      (struct
-        let digest_size, block_size = (D.digest_size, 128)
-      end)
+  include Make_BLAKE2
+            (Baijiu_blake2b.Unsafe)
+            (struct
+              let (digest_size, block_size) = (D.digest_size, 128)
+            end)
 end
 
 module Make_BLAKE2S (D : sig
   val digest_size : int
 end) : S = struct
-  include
-    Make_BLAKE2
-      (Baijiu_blake2s.Unsafe)
-      (struct
-        let digest_size, block_size = (D.digest_size, 64)
-      end)
+  include Make_BLAKE2
+            (Baijiu_blake2s.Unsafe)
+            (struct
+              let (digest_size, block_size) = (D.digest_size, 64)
+            end)
 end
 
 type 'k hash = BLAKE2B : BLAKE2B.t hash | BLAKE2S : BLAKE2S.t hash

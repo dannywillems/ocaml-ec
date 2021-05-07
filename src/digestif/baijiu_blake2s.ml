@@ -54,11 +54,13 @@ module type S = sig
 
   type kind = [ `BLAKE2S ]
 
-  val init : unit -> ctx
+  val init : ?personalisation:Bytes.t -> unit -> ctx
 
-  val with_outlen_and_bytes_key : int -> By.t -> int -> int -> ctx
+  val with_outlen_and_bytes_key :
+    ?personalisation:Bytes.t -> int -> By.t -> int -> int -> ctx
 
-  val with_outlen_and_bigstring_key : int -> Bi.t -> int -> int -> ctx
+  val with_outlen_and_bigstring_key :
+    ?personalisation:Bytes.t -> int -> Bi.t -> int -> int -> ctx
 
   val unsafe_feed_bytes : ctx -> By.t -> int -> int -> unit
 
@@ -186,7 +188,7 @@ module Unsafe : S = struct
     if ctx.last_node <> 0 then set_lastnode ctx ;
     ctx.f.(0) <- Int32.minus_one
 
-  let init () =
+  let init ?personalisation () =
     let buf = By.make 64 '\x00' in
     let ctx =
       { buflen = 0;
@@ -198,6 +200,16 @@ module Unsafe : S = struct
         f = Array.make 2 0l
       }
     in
+    let personal =
+      match personalisation with
+      | None -> Array.make 8 0
+      | Some personalisation ->
+          if Bytes.length personalisation != 8 then
+            failwith "Personalisation must be of 8 bytes long" ;
+          Array.init (Bytes.length personalisation) (fun i ->
+              int_of_char @@ Bytes.get personalisation i)
+    in
+    let param = { default_param with personal } in
     let param_bytes = param_to_bytes param in
     for i = 0 to 7 do
       ctx.h.(i) <- Int32.(iv.(i) lxor By.le32_to_cpu param_bytes (i * 4))
@@ -311,7 +323,7 @@ module Unsafe : S = struct
   let unsafe_feed_bigstring =
     feed ~blit:By.blit_from_bigstring ~le32_to_cpu:Bi.le32_to_cpu
 
-  let with_outlen_and_key ~blit outlen key off len =
+  let with_outlen_and_key ?personalisation ~blit outlen key off len =
     if outlen > max_outlen then
       failwith
         "out length can not be upper than %d (out length: %d)"
@@ -328,9 +340,24 @@ module Unsafe : S = struct
         f = Array.make 2 0l
       }
     in
+    (* XXX(dannywillems): adding personalisation *)
+    let personalisation =
+      match personalisation with
+      | None -> Array.make 8 0
+      | Some personalisation ->
+          if Bytes.length personalisation != 8 then
+            failwith "Personalisation must be of 8 bytes long" ;
+          Array.init 8 (fun i -> int_of_char @@ Bytes.get personalisation i)
+    in
     let param_bytes =
       param_to_bytes
-        { default_param with key_length = len; digest_length = outlen } in
+        { default_param with
+          key_length = len;
+          digest_length = outlen;
+          (* XXX(dannywillems): adding personalisation *)
+          personal = personalisation
+        }
+    in
     for i = 0 to 7 do
       ctx.h.(i) <- Int32.(iv.(i) lxor By.le32_to_cpu param_bytes (i * 4))
     done ;
@@ -340,11 +367,19 @@ module Unsafe : S = struct
       unsafe_feed_bytes ctx block 0 64 ) ;
     ctx
 
-  let with_outlen_and_bytes_key outlen key off len =
-    with_outlen_and_key ~blit:By.blit outlen key off len
+  (* XXX(dannywillems): adding personalisation *)
+  let with_outlen_and_bytes_key ?personalisation outlen key off len =
+    with_outlen_and_key ?personalisation ~blit:By.blit outlen key off len
 
-  let with_outlen_and_bigstring_key outlen key off len =
-    with_outlen_and_key ~blit:By.blit_from_bigstring outlen key off len
+  (* XXX(dannywillems): adding personalisation *)
+  let with_outlen_and_bigstring_key ?personalisation outlen key off len =
+    with_outlen_and_key
+      ?personalisation
+      ~blit:By.blit_from_bigstring
+      outlen
+      key
+      off
+      len
 
   let unsafe_get ctx =
     let res = By.make default_param.digest_length '\x00' in

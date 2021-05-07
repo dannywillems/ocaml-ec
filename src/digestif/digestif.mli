@@ -29,8 +29,8 @@ module type S = sig
   (** An empty hash context. *)
   val empty : ctx
 
-  val init : unit -> ctx
   (** Create a new hash state. *)
+  val init : ?personalisation:Bytes.t -> unit -> ctx
 
   (** [feed_bytes msg t] adds informations in [msg] to [t]. [feed] is analogous
       to appending: [feed (feed t msg1) msg2 = feed t (append msg1 msg2)] *)

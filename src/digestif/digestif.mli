@@ -85,36 +85,6 @@ module type S = sig
   val digestv_bigstring : bigstring list -> t
   (** Same as {!digestv_bytes} but for {!bigstring}. *)
 
-  val hmac_bytes : key:string -> ?off:int -> ?len:int -> Bytes.t -> t
-  (** [hmac_bytes ~key bytes] is the authentication code for {!Bytes.t} under
-      the secret [key], generated using the standard HMAC construction over this
-      hash algorithm. *)
-
-  val hmac_string : key:string -> ?off:int -> ?len:int -> String.t -> t
-  (** Same as {!hmac_bytes} but for {!String.t}. *)
-
-  val hmac_bigstring : key:string -> ?off:int -> ?len:int -> bigstring -> t
-  (** Same as {!hmac_bytes} but for {!bigstring}. *)
-
-  val hmaci_bytes : key:string -> Bytes.t iter -> t
-  (** Authentication code under the secret [key] over a collection of
-      {!Bytes.t}. *)
-
-  val hmaci_string : key:string -> String.t iter -> t
-  (** Same as {!hmaci_bytes} but for {!String.t}. *)
-
-  val hmaci_bigstring : key:string -> bigstring iter -> t
-  (** Same as {!hmaci_bytes} but for {!bigstring}. *)
-
-  val hmacv_bytes : key:string -> Bytes.t list -> t
-  (** Specialization of {!hmaci_bytes} with a list of {!Bytes.t} (see {!iter}). *)
-
-  val hmacv_string : key:string -> String.t list -> t
-  (** Same as {!hmacv_bytes} but for {!String.t}. *)
-
-  val hmacv_bigstring : key:string -> bigstring list -> t
-  (** Same as {!hmacv_bigstring} but for {!bigstring}. *)
-
   val unsafe_compare : t compare
   (** [unsafe_compare] function returns [0] on equality and a negative/positive
       [int] depending on the difference (like {!String.compare}). This is
@@ -169,65 +139,13 @@ module type S = sig
   (** [to_raw_string s] is [(s :> string)]. *)
 end
 
-(** Some hash algorithms expose extra MAC constructs. The interface is similar
-    to the [hmac_*] functions in [S]. *)
-module type MAC = sig
-  type t
-
-  val mac_bytes : key:string -> ?off:int -> ?len:int -> Bytes.t -> t
-
-  val mac_string : key:string -> ?off:int -> ?len:int -> String.t -> t
-
-  val mac_bigstring : key:string -> ?off:int -> ?len:int -> bigstring -> t
-
-  val maci_bytes : key:string -> Bytes.t iter -> t
-
-  val maci_string : key:string -> String.t iter -> t
-
-  val maci_bigstring : key:string -> bigstring iter -> t
-
-  val macv_bytes : key:string -> Bytes.t list -> t
-
-  val macv_string : key:string -> String.t list -> t
-
-  val macv_bigstring : key:string -> bigstring list -> t
-end
-
-module MD5 : S
-
-module SHA1 : S
-
-module SHA224 : S
-
-module SHA256 : S
-
-module SHA384 : S
-
-module SHA512 : S
-
-module SHA3_224 : S
-
-module SHA3_256 : S
-
-module SHA3_384 : S
-
-module SHA3_512 : S
-
-module WHIRLPOOL : S
-
 module BLAKE2B : sig
   include S
-
-  module Keyed : MAC with type t = t
 end
 
 module BLAKE2S : sig
   include S
-
-  module Keyed : MAC with type t = t
 end
-
-module RMD160 : S
 
 module Make_BLAKE2B (D : sig
   val digest_size : int
@@ -237,45 +155,7 @@ module Make_BLAKE2S (D : sig
   val digest_size : int
 end) : S
 
-type 'k hash =
-  | MD5 : MD5.t hash
-  | SHA1 : SHA1.t hash
-  | RMD160 : RMD160.t hash
-  | SHA224 : SHA224.t hash
-  | SHA256 : SHA256.t hash
-  | SHA384 : SHA384.t hash
-  | SHA512 : SHA512.t hash
-  | SHA3_224 : SHA3_224.t hash
-  | SHA3_256 : SHA3_256.t hash
-  | SHA3_384 : SHA3_384.t hash
-  | SHA3_512 : SHA3_512.t hash
-  | WHIRLPOOL : WHIRLPOOL.t hash
-  | BLAKE2B : BLAKE2B.t hash
-  | BLAKE2S : BLAKE2S.t hash
-
-val md5 : MD5.t hash
-
-val sha1 : SHA1.t hash
-
-val rmd160 : RMD160.t hash
-
-val sha224 : SHA224.t hash
-
-val sha256 : SHA256.t hash
-
-val sha384 : SHA384.t hash
-
-val sha512 : SHA512.t hash
-
-val sha3_224 : SHA3_224.t hash
-
-val sha3_256 : SHA3_256.t hash
-
-val sha3_384 : SHA3_384.t hash
-
-val sha3_512 : SHA3_512.t hash
-
-val whirlpool : WHIRLPOOL.t hash
+type 'k hash = BLAKE2B : BLAKE2B.t hash | BLAKE2S : BLAKE2S.t hash
 
 val blake2b : BLAKE2B.t hash
 
@@ -296,12 +176,6 @@ val digesti_bytes : 'k hash -> Bytes.t iter -> 'k t
 val digesti_string : 'k hash -> String.t iter -> 'k t
 
 val digesti_bigstring : 'k hash -> bigstring iter -> 'k t
-
-val hmaci_bytes : 'k hash -> key:string -> Bytes.t iter -> 'k t
-
-val hmaci_string : 'k hash -> key:string -> String.t iter -> 'k t
-
-val hmaci_bigstring : 'k hash -> key:string -> bigstring iter -> 'k t
 
 val pp : 'k hash -> 'k t pp
 
@@ -326,30 +200,6 @@ val of_raw_string_opt : 'k hash -> string -> 'k t option
 val to_raw_string : 'k hash -> 'k t -> string
 
 val of_digest : (module S with type t = 'hash) -> 'hash -> 'hash t
-
-val of_md5 : MD5.t -> MD5.t t
-
-val of_sha1 : SHA1.t -> SHA1.t t
-
-val of_rmd160 : RMD160.t -> RMD160.t t
-
-val of_sha224 : SHA224.t -> SHA224.t t
-
-val of_sha256 : SHA256.t -> SHA256.t t
-
-val of_sha384 : SHA384.t -> SHA384.t t
-
-val of_sha512 : SHA512.t -> SHA512.t t
-
-val of_sha3_224 : SHA3_224.t -> SHA3_224.t t
-
-val of_sha3_256 : SHA3_256.t -> SHA3_256.t t
-
-val of_sha3_384 : SHA3_384.t -> SHA3_384.t t
-
-val of_sha3_512 : SHA3_512.t -> SHA3_512.t t
-
-val of_whirlpool : WHIRLPOOL.t -> WHIRLPOOL.t t
 
 val of_blake2b : BLAKE2B.t -> BLAKE2B.t t
 

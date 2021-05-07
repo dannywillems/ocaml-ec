@@ -48,3 +48,9 @@
  (modules test_pedersen_hash test_iterator test_vector_pedersen_hash)
  (package pedersen-hash)
 )
+
+(tests
+ (names test_digestif)
+ (libraries digestif_fork alcotest hex)
+ (modules test_digestif)
+)

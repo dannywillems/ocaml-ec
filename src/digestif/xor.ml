@@ -29,7 +29,9 @@ module Make (B : BUFFER) = struct
     let n = ref n in
     let i = ref 0 in
     while !n >= size_of_long do
-      B.cpu_to_benat dst (dst_off + !i)
+      B.cpu_to_benat
+        dst
+        (dst_off + !i)
         Nat.(
           B.benat_to_cpu dst (dst_off + !i)
           lxor B.benat_to_cpu src (src_off + !i)) ;
@@ -37,7 +39,9 @@ module Make (B : BUFFER) = struct
       i := !i + size_of_long
     done ;
     while !n > 0 do
-      B.cpu_to_benat dst (dst_off + !i)
+      B.cpu_to_benat
+        dst
+        (dst_off + !i)
         Nat.(
           B.benat_to_cpu src (src_off + !i)
           lxor B.benat_to_cpu dst (dst_off + !i)) ;
@@ -46,8 +50,8 @@ module Make (B : BUFFER) = struct
     done
 
   let xor_into a b n =
-    if n > imin (B.length a) (B.length b)
-    then raise (Invalid_argument "Baijiu.Xor.xor_inrot: buffers to small")
+    if n > imin (B.length a) (B.length b) then
+      raise (Invalid_argument "Baijiu.Xor.xor_inrot: buffers to small")
     else xor_into a 0 b 0 n
 
   let xor a b =

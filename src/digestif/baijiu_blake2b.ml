@@ -74,119 +74,117 @@ end
 module Unsafe : S = struct
   type kind = [ `BLAKE2B ]
 
-  type param = {
-    digest_length : int;
-    key_length : int;
-    fanout : int;
-    depth : int;
-    leaf_length : int32;
-    node_offset : int32;
-    xof_length : int32;
-    node_depth : int;
-    inner_length : int;
-    reserved : int array;
-    salt : int array;
-    personal : int array;
-  }
+  type param =
+    { digest_length : int;
+      key_length : int;
+      fanout : int;
+      depth : int;
+      leaf_length : int32;
+      node_offset : int32;
+      xof_length : int32;
+      node_depth : int;
+      inner_length : int;
+      reserved : int array;
+      salt : int array;
+      personal : int array
+    }
 
-  type ctx = {
-    mutable buflen : int;
-    outlen : int;
-    mutable last_node : int;
-    buf : Bytes.t;
-    h : int64 array;
-    t : int64 array;
-    f : int64 array;
-  }
+  type ctx =
+    { mutable buflen : int;
+      outlen : int;
+      mutable last_node : int;
+      buf : Bytes.t;
+      h : int64 array;
+      t : int64 array;
+      f : int64 array
+    }
 
   let dup ctx =
-    {
-      buflen = ctx.buflen;
+    { buflen = ctx.buflen;
       outlen = ctx.outlen;
       last_node = ctx.last_node;
       buf = By.copy ctx.buf;
       h = Array.copy ctx.h;
       t = Array.copy ctx.t;
-      f = Array.copy ctx.f;
+      f = Array.copy ctx.f
     }
 
   let param_to_bytes param =
     let arr =
-      [|
-        param.digest_length land 0xFF;
-        param.key_length land 0xFF;
-        param.fanout land 0xFF;
-        param.depth land 0xFF (* store to little-endian *);
-        Int32.(to_int ((param.leaf_length lsr 0) land 0xFFl));
-        Int32.(to_int ((param.leaf_length lsr 8) land 0xFFl));
-        Int32.(to_int ((param.leaf_length lsr 16) land 0xFFl));
-        Int32.(to_int ((param.leaf_length lsr 24) land 0xFFl))
-        (* store to little-endian *);
-        Int32.(to_int ((param.node_offset lsr 0) land 0xFFl));
-        Int32.(to_int ((param.node_offset lsr 8) land 0xFFl));
-        Int32.(to_int ((param.node_offset lsr 16) land 0xFFl));
-        Int32.(to_int ((param.node_offset lsr 24) land 0xFFl))
-        (* store to little-endian *);
-        Int32.(to_int ((param.xof_length lsr 0) land 0xFFl));
-        Int32.(to_int ((param.xof_length lsr 8) land 0xFFl));
-        Int32.(to_int ((param.xof_length lsr 16) land 0xFFl));
-        Int32.(to_int ((param.xof_length lsr 24) land 0xFFl));
-        param.node_depth land 0xFF;
-        param.inner_length land 0xFF;
-        param.reserved.(0) land 0xFF;
-        param.reserved.(1) land 0xFF;
-        param.reserved.(2) land 0xFF;
-        param.reserved.(3) land 0xFF;
-        param.reserved.(4) land 0xFF;
-        param.reserved.(5) land 0xFF;
-        param.reserved.(6) land 0xFF;
-        param.reserved.(7) land 0xFF;
-        param.reserved.(8) land 0xFF;
-        param.reserved.(9) land 0xFF;
-        param.reserved.(10) land 0xFF;
-        param.reserved.(11) land 0xFF;
-        param.reserved.(12) land 0xFF;
-        param.reserved.(13) land 0xFF;
-        param.salt.(0) land 0xFF;
-        param.salt.(1) land 0xFF;
-        param.salt.(2) land 0xFF;
-        param.salt.(3) land 0xFF;
-        param.salt.(4) land 0xFF;
-        param.salt.(5) land 0xFF;
-        param.salt.(6) land 0xFF;
-        param.salt.(7) land 0xFF;
-        param.salt.(8) land 0xFF;
-        param.salt.(9) land 0xFF;
-        param.salt.(10) land 0xFF;
-        param.salt.(11) land 0xFF;
-        param.salt.(12) land 0xFF;
-        param.salt.(13) land 0xFF;
-        param.salt.(14) land 0xFF;
-        param.salt.(15) land 0xFF;
-        param.personal.(0) land 0xFF;
-        param.personal.(1) land 0xFF;
-        param.personal.(2) land 0xFF;
-        param.personal.(3) land 0xFF;
-        param.personal.(4) land 0xFF;
-        param.personal.(5) land 0xFF;
-        param.personal.(6) land 0xFF;
-        param.personal.(7) land 0xFF;
-        param.personal.(8) land 0xFF;
-        param.personal.(9) land 0xFF;
-        param.personal.(10) land 0xFF;
-        param.personal.(11) land 0xFF;
-        param.personal.(12) land 0xFF;
-        param.personal.(13) land 0xFF;
-        param.personal.(14) land 0xFF;
-        param.personal.(15) land 0xFF;
-      |] in
+      [| param.digest_length land 0xFF;
+         param.key_length land 0xFF;
+         param.fanout land 0xFF;
+         param.depth land 0xFF (* store to little-endian *);
+         Int32.(to_int ((param.leaf_length lsr 0) land 0xFFl));
+         Int32.(to_int ((param.leaf_length lsr 8) land 0xFFl));
+         Int32.(to_int ((param.leaf_length lsr 16) land 0xFFl));
+         Int32.(to_int ((param.leaf_length lsr 24) land 0xFFl))
+         (* store to little-endian *);
+         Int32.(to_int ((param.node_offset lsr 0) land 0xFFl));
+         Int32.(to_int ((param.node_offset lsr 8) land 0xFFl));
+         Int32.(to_int ((param.node_offset lsr 16) land 0xFFl));
+         Int32.(to_int ((param.node_offset lsr 24) land 0xFFl))
+         (* store to little-endian *);
+         Int32.(to_int ((param.xof_length lsr 0) land 0xFFl));
+         Int32.(to_int ((param.xof_length lsr 8) land 0xFFl));
+         Int32.(to_int ((param.xof_length lsr 16) land 0xFFl));
+         Int32.(to_int ((param.xof_length lsr 24) land 0xFFl));
+         param.node_depth land 0xFF;
+         param.inner_length land 0xFF;
+         param.reserved.(0) land 0xFF;
+         param.reserved.(1) land 0xFF;
+         param.reserved.(2) land 0xFF;
+         param.reserved.(3) land 0xFF;
+         param.reserved.(4) land 0xFF;
+         param.reserved.(5) land 0xFF;
+         param.reserved.(6) land 0xFF;
+         param.reserved.(7) land 0xFF;
+         param.reserved.(8) land 0xFF;
+         param.reserved.(9) land 0xFF;
+         param.reserved.(10) land 0xFF;
+         param.reserved.(11) land 0xFF;
+         param.reserved.(12) land 0xFF;
+         param.reserved.(13) land 0xFF;
+         param.salt.(0) land 0xFF;
+         param.salt.(1) land 0xFF;
+         param.salt.(2) land 0xFF;
+         param.salt.(3) land 0xFF;
+         param.salt.(4) land 0xFF;
+         param.salt.(5) land 0xFF;
+         param.salt.(6) land 0xFF;
+         param.salt.(7) land 0xFF;
+         param.salt.(8) land 0xFF;
+         param.salt.(9) land 0xFF;
+         param.salt.(10) land 0xFF;
+         param.salt.(11) land 0xFF;
+         param.salt.(12) land 0xFF;
+         param.salt.(13) land 0xFF;
+         param.salt.(14) land 0xFF;
+         param.salt.(15) land 0xFF;
+         param.personal.(0) land 0xFF;
+         param.personal.(1) land 0xFF;
+         param.personal.(2) land 0xFF;
+         param.personal.(3) land 0xFF;
+         param.personal.(4) land 0xFF;
+         param.personal.(5) land 0xFF;
+         param.personal.(6) land 0xFF;
+         param.personal.(7) land 0xFF;
+         param.personal.(8) land 0xFF;
+         param.personal.(9) land 0xFF;
+         param.personal.(10) land 0xFF;
+         param.personal.(11) land 0xFF;
+         param.personal.(12) land 0xFF;
+         param.personal.(13) land 0xFF;
+         param.personal.(14) land 0xFF;
+         param.personal.(15) land 0xFF
+      |]
+    in
     By.init 64 (fun i -> Char.unsafe_chr arr.(i))
 
   let max_outlen = 64
 
   let default_param =
-    {
-      digest_length = max_outlen;
+    { digest_length = max_outlen;
       key_length = 0;
       fanout = 1;
       depth = 1;
@@ -197,19 +195,18 @@ module Unsafe : S = struct
       inner_length = 0;
       reserved = [| 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 |];
       salt = [| 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 |];
-      personal = [| 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 |];
+      personal = [| 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 |]
     }
 
   let iv =
-    [|
-      0x6a09e667f3bcc908L;
-      0xbb67ae8584caa73bL;
-      0x3c6ef372fe94f82bL;
-      0xa54ff53a5f1d36f1L;
-      0x510e527fade682d1L;
-      0x9b05688c2b3e6c1fL;
-      0x1f83d9abfb41bd6bL;
-      0x5be0cd19137e2179L;
+    [| 0x6a09e667f3bcc908L;
+       0xbb67ae8584caa73bL;
+       0x3c6ef372fe94f82bL;
+       0xa54ff53a5f1d36f1L;
+       0x510e527fade682d1L;
+       0x9b05688c2b3e6c1fL;
+       0x1f83d9abfb41bd6bL;
+       0x5be0cd19137e2179L
     |]
 
   let increment_counter ctx inc =
@@ -227,35 +224,34 @@ module Unsafe : S = struct
     let buf = By.make 128 '\x00' in
     By.fill buf 0 128 '\x00' ;
     let ctx =
-      {
-        buflen = 0;
+      { buflen = 0;
         outlen = default_param.digest_length;
         last_node = 0;
         buf;
         h = Array.make 8 0L;
         t = Array.make 2 0L;
-        f = Array.make 2 0L;
-      } in
-    let param_bytes = param_to_bytes default_param in
+        f = Array.make 2 0L
+      }
+    in
+    let param_bytes = param_to_bytes param in
     for i = 0 to 7 do
       ctx.h.(i) <- Int64.(iv.(i) lxor By.le64_to_cpu param_bytes (i * 8))
     done ;
     ctx
 
   let sigma =
-    [|
-      [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15 |];
-      [| 14; 10; 4; 8; 9; 15; 13; 6; 1; 12; 0; 2; 11; 7; 5; 3 |];
-      [| 11; 8; 12; 0; 5; 2; 15; 13; 10; 14; 3; 6; 7; 1; 9; 4 |];
-      [| 7; 9; 3; 1; 13; 12; 11; 14; 2; 6; 5; 10; 4; 0; 15; 8 |];
-      [| 9; 0; 5; 7; 2; 4; 10; 15; 14; 1; 11; 12; 6; 8; 3; 13 |];
-      [| 2; 12; 6; 10; 0; 11; 8; 3; 4; 13; 7; 5; 15; 14; 1; 9 |];
-      [| 12; 5; 1; 15; 14; 13; 4; 10; 0; 7; 6; 3; 9; 2; 8; 11 |];
-      [| 13; 11; 7; 14; 12; 1; 3; 9; 5; 0; 15; 4; 8; 6; 2; 10 |];
-      [| 6; 15; 14; 9; 11; 3; 0; 8; 12; 2; 13; 7; 1; 4; 10; 5 |];
-      [| 10; 2; 8; 4; 7; 6; 1; 5; 15; 11; 9; 14; 3; 12; 13; 0 |];
-      [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15 |];
-      [| 14; 10; 4; 8; 9; 15; 13; 6; 1; 12; 0; 2; 11; 7; 5; 3 |];
+    [| [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15 |];
+       [| 14; 10; 4; 8; 9; 15; 13; 6; 1; 12; 0; 2; 11; 7; 5; 3 |];
+       [| 11; 8; 12; 0; 5; 2; 15; 13; 10; 14; 3; 6; 7; 1; 9; 4 |];
+       [| 7; 9; 3; 1; 13; 12; 11; 14; 2; 6; 5; 10; 4; 0; 15; 8 |];
+       [| 9; 0; 5; 7; 2; 4; 10; 15; 14; 1; 11; 12; 6; 8; 3; 13 |];
+       [| 2; 12; 6; 10; 0; 11; 8; 3; 4; 13; 7; 5; 15; 14; 1; 9 |];
+       [| 12; 5; 1; 15; 14; 13; 4; 10; 0; 7; 6; 3; 9; 2; 8; 11 |];
+       [| 13; 11; 7; 14; 12; 1; 3; 9; 5; 0; 15; 4; 8; 6; 2; 10 |];
+       [| 6; 15; 14; 9; 11; 3; 0; 8; 12; 2; 13; 7; 1; 4; 10; 5 |];
+       [| 10; 2; 8; 4; 7; 6; 1; 5; 15; 11; 9; 14; 3; 12; 13; 0 |];
+       [| 0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15 |];
+       [| 14; 10; 4; 8; 9; 15; 13; 6; 1; 12; 0; 2; 11; 7; 5; 3 |]
     |]
 
   let compress :
@@ -273,7 +269,8 @@ module Unsafe : S = struct
       v.(a_idx) <- v.(a_idx) + v.(b_idx) + m.(sigma.(r).((2 * i) ++ 1)) ;
       v.(d_idx) <- ror64 (v.(d_idx) lxor v.(a_idx)) 16 ;
       v.(c_idx) <- v.(c_idx) + v.(d_idx) ;
-      v.(b_idx) <- ror64 (v.(b_idx) lxor v.(c_idx)) 63 in
+      v.(b_idx) <- ror64 (v.(b_idx) lxor v.(c_idx)) 63
+    in
     let r r =
       g r 0 0 4 8 12 ;
       g r 1 1 5 9 13 ;
@@ -327,12 +324,10 @@ module Unsafe : S = struct
    fun ~blit ~le64_to_cpu ctx buf off len ->
     let in_off = ref off in
     let in_len = ref len in
-    if !in_len > 0
-    then (
+    if !in_len > 0 then (
       let left = ctx.buflen in
       let fill = 128 - left in
-      if !in_len > fill
-      then (
+      if !in_len > fill then (
         ctx.buflen <- 0 ;
         blit buf !in_off ctx.buf left fill ;
         increment_counter ctx 128L ;
@@ -344,9 +339,9 @@ module Unsafe : S = struct
           compress ~le64_to_cpu ctx buf !in_off ;
           in_off := !in_off + 128 ;
           in_len := !in_len - 128
-        done) ;
+        done ) ;
       blit buf !in_off ctx.buf ctx.buflen !in_len ;
-      ctx.buflen <- ctx.buflen + !in_len) ;
+      ctx.buflen <- ctx.buflen + !in_len ) ;
     ()
 
   let unsafe_feed_bytes = feed ~blit:By.blit ~le64_to_cpu:By.le64_to_cpu
@@ -355,32 +350,32 @@ module Unsafe : S = struct
     feed ~blit:By.blit_from_bigstring ~le64_to_cpu:Bi.le64_to_cpu
 
   let with_outlen_and_key ~blit outlen key off len =
-    if outlen > max_outlen
-    then
-      failwith "out length can not be upper than %d (out length: %d)" max_outlen
+    if outlen > max_outlen then
+      failwith
+        "out length can not be upper than %d (out length: %d)"
+        max_outlen
         outlen ;
     let buf = By.make 128 '\x00' in
     let ctx =
-      {
-        buflen = 0;
+      { buflen = 0;
         outlen;
         last_node = 0;
         buf;
         h = Array.make 8 0L;
         t = Array.make 2 0L;
-        f = Array.make 2 0L;
-      } in
+        f = Array.make 2 0L
+      }
+    in
     let param_bytes =
       param_to_bytes
         { default_param with digest_length = outlen; key_length = len } in
     for i = 0 to 7 do
       ctx.h.(i) <- Int64.(iv.(i) lxor By.le64_to_cpu param_bytes (i * 8))
     done ;
-    if len > 0
-    then (
+    if len > 0 then (
       let block = By.make 128 '\x00' in
       blit key off block 0 len ;
-      unsafe_feed_bytes ctx block 0 128) ;
+      unsafe_feed_bytes ctx block 0 128 ) ;
     ctx
 
   let with_outlen_and_bytes_key outlen key off len =
@@ -398,11 +393,8 @@ module Unsafe : S = struct
     for i = 0 to 7 do
       By.cpu_to_le64 res (i * 8) ctx.h.(i)
     done ;
-    if ctx.outlen < default_param.digest_length
-    then By.sub res 0 ctx.outlen
-    else if ctx.outlen > default_param.digest_length
-    then
-      assert false
+    if ctx.outlen < default_param.digest_length then By.sub res 0 ctx.outlen
+    else if ctx.outlen > default_param.digest_length then assert false
       (* XXX(dinosaure): [ctx] can not be initialized with [outlen > digest_length = max_outlen]. *)
     else res
 end

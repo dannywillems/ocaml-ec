@@ -75,3 +75,10 @@
  (libraries ec-curve25519 alcotest ec-pbt)
  (package ec-curve25519)
 )
+
+(tests
+ (names test_ed25519)
+ (modules test_ed25519)
+ (libraries ec-curve25519 ed25519 alcotest)
+ (package ed25519)
+)

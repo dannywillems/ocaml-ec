@@ -1,0 +1,6 @@
+(library
+ (name ed25519)
+ (public_name ed25519)
+ (modules ed25519)
+ (libraries ec-curve25519 digestif hex)
+)

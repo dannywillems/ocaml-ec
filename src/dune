@@ -59,3 +59,11 @@
  (modules ec_babyjubjub_reduced)
  (instrumentation (backend bisect_ppx))
 )
+
+(library
+ (name pedersen_hash)
+ (public_name pedersen-hash)
+ (modules pedersen_hash iterator)
+ (libraries ec-jubjub)
+ (instrumentation (backend bisect_ppx))
+)

@@ -19,8 +19,7 @@ struct
         else
           let a = Option.value a_opt ~default:0 in
           let b = Option.value (Iterator.Bit.next iterator) ~default:0 in
-          let c_opt = Iterator.Bit.next iterator in
-          let c = Option.value c_opt ~default:0 in
+          let c = Option.value (Iterator.Bit.next iterator) ~default:0 in
           let enc_m_j = (1 - (2 * c)) * (1 + a + (2 * b)) in
           (* <M_i> accumulated *)
           let enc_m_j = Ec.ScalarField.of_z (Z.of_int enc_m_j) in
@@ -50,6 +49,8 @@ module Zcash =
   MakePedersenHash
     (Ec_jubjub.Affine)
     (struct
+      (* generators from
+         https://github.com/zcash/librustzcash/blob/de1345a1c2f10b0843ab1f1ea6463b2330fdc673/zcash_primitives/src/constants.rs#L146 *)
       let generators =
         let tmp =
           [ ( "0x73c016a42ded9578b5ea25de7ec0e3782f0c718f6f0fbadd194e42926f661b51",

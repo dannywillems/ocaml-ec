@@ -1,3 +1,6 @@
+(* Test vectors from
+https://github.com/zcash/librustzcash/blob/de1345a1c2f10b0843ab1f1ea6463b2330fdc673/zcash_primitives/src/test_vectors/pedersen_hash_vectors.rs *)
+
 let vectors =
   [ ( [true; true; true; true; true; true],
       ( "0x06b1187c11ca4fb4383b2e0d0dbbde3ad3617338b5029187ec65a5eaed5e4d0b",

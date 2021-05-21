@@ -4,7 +4,7 @@ module Iterator : sig
   module Bit : sig
     type t
 
-    val create_le : Bytes.t -> t
+    val of_bytes_le : bytes -> t
 
     val create_from_bool_list : bool list -> t
 

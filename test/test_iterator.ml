@@ -7,7 +7,9 @@ let test_one_byte () =
   in
   List.iter
     (fun (b, expected_l) ->
-      let iterator = Pedersen_hash.Iterator.Bit.create_le (Bytes.of_string b) in
+      let iterator =
+        Pedersen_hash.Iterator.Bit.of_bytes_le (Bytes.of_string b)
+      in
       List.iter
         (fun exp_b ->
           assert (Pedersen_hash.Iterator.Bit.next iterator = Some exp_b))
@@ -84,7 +86,9 @@ let test_multiple_bytes () =
   in
   List.iter
     (fun (b, expected_l) ->
-      let iterator = Pedersen_hash.Iterator.Bit.create_le (Bytes.of_string b) in
+      let iterator =
+        Pedersen_hash.Iterator.Bit.of_bytes_le (Bytes.of_string b)
+      in
       List.iter
         (fun exp_b ->
           assert (Pedersen_hash.Iterator.Bit.next iterator = Some exp_b))

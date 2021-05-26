@@ -124,3 +124,10 @@
  (libraries ec-curve448 alcotest ec-pbt)
  (package ec-curve448)
 )
+
+(tests
+ (names test_bn254)
+ (modules test_bn254)
+ (libraries ec-bn254 alcotest ec-pbt)
+ (package ec-bn254)
+)

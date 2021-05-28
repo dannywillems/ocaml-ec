@@ -66,7 +66,8 @@ module MakeValueGeneration (G : Ec_sig.BASE) = struct
 
   let of_bytes_with_to_bytes_are_inverse_functions () =
     let g = G.random () in
-    assert (G.(eq (of_bytes_exn (to_bytes g)) g))
+    let g' = G.(of_bytes_exn (to_bytes g)) in
+    assert (G.eq g g')
 
   (** Returns the tests to be used with Alcotest *)
   let get_tests () =

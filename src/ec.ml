@@ -77,7 +77,59 @@ module MakeProjectiveWeierstrass
 
   let one = of_bytes_exn Params.bytes_generator
 
+  let mul_by_3b x =
+    let x = Fq.(b * x) in
+    let x = Fq.(x + x + x) in
+    x
+
+  (* Does not seem to be faster when testing scalar multiplication on G1 of
+     BLS12-381 *)
+  (*
+  let add_null_j_invariant p1 p2 =
+    (* Algorithm 7: https://eprint.iacr.org/2015/1060.pdf *)
+    let t0 = Fq.(p1.x * p2.x) in
+    let t1 = Fq.(p1.y * p2.y) in
+    let t2 = Fq.(p1.z * p2.z) in
+    let t3 = Fq.(p1.x + p1.y) in
+    let t4 = Fq.(p2.x + p2.y) in
+    let t3 = Fq.(t3 * t4) in
+    let t4 = Fq.(t0 + t1) in
+    let t3 = Fq.(t3 + negate t4) in
+    let t4 = Fq.(p1.y + p1.z) in
+    let x3 = Fq.(p2.y + p2.z) in
+    let t4 = Fq.(t4 * x3) in
+    let x3 = Fq.(t1 + t2) in
+    let t4 = Fq.(t4 + negate x3) in
+    let x3 = Fq.(p1.x + p1.z) in
+    let y3 = Fq.(p2.x + p2.z) in
+    let x3 = Fq.(x3 * y3) in
+    let y3 = Fq.(t0 + t2) in
+    let y3 = Fq.(x3 + negate y3) in
+    let x3 = Fq.(t0 + t0) in
+    let t0 = Fq.(x3 + t0) in
+    let t2 = mul_by_3b t2 in
+    let z3 = Fq.(t1 + t2) in
+    let t1 = Fq.(t1 + negate t2) in
+    let y3 = mul_by_3b y3 in
+    let x3 = Fq.(t4 * y3) in
+    let t2 = Fq.(t3 * t1) in
+    let x3 = Fq.(t2 + negate x3) in
+    let y3 = Fq.(y3 * t0) in
+    let t1 = Fq.(t1 * z3) in
+    let y3 = Fq.(t1 + y3) in
+    let t0 = Fq.(t0 * t3) in
+    let z3 = Fq.(z3 * t4) in
+    let z3 = Fq.(z3 + t0) in
+    { x = x3; y = y3; z = z3 }
+  *)
+
   let add t1 t2 =
+    (* Does not seem to be faster when testing scalar multiplication on G1 of BLS12-381 *)
+    (* Algorithm 8: https://eprint.iacr.org/2015/1060.pdf *)
+    (*
+     if Fq.(is_zero a) then add_null_j_invariant t1 t2
+     else
+    *)
     (* See https://github.com/o1-labs/snarky/blob/master/snarkette/elliptic_curve.ml *)
     let open Fq in
     let x1z2 = t1.x * t2.z in
@@ -115,11 +167,6 @@ module MakeProjectiveWeierstrass
       let y3 = (u * (r + negate a)) + negate (vvv * y1z2) in
       let z3 = vvv * z1z2 in
       { x = x3; y = y3; z = z3 }
-
-  let mul_by_3b x =
-    let x = Fq.(b * x) in
-    let x = Fq.(x + x + x) in
-    x
 
   let double t =
     if Fq.is_zero a then

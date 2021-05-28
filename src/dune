@@ -67,3 +67,11 @@
  (libraries ec-jubjub)
  (instrumentation (backend bisect_ppx))
 )
+
+(library
+ (name ec_bls12_381)
+ (public_name ec-bls12-381)
+ (modules ec_bls12_381)
+ (libraries ec ff ec-sig)
+ (instrumentation (backend bisect_ppx))
+)

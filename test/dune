@@ -48,3 +48,11 @@
  (modules test_pedersen_hash test_iterator test_vector_pedersen_hash)
  (package pedersen-hash)
 )
+
+(tests
+ (names test_bls12_381)
+ (modules test_bls12_381)
+ (libraries ec-bls12-381 alcotest ec-pbt)
+ (package ec-bls12-381)
+)
+

@@ -47,9 +47,10 @@ module MakeProjectiveWeierstrass
           if Fq.is_zero x && Fq.is_zero z then Some zero
           else if Fq.is_zero z then None
           else
-            let x = Fq.(x / z) in
-            let y = Fq.(y / z) in
-            if Fq.((x * x * x) + (a * x) + b = y * y) then Some { x; y; z }
+            let x' = Fq.(x / z) in
+            let y' = Fq.(y / z) in
+            if Fq.((x' * x' * x') + (a * x') + b = y' * y') then
+              Some { x; y; z }
             else None
 
   let check_bytes bytes =

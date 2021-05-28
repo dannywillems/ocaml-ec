@@ -5,6 +5,8 @@ module MakeProjectiveWeierstrass
 
       val b : Fq.t
 
+      val cofactor : Z.t
+
       val bytes_generator : Bytes.t
     end) :
   Ec_sig.ProjectiveWeierstrassT
@@ -75,16 +77,6 @@ module MakeProjectiveWeierstrass
 
   let one = of_bytes_exn Params.bytes_generator
 
-  let random ?state () =
-    (match state with None -> () | Some s -> Random.set_state s) ;
-    let rec aux () =
-      let x = Fq.random () in
-      let y_square = Fq.((x * x * x) + (a * x) + b) in
-      let y_opt = Fq.sqrt_opt y_square in
-      match y_opt with None -> aux () | Some y -> { x; y; z = Fq.one }
-    in
-    aux ()
-
   let add t1 t2 =
     (* See https://github.com/o1-labs/snarky/blob/master/snarkette/elliptic_curve.ml *)
     let open Fq in
@@ -148,6 +140,18 @@ module MakeProjectiveWeierstrass
         if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
     aux x (ScalarField.to_z n)
+
+  let random ?state () =
+    (match state with None -> () | Some s -> Random.set_state s) ;
+    let rec aux () =
+      let x = Fq.random () in
+      let y_square = Fq.((x * x * x) + (a * x) + b) in
+      let y_opt = Fq.sqrt_opt y_square in
+      match y_opt with
+      | None -> aux ()
+      | Some y -> mul { x; y; z = Fq.one } (ScalarField.of_z Params.cofactor)
+    in
+    aux ()
 
   let get_x_coordinate t = t.x
 

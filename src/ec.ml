@@ -116,7 +116,35 @@ module MakeProjectiveWeierstrass
       let z3 = vvv * z1z2 in
       { x = x3; y = y3; z = z3 }
 
-  let double t = add t t
+  let mul_by_3b x =
+    let x = Fq.(b * x) in
+    let x = Fq.(x + x + x) in
+    x
+
+  let double t =
+    if Fq.is_zero a then
+      (* Algorithm 9: https://eprint.iacr.org/2015/1060.pdf *)
+      let t0 = Fq.(square t.y) in
+      let z3 = Fq.(double t0) in
+      let z3 = Fq.(double z3) in
+      let z3 = Fq.(double z3) in
+      let t1 = Fq.(t.y * t.z) in
+      let t2 = Fq.(square t.z) in
+      let t2 = mul_by_3b t2 in
+      let x3 = Fq.(t2 * z3) in
+      let y3 = Fq.(t0 + t2) in
+      let z3 = Fq.(t1 * z3) in
+      let t1 = Fq.(t2 + t2) in
+      let t2 = Fq.(t1 + t2) in
+      let t0 = Fq.(t0 + negate t2) in
+      let y3 = Fq.(t0 * y3) in
+      let y3 = Fq.(x3 + y3) in
+      let t1 = Fq.(t.x * t.y) in
+      let x3 = Fq.(t0 * t1) in
+      let x3 = Fq.(x3 + x3) in
+      let p = { x = x3; y = y3; z = z3 } in
+      if is_zero p then zero else p
+    else add t t
 
   let negate { x; y; z } = { x; y = Fq.negate y; z }
 

@@ -45,6 +45,22 @@
 )
 
 (library
+ (public_name ec-tweedledee)
+ (libraries ff ec-sig ec)
+ (name ec_tweedledee)
+ (modules ec_tweedledee)
+ (instrumentation (backend bisect_ppx))
+)
+
+(library
+ (public_name ec-tweedledum)
+ (libraries ff ec-sig ec)
+ (name ec_tweedledum)
+ (modules ec_tweedledum)
+ (instrumentation (backend bisect_ppx))
+)
+
+(library
  (public_name ec-jubjub)
  (libraries ff ec-sig ec)
  (name ec_jubjub)

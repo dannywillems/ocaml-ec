@@ -48,3 +48,17 @@
  (modules test_pedersen_hash test_iterator test_vector_pedersen_hash)
  (package pedersen-hash)
 )
+
+(test
+ (name test_tweedledum)
+ (modules test_tweedledum)
+ (libraries ec-tweedledum alcotest ec-pbt)
+ (package ec-tweedledum)
+)
+
+(test
+ (name test_tweedledee)
+ (modules test_tweedledee)
+ (libraries ec-tweedledee alcotest ec-pbt)
+ (package ec-tweedledee)
+)

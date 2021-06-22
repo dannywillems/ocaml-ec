@@ -63,16 +63,16 @@
  (package ec-tweedledee)
 )
 
-(test
- (name test_vesta)
- (modules test_vesta)
+(tests
+ (names test_vesta test_iso_vesta)
+ (modules test_vesta test_iso_vesta)
  (libraries ec-vesta alcotest ec-pbt)
  (package ec-vesta)
 )
 
-(test
- (name test_pallas)
- (modules test_pallas)
+(tests
+ (names test_pallas test_iso_pallas)
+ (modules test_pallas test_iso_pallas)
  (libraries ec-pallas alcotest ec-pbt)
  (package ec-pallas)
 )

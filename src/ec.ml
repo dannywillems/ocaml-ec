@@ -29,6 +29,14 @@ module MakeProjectiveWeierstrass
 
   let is_zero t = Fq.(t.x = zero) && Fq.(t.z = zero)
 
+  let is_on_curve x y z =
+    if Fq.is_zero x && Fq.is_zero z then true
+    else if Fq.is_zero z then false
+    else
+      let x' = Fq.(x / z) in
+      let y' = Fq.(y / z) in
+      Fq.((x' * x' * x') + (a * x') + b = y' * y')
+
   let of_bytes_opt bytes =
     (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
        creates a new buffer *)
@@ -155,9 +163,17 @@ module MakeProjectiveWeierstrass
 
   let get_z_coordinate t = t.z
 
-  let from_coordinates_exn ~x ~y ~z = { x; y; z }
+  let from_coordinates_exn ~x ~y ~z =
+    if is_on_curve x y z then { x; y; z }
+    else
+      raise
+        (Not_on_curve
+           (Bytes.concat
+              Bytes.empty
+              [Fq.to_bytes x; Fq.to_bytes y; Fq.to_bytes z]))
 
-  let from_coordinates_opt ~x ~y ~z = Some { x; y; z }
+  let from_coordinates_opt ~x ~y ~z =
+    if is_on_curve x y z then Some { x; y; z } else None
 
   let get_affine_x_coordinate t =
     if is_zero t then failwith "Zero" else Fq.(t.x / t.z)

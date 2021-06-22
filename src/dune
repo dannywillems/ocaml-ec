@@ -97,4 +97,13 @@
  (public_name pedersen-hash)
  (modules pedersen_hash iterator)
  (libraries ec-jubjub)
+ (instrumentation (backend bisect_ppx))
+)
+
+(library
+ (public_name ec-curve25519)
+ (libraries ff ec-sig ec)
+ (name ec_curve25519)
+ (modules ec_curve25519)
+ (instrumentation (backend bisect_ppx))
 )

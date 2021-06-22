@@ -76,3 +76,10 @@
  (libraries ec-pallas alcotest ec-pbt)
  (package ec-pallas)
 )
+
+(test
+ (name test_curve25519)
+ (modules test_curve25519)
+ (libraries ec-curve25519 alcotest ec-pbt)
+ (package ec-curve25519)
+)

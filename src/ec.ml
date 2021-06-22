@@ -158,6 +158,16 @@ module MakeProjectiveWeierstrass
   let from_coordinates_exn ~x ~y ~z = { x; y; z }
 
   let from_coordinates_opt ~x ~y ~z = Some { x; y; z }
+
+  let get_affine_x_coordinate t =
+    if is_zero t then failwith "Zero" else Fq.(t.x / t.z)
+
+  let get_affine_y_coordinate t =
+    if is_zero t then failwith "Zero" else Fq.(t.y / t.z)
+
+  let from_affine_coordinates_exn ~x ~y = from_coordinates_exn ~x ~y ~z:Fq.one
+
+  let from_affine_coordinates_opt ~x ~y = from_coordinates_exn ~x ~y ~z:Fq.one
 end
 
 module MakeAffineEdwards

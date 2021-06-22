@@ -104,6 +104,14 @@ module type ProjectiveWeierstrassT = sig
   *)
   val from_coordinates_exn :
     x:BaseField.t -> y:BaseField.t -> z:BaseField.t -> t
+
+  val get_affine_x_coordinate : t -> BaseField.t
+
+  val get_affine_y_coordinate : t -> BaseField.t
+
+  val from_affine_coordinates_exn : x:BaseField.t -> y:BaseField.t -> t
+
+  val from_affine_coordinates_opt : x:BaseField.t -> y:BaseField.t -> t
 end
 
 module type AffineEdwardsT = sig

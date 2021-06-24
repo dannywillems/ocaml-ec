@@ -1,0 +1,6 @@
+(library
+ (public_name poseidon252)
+ (name poseidon252)
+ (modules poseidon252 constants ark mds)
+ (libraries ff ff-sig)
+)

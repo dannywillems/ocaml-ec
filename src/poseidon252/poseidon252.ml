@@ -7,6 +7,8 @@ module Scalar = Ff.MakeFp (struct
       "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 end)
 
+let res = Array.make width Scalar.zero
+
 (* simply verify size_in_bytes in Scalar is correct so we can use it everywhere,
    specifically when reading the mds binary file
 *)
@@ -51,14 +53,14 @@ module Strategy = struct
 
   let apply_eval_matrix m v =
     let v = v.state in
-    let res = Array.make width Scalar.zero in
     for j = 0 to width - 1 do
       for k = 0 to width - 1 do
         res.(k) <- Scalar.(res.(k) + (m.(k).(j) * v.(j)))
       done
     done ;
     for j = 0 to width - 1 do
-      v.(j) <- res.(j)
+      v.(j) <- res.(j) ;
+      res.(j) <- Scalar.zero
     done
 
   let apply_partial_round s =

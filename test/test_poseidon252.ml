@@ -1,39 +1,37 @@
+module Scalar = Ff.MakeFp (struct
+  let prime_order =
+    Z.of_string
+      "52435875175126190479447740508185965837690552500527637822603658699938581184513"
+end)
+
+module Poseidon = Poseidon252.Make (Scalar)
+
 let test_perm_is_consistent () =
-  let x =
-    Array.make Poseidon252.Constants.width (Poseidon252.Scalar.of_string "17")
-  in
-  let y =
-    Array.make Poseidon252.Constants.width (Poseidon252.Scalar.of_string "17")
-  in
-  let z =
-    Array.make Poseidon252.Constants.width (Poseidon252.Scalar.of_string "19")
-  in
+  let x = Array.make Poseidon252.Constants.width (Scalar.of_string "17") in
+  let y = Array.make Poseidon252.Constants.width (Scalar.of_string "17") in
+  let z = Array.make Poseidon252.Constants.width (Scalar.of_string "19") in
 
-  let state_x = Poseidon252.Strategy.init x in
-  let state_y = Poseidon252.Strategy.init y in
-  let state_z = Poseidon252.Strategy.init z in
+  let state_x = Poseidon.Strategy.init x in
+  let state_y = Poseidon.Strategy.init y in
+  let state_z = Poseidon.Strategy.init z in
 
-  Poseidon252.Strategy.apply_perm state_x ;
-  Poseidon252.Strategy.apply_perm state_y ;
-  Poseidon252.Strategy.apply_perm state_z ;
+  Poseidon.Strategy.apply_perm state_x ;
+  Poseidon.Strategy.apply_perm state_y ;
+  Poseidon.Strategy.apply_perm state_z ;
 
-  assert (Poseidon252.Strategy.(get state_x = get state_y)) ;
-  assert (Poseidon252.Strategy.(get state_x <> get state_z))
+  assert (Poseidon.Strategy.(get state_x = get state_y)) ;
+  assert (Poseidon.Strategy.(get state_x <> get state_z))
 
 let test_vectors_hades252 () =
   let vectors =
-    [ ( Array.make
-          Poseidon252.Constants.width
-          (Poseidon252.Scalar.of_string "17"),
+    [ ( Array.make Poseidon252.Constants.width (Scalar.of_string "17"),
         [| "20b31534ae4b071c49f0bfaf757c60eeedbc8afd8de7e778c1b870e45b5a334a";
            "84460293173542e4fa384e65596b8bd34f3394c3a424470c0963c57c1208f104";
            "33106ccdafa51903ae0d6c0c1adcf1aa568dd164cc7490ce1c66b64c58865a4c";
            "4454fbb8dbe02de35e5521a4c5b7f0e6dc7968b0f983040336cc17d3792c2c43";
            "914fb19a465a71043e27b88b75603f75a4e664dd87ce27f74c47faf65b4e0f5e"
         |] );
-      ( Array.make
-          Poseidon252.Constants.width
-          (Poseidon252.Scalar.of_string "19"),
+      ( Array.make Poseidon252.Constants.width (Scalar.of_string "19"),
         [| "2f26f38f20a624eb7ddc58a28f94a868824a320a64a05c7b028be716c3d47938";
            "577a6555ceb8acfcec1024f76a647a63bef97ef490fa875d5d8d640e9c477973";
            "d3c9f03664b22c12a49a428cd13bf60c397105ae18039208598f00270b71472f";
@@ -43,28 +41,25 @@ let test_vectors_hades252 () =
   in
   List.iter
     (fun (input, expected_output) ->
-      let s = Poseidon252.Strategy.init input in
-      Poseidon252.Strategy.apply_perm s ;
-      let res = Poseidon252.Strategy.get s in
+      let s = Poseidon.Strategy.init input in
+      Poseidon.Strategy.apply_perm s ;
+      let res = Poseidon.Strategy.get s in
       let expected_output =
         Array.map
-          (fun s -> Poseidon252.Scalar.of_bytes_exn (Hex.to_bytes (`Hex s)))
+          (fun s -> Scalar.of_bytes_exn (Hex.to_bytes (`Hex s)))
           expected_output
       in
       if res <> expected_output then
         let res =
           String.concat
             "; "
-            ( Array.to_list
-            @@ Array.map (fun s -> Poseidon252.Scalar.to_string s) res )
+            (Array.to_list @@ Array.map (fun s -> Scalar.to_string s) res)
         in
         let expected_output =
           String.concat
             "; "
             ( Array.to_list
-            @@ Array.map
-                 (fun s -> Poseidon252.Scalar.to_string s)
-                 expected_output )
+            @@ Array.map (fun s -> Scalar.to_string s) expected_output )
         in
         Alcotest.failf
           "Computed result: [%s]. Expected result: [%s]\n"
@@ -74,7 +69,7 @@ let test_vectors_hades252 () =
 
 let test_vectors_poseidon252 () =
   (* See https://github.com/dusk-network/Poseidon252/blob/91bab8cac8fb50bc6f9dc8b039165380600bb5f2/src/sponge/sponge.rs#L302 *)
-  let open Poseidon252 in
+  let open Poseidon in
   let test_inputs =
     [| "bb67ed265bf1db490ded2e1ede55c0d14c55521509dc73f9c354e98ab76c9625";
        "7e74220084d75e10c89e9435d47bb5b8075991b2e29be3b84421dac3b1ee6007";

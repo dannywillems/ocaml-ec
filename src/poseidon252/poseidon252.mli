@@ -8,24 +8,24 @@ module Constants : sig
   val partial_rounds : int
 end
 
-module Scalar : Ff_sig.PRIME
+module Make : functor (Scalar : Ff_sig.PRIME) -> sig
+  module Strategy : sig
+    type state
 
-module Strategy : sig
-  type state
+    val init : Scalar.t array -> state
 
-  val init : Scalar.t array -> state
+    val apply_perm : state -> unit
 
-  val apply_perm : state -> unit
+    val get : state -> Scalar.t array
+  end
 
-  val get : state -> Scalar.t array
-end
+  module Hash : sig
+    type ctxt
 
-module Hash : sig
-  type ctxt
+    val init : unit -> ctxt
 
-  val init : unit -> ctxt
+    val hash : ctxt -> Scalar.t array -> ctxt
 
-  val hash : ctxt -> Scalar.t array -> ctxt
-
-  val get : ctxt -> Scalar.t
+    val get : ctxt -> Scalar.t
+  end
 end

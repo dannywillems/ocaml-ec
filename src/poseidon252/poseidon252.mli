@@ -8,7 +8,17 @@ module Constants : sig
   val partial_rounds : int
 end
 
-module Make : functor (Scalar : Ff_sig.PRIME) -> sig
+module Make : functor
+  (Scalar : sig
+     include Ff_sig.PRIME
+
+     val add_inplace : t -> t -> unit
+
+     val mul_inplace : t -> t -> unit
+
+     val copy : t -> t
+   end)
+  -> sig
   module Strategy : sig
     type state
 

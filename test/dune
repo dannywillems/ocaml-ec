@@ -87,6 +87,6 @@
 (test
  (name test_poseidon252)
  (modules test_poseidon252)
- (libraries poseidon252 alcotest hex)
+ (libraries poseidon252 alcotest hex bls12-381-unix-blst)
  (package poseidon252)
 )

@@ -3,4 +3,5 @@
  (name poseidon252)
  (modules poseidon252 constants ark mds)
  (libraries ff ff-sig)
+ (ocamlopt_flags (:standard -g -O3))
 )

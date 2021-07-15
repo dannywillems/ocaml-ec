@@ -90,3 +90,10 @@
  (libraries poseidon alcotest hex)
  (package poseidon)
 )
+
+(test
+ (name test_poseidon_orchard)
+ (modules test_poseidon_orchard)
+ (libraries poseidon alcotest hex)
+ (package poseidon)
+)

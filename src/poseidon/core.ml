@@ -1,8 +1,6 @@
 module type PARAMETERS = sig
   val width : int
 
-  val nb_constants : int
-
   val full_rounds : int
 
   val partial_rounds : int
@@ -42,8 +40,7 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
   (* Verify the constants are consistent *)
   let () =
     assert (Array.length mds_matrix = width) ;
-    assert (Array.for_all (fun line -> Array.length line = width) mds_matrix) ;
-    assert (Array.length round_constants = nb_constants)
+    assert (Array.for_all (fun line -> Array.length line = width) mds_matrix)
 
   let mds_matrix =
     Array.map (Array.map Scalar.of_string) mds_matrix

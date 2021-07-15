@@ -1,8 +1,6 @@
 module type PARAMETERS = sig
   val width : int
 
-  val nb_constants : int
-
   val full_rounds : int
 
   val partial_rounds : int

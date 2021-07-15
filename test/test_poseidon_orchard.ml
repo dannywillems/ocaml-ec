@@ -64,6 +64,23 @@ let test_vectors_hades_orchard () =
           expected_output)
     vectors
 
+let test_vectors_poseidon_orchard () =
+  let open Poseidon in
+  let test_inputs =
+    [ ( [| "0"; "1"; "36893488147419103232" |],
+        "9294224303572826231334390170707418973776412638020053350998514035066722916288"
+      ) ]
+  in
+  List.iter
+    (fun (inputs, expected_output) ->
+      let inputs = Array.map (fun x -> Scalar.of_string x) inputs in
+      let ctxt = Hash.init () in
+      let ctxt = Hash.hash ctxt inputs in
+      let v = Hash.get ctxt in
+      let exp_res = Scalar.of_string expected_output in
+      assert (Scalar.eq v exp_res))
+    test_inputs
+
 let () =
   Alcotest.run
     ~verbose:true
@@ -76,8 +93,8 @@ let () =
             "Test vectors from zcash-hackworks/zcash-test-vectors"
             `Quick
             test_vectors_hades_orchard ] )
-      (* ( "Test vectors for Poseidon252",
+      (* ( "Test vectors for Poseidon Orchard",
        *   [ Alcotest.test_case
-       *       "Test vectors from dusk-network/poseidon252"
+       *       "Test vectors from zcash-hackworks/zcash-test-vectors"
        *       `Quick
-       *       test_vectors_poseidon252 ] ) *) ]
+       *       test_vectors_poseidon_orchard ] ) *) ]

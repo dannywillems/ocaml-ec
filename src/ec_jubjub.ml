@@ -1,6 +1,15 @@
-(* https://github.com/daira/jubjub *)
-(* Check it is not a small order element *)
+(**
+  https://github.com/daira/jubjub
 
+  Base field: 52435875175126190479447740508185965837690552500527637822603658699938581184513
+  Scalar field: 6554484396890773809930967563523245729705921265872317281365359162392183254199
+
+  Base field multiplicative subgroup decomposition:
+    2^32 * 3 * 11 * 19 * 10177 * 125527 * 859267 * 906349^2 * 2508409 * 2529403 * 52437899 * 254760293^2
+
+  Prime field multiplication subgroup decomposition:
+    2 * 3 * 12281 * 88951556562858260862727893541829461901934170206990707615630637602694993
+*)
 module Base = Ff.MakeFp (struct
   let prime_order =
     Z.of_string

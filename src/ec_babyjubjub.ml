@@ -1,4 +1,15 @@
-(* https://eips.ethereum.org/EIPS/eip-2494#specification *)
+(**
+  https://eips.ethereum.org/EIPS/eip-2494#specification
+
+  Base field: 21888242871839275222246405745257275088548364400416034343698204186575808495617
+  Scalar field: 2736030358979909402780800718157159386076813972158567259200215660948447373041
+
+  Base field multiplicative subgroup decomposition:
+    2^28 * 3^2 * 13 * 29 * 983 * 11003 * 237073 * 405928799 * 23088226308677670388631582763742451703676949
+  Prime field multiplication subgroup decomposition:
+    2^4 * 3 * 5 * 11^2 * 17 * 967 * 5731244081299119113329403448958138808514418469011002817495701323359
+*)
+
 (* Check it is not a small order element *)
 
 module Base = Ff.MakeFp (struct

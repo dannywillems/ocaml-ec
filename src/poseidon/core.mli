@@ -8,6 +8,8 @@ module type PARAMETERS = sig
   val round_constants : string array
 
   val mds_matrix : string array array
+
+  val partial_round_idx_to_permute : int
 end
 
 module type STRATEGY = sig

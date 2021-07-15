@@ -8,6 +8,8 @@ module Constant : Core.PARAMETERS = struct
   let mds_matrix = Mds_poseidon252.v
 
   let round_constants = Ark_poseidon252.v
+
+  let partial_round_idx_to_permute = 4
 end
 
 module Make (Scalar : Ff_sig.PRIME) = Core.Make (Constant) (Scalar)

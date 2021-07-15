@@ -8,6 +8,8 @@ module type PARAMETERS = sig
   val round_constants : string array
 
   val mds_matrix : string array array
+
+  val partial_round_idx_to_permute : int
 end
 
 module type STRATEGY = sig
@@ -75,8 +77,7 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
 
     let apply_s_box_last_elem s =
       let s = s.state in
-      let last_elem_idx = Array.length s - 1 in
-      s.(last_elem_idx) <- s_box s.(last_elem_idx)
+      s.(partial_round_idx_to_permute) <- s_box s.(partial_round_idx_to_permute)
 
     let apply_s_box s =
       let s = s.state in

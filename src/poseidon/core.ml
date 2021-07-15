@@ -1,22 +1,61 @@
-module Constants = Constants
-open Constants
+module type PARAMETERS = sig
+  val width : int
 
-module Make (Scalar : Ff_sig.PRIME) = struct
+  val nb_constants : int
+
+  val full_rounds : int
+
+  val partial_rounds : int
+
+  val round_constants : string array
+
+  val mds_matrix : string array array
+end
+
+module type STRATEGY = sig
+  type scalar
+
+  type state
+
+  val init : scalar array -> state
+
+  val apply_perm : state -> unit
+
+  val get : state -> scalar array
+end
+
+module type HASH = sig
+  type scalar
+
+  type ctxt
+
+  val init : unit -> ctxt
+
+  val hash : ctxt -> scalar array -> ctxt
+
+  val get : ctxt -> scalar
+end
+
+module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
+  open C
+
+  (* Verify the constants are consistent *)
+  let () =
+    assert (Array.length mds_matrix = width) ;
+    assert (Array.for_all (fun line -> Array.length line = width) mds_matrix) ;
+    assert (Array.length round_constants = nb_constants)
+
+  let mds_matrix =
+    Array.map (Array.map Scalar.of_string) mds_matrix
+
+  let round_constants = Array.map Scalar.of_string round_constants
+
   (* Initialize only once an array for the MDS matrix multiplication *)
   let res = Array.make width Scalar.zero
 
-  (* simply verify size_in_bytes in Scalar is correct so we can use it everywhere,
-     specifically when reading the mds binary file. This check is here because
-     the parameters are not given in the functor yet.
-  *)
-  let () = assert (Scalar.size_in_bytes = 32)
-
-  let mds_matrix =
-    Array.map (fun l -> Array.map (fun s -> Scalar.of_string s) l) Mds.v
-
-  let round_constants = Array.map (fun s -> Scalar.of_string s) Ark.v
-
   module Strategy = struct
+    type scalar = Scalar.t
+
     type state = { mutable i_round_key : int; state : Scalar.t array }
 
     let init state = { i_round_key = 0; state = Array.copy state }
@@ -90,14 +129,16 @@ module Make (Scalar : Ff_sig.PRIME) = struct
   end
 
   module Hash = struct
+    type scalar = Scalar.t
+
     type ctxt = Strategy.state
 
     let init () =
       let state = Strategy.init (Array.make width Scalar.zero) in
       state
 
-    let hash state d =
-      let l = Array.length d in
+    let hash state data =
+      let l = Array.length data in
       let chunk_size = width - 1 in
       let nb_full_chunk = l / chunk_size in
       let r = l mod chunk_size in
@@ -105,14 +146,14 @@ module Make (Scalar : Ff_sig.PRIME) = struct
       for i = 0 to nb_full_chunk - 1 do
         let ofs = i * chunk_size in
         for j = 0 to chunk_size - 1 do
-          Strategy.add_cst state (1 + j) d.(ofs + j)
+          Strategy.add_cst state (1 + j) data.(ofs + j)
         done ;
         Strategy.apply_perm state
       done ;
       (* we add the last partial chunk, add pad with one *)
       for j = 0 to r - 1 do
         let idx = 1 + j in
-        Strategy.add_cst state idx d.((nb_full_chunk * chunk_size) + j)
+        Strategy.add_cst state idx data.((nb_full_chunk * chunk_size) + j)
       done ;
       Strategy.add_cst state (r + 1) Scalar.one ;
       Strategy.apply_perm state ;

@@ -4,12 +4,13 @@ module Scalar = Ff.MakeFp (struct
       "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 end)
 
+open Poseidon
 module Poseidon = Poseidon252.Make (Scalar)
 
 let test_perm_is_consistent () =
-  let x = Array.make Poseidon252.Constants.width (Scalar.of_string "17") in
-  let y = Array.make Poseidon252.Constants.width (Scalar.of_string "17") in
-  let z = Array.make Poseidon252.Constants.width (Scalar.of_string "19") in
+  let x = Array.make Poseidon252.Constant.width (Scalar.of_string "17") in
+  let y = Array.make Poseidon252.Constant.width (Scalar.of_string "17") in
+  let z = Array.make Poseidon252.Constant.width (Scalar.of_string "19") in
 
   let state_x = Poseidon.Strategy.init x in
   let state_y = Poseidon.Strategy.init y in
@@ -24,14 +25,14 @@ let test_perm_is_consistent () =
 
 let test_vectors_hades252 () =
   let vectors =
-    [ ( Array.make Poseidon252.Constants.width (Scalar.of_string "17"),
+    [ ( Array.make Poseidon252.Constant.width (Scalar.of_string "17"),
         [| "20b31534ae4b071c49f0bfaf757c60eeedbc8afd8de7e778c1b870e45b5a334a";
            "84460293173542e4fa384e65596b8bd34f3394c3a424470c0963c57c1208f104";
            "33106ccdafa51903ae0d6c0c1adcf1aa568dd164cc7490ce1c66b64c58865a4c";
            "4454fbb8dbe02de35e5521a4c5b7f0e6dc7968b0f983040336cc17d3792c2c43";
            "914fb19a465a71043e27b88b75603f75a4e664dd87ce27f74c47faf65b4e0f5e"
         |] );
-      ( Array.make Poseidon252.Constants.width (Scalar.of_string "19"),
+      ( Array.make Poseidon252.Constant.width (Scalar.of_string "19"),
         [| "2f26f38f20a624eb7ddc58a28f94a868824a320a64a05c7b028be716c3d47938";
            "577a6555ceb8acfcec1024f76a647a63bef97ef490fa875d5d8d640e9c477973";
            "d3c9f03664b22c12a49a428cd13bf60c397105ae18039208598f00270b71472f";

@@ -92,7 +92,11 @@ let test_vectors_poseidon252 () =
     let ctxt = Hash.hash ctxt points in
     let v = Hash.get ctxt in
     let exp_res = Scalar.of_bytes_exn (Hex.to_bytes (`Hex expected_res)) in
-    assert (Scalar.eq v exp_res)
+    if not (Scalar.eq v exp_res) then
+      Alcotest.failf
+        "Expected result %s, but computed %s"
+        Hex.(show (of_bytes (Scalar.to_bytes exp_res)))
+        Hex.(show (of_bytes (Scalar.to_bytes v)))
   in
   inner [||] "00c78302fb0a2213d756fc08cb382d02adb4fd22d132fa14413f6a60e32d9054" ;
   inner

@@ -94,6 +94,7 @@ let test_vectors_poseidon252 () =
     let exp_res = Scalar.of_bytes_exn (Hex.to_bytes (`Hex expected_res)) in
     assert (Scalar.eq v exp_res)
   in
+  inner [||] "00c78302fb0a2213d756fc08cb382d02adb4fd22d132fa14413f6a60e32d9054" ;
   inner
     (Array.sub test_inputs 0 3)
     "e36f4ea9b858d5c85b02770823c7c5d8253c28787d17f283ca348b906dca8528" ;

@@ -89,7 +89,7 @@ let test_vectors_poseidon252 () =
   in
   let inner points expected_res =
     let ctxt = Hash.init () in
-    let ctxt = Hash.hash ctxt points in
+    let ctxt = Hash.digest ctxt points in
     let v = Hash.get ctxt in
     let exp_res = Scalar.of_bytes_exn (Hex.to_bytes (`Hex expected_res)) in
     if not (Scalar.eq v exp_res) then

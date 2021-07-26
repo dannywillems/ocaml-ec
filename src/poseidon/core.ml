@@ -31,7 +31,7 @@ module type HASH = sig
 
   val init : unit -> ctxt
 
-  val hash : ctxt -> scalar array -> ctxt
+  val digest : ctxt -> scalar array -> ctxt
 
   val get : ctxt -> scalar
 end
@@ -135,7 +135,7 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
       let state = Strategy.init (Array.make width Scalar.zero) in
       state
 
-    let hash state data =
+    let digest state data =
       let l = Array.length data in
       let chunk_size = width - 1 in
       let nb_full_chunk = l / chunk_size in

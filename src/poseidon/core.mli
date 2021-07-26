@@ -46,7 +46,7 @@ module type HASH = sig
   (** [hash ctxt input] computes the hash of the given input. The input must be
       of length [width - 1]
   *)
-  val hash : ctxt -> scalar array -> ctxt
+  val digest : ctxt -> scalar array -> ctxt
 
   (** [get ctxt] returns the resulting point after [hash] has been called *)
   val get : ctxt -> scalar

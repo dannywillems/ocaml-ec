@@ -83,3 +83,17 @@
  (libraries ec-curve25519 alcotest ec-pbt)
  (package ec-curve25519)
 )
+
+(test
+ (name test_poseidon252)
+ (modules test_poseidon252)
+ (libraries poseidon alcotest hex)
+ (package poseidon)
+)
+
+(test
+ (name test_poseidon_orchard)
+ (modules test_poseidon_orchard)
+ (libraries poseidon alcotest hex)
+ (package poseidon)
+)

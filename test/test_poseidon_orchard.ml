@@ -75,7 +75,7 @@ let test_vectors_poseidon_orchard () =
     (fun (inputs, expected_output) ->
       let inputs = Array.map (fun x -> Scalar.of_string x) inputs in
       let ctxt = Hash.init () in
-      let ctxt = Hash.hash ctxt inputs in
+      let ctxt = Hash.digest ctxt inputs in
       let v = Hash.get ctxt in
       let exp_res = Scalar.of_string expected_output in
       assert (Scalar.eq v exp_res))

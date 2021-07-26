@@ -59,8 +59,8 @@ let test_vectors_hades252 () =
         let expected_output =
           String.concat
             "; "
-            (Array.to_list
-            @@ Array.map (fun s -> Scalar.to_string s) expected_output)
+            ( Array.to_list
+            @@ Array.map (fun s -> Scalar.to_string s) expected_output )
         in
         Alcotest.failf
           "Computed result: [%s]. Expected result: [%s]\n"

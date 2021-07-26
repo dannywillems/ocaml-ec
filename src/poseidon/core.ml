@@ -44,8 +44,7 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
     assert (Array.length mds_matrix = width) ;
     assert (Array.for_all (fun line -> Array.length line = width) mds_matrix)
 
-  let mds_matrix =
-    Array.map (Array.map Scalar.of_string) mds_matrix
+  let mds_matrix = Array.map (Array.map Scalar.of_string) mds_matrix
 
   let round_constants = Array.map Scalar.of_string round_constants
 

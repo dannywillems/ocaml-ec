@@ -1,6 +1,6 @@
 (library
  (public_name poseidon)
  (name poseidon)
- (modules poseidon core poseidon252 ark_poseidon252 mds_poseidon252 orchard mds_orchard ark_orchard)
- (libraries ff ff-sig)
-)
+ (modules poseidon core poseidon252 ark_poseidon252 mds_poseidon252 orchard
+   mds_orchard ark_orchard)
+ (libraries ff ff-sig))

@@ -10,9 +10,11 @@ lint:
   image: registry.gitlab.com/dannywillems/docker-ocamlformat:0.15.0
   before_script:
     - eval $(opam env)
+    # FIXME: dune must be upgraded upsteam on docker-ocamlformat
+    - opam update
+    - opam upgrade dune
   script:
-    - ocamlformat --check src/*.ml*
-    - ocamlformat --check test/*.ml*
+    - dune build @fmt
   rules:
     - when: always
 

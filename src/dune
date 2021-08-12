@@ -144,5 +144,12 @@
    eqaf
    bigarray-compat
  )
+)
+
+(library
+ (public_name ec-curve448)
+ (libraries ff ec-sig ec)
+ (name ec_curve448)
+ (modules ec_curve448)
  (instrumentation (backend bisect_ppx))
 )

@@ -117,3 +117,10 @@
  (modules test_redjubjub)
  (package redjubjub)
 )
+
+(tests
+ (names test_curve448)
+ (modules test_curve448)
+ (libraries ec-curve448 alcotest ec-pbt)
+ (package ec-curve448)
+)

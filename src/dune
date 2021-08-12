@@ -1,162 +1,156 @@
 ; Digestif fork
+
 (copy_files digestif/{*.ml*})
 
 (library
  (public_name ec-sig)
  (name ec_sig)
  (modules ec_sig)
- (libraries ff-sig)
-)
+ (libraries ff-sig))
 
 (library
  (public_name ec)
  (libraries ff-sig ec-sig)
  (modules ec)
  (name ec)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
-  (public_name ec-pbt)
-  (name ec_pbt)
-  (libraries ec_sig alcotest)
-  (modules ec_pbt)
-)
+ (public_name ec-pbt)
+ (name ec_pbt)
+ (libraries ec_sig alcotest)
+ (modules ec_pbt))
 
 (library
  (public_name ec-secp256k1)
  (libraries ff ec-sig ec)
  (name ec_secp256k1)
  (modules ec_secp256k1)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-secp256r1)
  (libraries ff ec-sig ec)
  (name ec_secp256r1)
  (modules ec_secp256r1)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-babyjubjub)
  (libraries ff ec-sig ec)
  (name ec_babyjubjub)
  (modules ec_babyjubjub)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-vesta)
  (libraries ff ec-sig ec)
  (name ec_vesta)
  (modules ec_vesta)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-pallas)
  (libraries ff ec-sig ec)
  (name ec_pallas)
  (modules ec_pallas)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-tweedledee)
  (libraries ff ec-sig ec)
  (name ec_tweedledee)
  (modules ec_tweedledee)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-tweedledum)
  (libraries ff ec-sig ec)
  (name ec_tweedledum)
  (modules ec_tweedledum)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-jubjub)
  (libraries ff ec-sig ec)
  (name ec_jubjub)
  (modules ec_jubjub)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-babyjubjub-reduced)
  (libraries ff ec-sig ec)
  (name ec_babyjubjub_reduced)
  (modules ec_babyjubjub_reduced)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (name pedersen_hash)
  (public_name pedersen-hash)
  (modules pedersen_hash iterator)
  (libraries ec-jubjub)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (public_name ec-curve25519)
  (libraries ff ec-sig ec)
  (name ec_curve25519)
  (modules ec_curve25519)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))
 
 (library
  (name reddsa)
  (public_name reddsa)
  (modules
-   reddsa
-   ; Digestif fork, copied from the directory digestif
-   digestif
-   digestif_conv
-   digestif_eq
-   xor
-   digestif_bi
-   digestif_by
-   baijiu_blake2s
-   baijiu_blake2b
- )
+  reddsa
+  ; Digestif fork, copied from the directory digestif
+  digestif
+  digestif_conv
+  digestif_eq
+  xor
+  digestif_bi
+  digestif_by
+  baijiu_blake2s
+  baijiu_blake2b)
  (private_modules
-   ; Digestif fork, copied from the directory digestif
-   digestif
-   digestif_conv
-   digestif_eq
-   xor
-   digestif_bi
-   digestif_by
-   baijiu_blake2s
-   baijiu_blake2b
- )
+  ; Digestif fork, copied from the directory digestif
+  digestif
+  digestif_conv
+  digestif_eq
+  xor
+  digestif_bi
+  digestif_by
+  baijiu_blake2s
+  baijiu_blake2b)
  (libraries
-   ec-jubjub
-   hex
-   ; For digestif, see https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44
-   eqaf
-   bigarray-compat
- )
-)
+  ec-jubjub
+  hex
+  ; For digestif, see https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44
+  eqaf
+  bigarray-compat))
 
 (library
  (public_name ec-curve448)
  (libraries ff ec-sig ec)
  (name ec_curve448)
- (modules ec_curve448)
-)
+ (modules ec_curve448))
 
 (library
  (name ec_bn254)
  (public_name ec-bn254)
  (modules ec_bn254)
  (libraries ec ff)
- (instrumentation (backend bisect_ppx))
-)
+ (instrumentation
+  (backend bisect_ppx)))

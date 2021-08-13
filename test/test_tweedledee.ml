@@ -1,8 +1,9 @@
 module TweedledeeValueGeneration =
-  Ec_pbt.MakeValueGeneration (Ec_tweedledee.Projective)
-module TweedledeeEquality = Ec_pbt.MakeEquality (Ec_tweedledee.Projective)
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Tweedledee.Projective)
+module TweedledeeEquality =
+  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Tweedledee.Projective)
 module TweedledeeECProperties =
-  Ec_pbt.MakeECProperties (Ec_tweedledee.Projective)
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Tweedledee.Projective)
 
 let () =
   let open Alcotest in

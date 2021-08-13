@@ -1,10 +1,11 @@
+open Mec.Hash
+
 module Scalar = Ff.MakeFp (struct
   let prime_order =
     Z.of_string
       "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 end)
 
-open Poseidon
 module Poseidon = Poseidon252.Make (Scalar)
 
 let test_perm_is_consistent () =

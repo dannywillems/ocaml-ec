@@ -4,7 +4,7 @@ let test_b_cannot_be_null_for_weierstrass_form () =
   end) in
   try
     let module E =
-      Ec.MakeProjectiveWeierstrass (Fq) (Fq)
+      Mec.Curve.Utils.Functor.MakeProjectiveWeierstrass (Fq) (Fq)
         (struct
           let a = Fq.random ()
 
@@ -19,7 +19,7 @@ let test_b_cannot_be_null_for_weierstrass_form () =
 let () =
   Alcotest.run
     ~verbose:true
-    "Ec functors"
+    "Curve functors"
     [ ( "Check initialisation strengthen conditions",
         [ Alcotest.test_case
             "b cannot be null"

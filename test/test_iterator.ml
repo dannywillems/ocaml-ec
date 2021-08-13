@@ -1,3 +1,5 @@
+open Mec.Utils
+
 let test_one_byte () =
   (* Single byte *)
   let test_vectors =
@@ -7,14 +9,11 @@ let test_one_byte () =
   in
   List.iter
     (fun (b, expected_l) ->
-      let iterator =
-        Pedersen_hash.Iterator.Bit.of_bytes_le (Bytes.of_string b)
-      in
+      let iterator = Iterator.Bit.of_bytes_le (Bytes.of_string b) in
       List.iter
-        (fun exp_b ->
-          assert (Pedersen_hash.Iterator.Bit.next iterator = Some exp_b))
+        (fun exp_b -> assert (Iterator.Bit.next iterator = Some exp_b))
         expected_l ;
-      assert (Pedersen_hash.Iterator.Bit.next iterator = None))
+      assert (Iterator.Bit.next iterator = None))
     test_vectors
 
 let test_from_bool_list () =
@@ -26,12 +25,11 @@ let test_from_bool_list () =
   in
   List.iter
     (fun (b, expected_l) ->
-      let iterator = Pedersen_hash.Iterator.Bit.create_from_bool_list b in
+      let iterator = Iterator.Bit.create_from_bool_list b in
       List.iter
-        (fun exp_b ->
-          assert (Pedersen_hash.Iterator.Bit.next iterator = Some exp_b))
+        (fun exp_b -> assert (Iterator.Bit.next iterator = Some exp_b))
         expected_l ;
-      assert (Pedersen_hash.Iterator.Bit.next iterator = None))
+      assert (Iterator.Bit.next iterator = None))
     test_vectors
 
 let test_multiple_bytes () =
@@ -86,14 +84,11 @@ let test_multiple_bytes () =
   in
   List.iter
     (fun (b, expected_l) ->
-      let iterator =
-        Pedersen_hash.Iterator.Bit.of_bytes_le (Bytes.of_string b)
-      in
+      let iterator = Iterator.Bit.of_bytes_le (Bytes.of_string b) in
       List.iter
-        (fun exp_b ->
-          assert (Pedersen_hash.Iterator.Bit.next iterator = Some exp_b))
+        (fun exp_b -> assert (Iterator.Bit.next iterator = Some exp_b))
         expected_l ;
-      assert (Pedersen_hash.Iterator.Bit.next iterator = None))
+      assert (Iterator.Bit.next iterator = None))
     test_vectors
 
 let () =

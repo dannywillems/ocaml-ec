@@ -1,7 +1,9 @@
 module Secp256k1ValueGeneration =
-  Ec_pbt.MakeValueGeneration (Ec_secp256k1.Projective)
-module Secp256k1Equality = Ec_pbt.MakeEquality (Ec_secp256k1.Projective)
-module Secp256k1ECProperties = Ec_pbt.MakeECProperties (Ec_secp256k1.Projective)
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Secp256k1.Projective)
+module Secp256k1Equality =
+  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Secp256k1.Projective)
+module Secp256k1ECProperties =
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Secp256k1.Projective)
 
 let test_vectors () =
   (* http://point-at-infinity.org/ecc/nisttv *)
@@ -40,13 +42,14 @@ let test_vectors () =
           Bytes.empty
           (List.map
              (fun x ->
-               Ec_secp256k1.Fq.to_bytes
-                 (Ec_secp256k1.Fq.of_z (Z.of_string_base 16 x)))
+               Mec.Curve.Secp256k1.Projective.Base.to_bytes
+                 (Mec.Curve.Secp256k1.Projective.Base.of_z
+                    (Z.of_string_base 16 x)))
              [x; y; "1"]))
       vectors
   in
   List.iter
-    (fun bytes -> assert (Ec_secp256k1.Projective.check_bytes bytes))
+    (fun bytes -> assert (Mec.Curve.Secp256k1.Projective.check_bytes bytes))
     bytes
 
 let () =

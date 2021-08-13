@@ -1,6 +1,9 @@
-module VestaValueGeneration = Ec_pbt.MakeValueGeneration (Ec_vesta.Projective)
-module VestaEquality = Ec_pbt.MakeEquality (Ec_vesta.Projective)
-module VestaECProperties = Ec_pbt.MakeECProperties (Ec_vesta.Projective)
+module VestaValueGeneration =
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Vesta.Projective)
+module VestaEquality =
+  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Vesta.Projective)
+module VestaECProperties =
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Vesta.Projective)
 
 let () =
   let open Alcotest in

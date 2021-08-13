@@ -22,7 +22,7 @@
 (*                                                                           *)
 (*****************************************************************************)
 
-open Digestif_fork
+module Digestif = Mec.Digestif
 
 let rec repeat n f =
   if n <= 0 then

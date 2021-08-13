@@ -1,8 +1,9 @@
 module TweedledumValueGeneration =
-  Ec_pbt.MakeValueGeneration (Ec_tweedledum.Projective)
-module TweedledumEquality = Ec_pbt.MakeEquality (Ec_tweedledum.Projective)
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Tweedledum.Projective)
+module TweedledumEquality =
+  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Tweedledum.Projective)
 module TweedledumECProperties =
-  Ec_pbt.MakeECProperties (Ec_tweedledum.Projective)
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Tweedledum.Projective)
 
 let () =
   let open Alcotest in

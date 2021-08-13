@@ -22,6 +22,9 @@
 (*                                                                           *)
 (*****************************************************************************)
 
+open Mec.Protocol.Sapling
+open Mec.Curve
+
 let test_vectors () =
   let v =
     [ (* Spending key:
@@ -59,13 +62,13 @@ let test_vectors () =
   in
   List.iter
     (fun (personalisation, bytes, (u, v)) ->
-      let u = Ec_jubjub.Affine.BaseField.of_string u in
-      let v = Ec_jubjub.Affine.BaseField.of_string v in
-      let expected_p = Ec_jubjub.Affine.from_coordinates_exn ~u ~v in
+      let u = Jubjub.Affine.Base.of_string u in
+      let v = Jubjub.Affine.Base.of_string v in
+      let expected_p = Jubjub.Affine.from_coordinates_exn ~u ~v in
       let p =
-        Group_hash.find_group_hash bytes (Bytes.of_string personalisation)
+        GroupHash.find_group_hash bytes (Bytes.of_string personalisation)
       in
-      assert (Ec_jubjub.Affine.eq p expected_p))
+      assert (Jubjub.Affine.eq p expected_p))
     v
 
 let () =

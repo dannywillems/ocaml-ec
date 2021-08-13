@@ -1,8 +1,10 @@
-module ValueGeneration = Ec_pbt.MakeValueGeneration (Ec_babyjubjub.Affine)
-module Equality = Ec_pbt.MakeEquality (Ec_babyjubjub.Affine)
-module Properties = Ec_pbt.MakeECProperties (Ec_babyjubjub.Affine)
+module ValueGeneration =
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.BabyJubjub.Affine)
+module Equality = Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.BabyJubjub.Affine)
+module Properties =
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.BabyJubjub.Affine)
 module EdwardsCurveProperties =
-  Ec_pbt.MakeEdwardsCurveProperties (Ec_babyjubjub.Affine)
+  Mec.Curve.Utils.PBT.MakeEdwardsCurveProperties (Mec.Curve.BabyJubjub.Affine)
 
 let test_doubling () =
   let vectors =
@@ -15,13 +17,13 @@ let test_doubling () =
   in
   List.iter
     (fun ((x1, y1), (x2, y2)) ->
-      let x1 = Ec_babyjubjub.Affine.BaseField.of_string x1 in
-      let y1 = Ec_babyjubjub.Affine.BaseField.of_string y1 in
-      let x2 = Ec_babyjubjub.Affine.BaseField.of_string x2 in
-      let y2 = Ec_babyjubjub.Affine.BaseField.of_string y2 in
-      let p1 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
-      let p2 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
-      assert (Ec_babyjubjub.Affine.(eq (double p1) p2)))
+      let x1 = Mec.Curve.BabyJubjub.Affine.Base.of_string x1 in
+      let y1 = Mec.Curve.BabyJubjub.Affine.Base.of_string y1 in
+      let x2 = Mec.Curve.BabyJubjub.Affine.Base.of_string x2 in
+      let y2 = Mec.Curve.BabyJubjub.Affine.Base.of_string y2 in
+      let p1 = Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
+      let p2 = Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
+      assert (Mec.Curve.BabyJubjub.Affine.(eq (double p1) p2)))
     vectors
 
 let test_addition () =
@@ -38,18 +40,18 @@ let test_addition () =
   in
   List.iter
     (fun ((x1, y1), (x2, y2), (x3, y3)) ->
-      let x1 = Ec_babyjubjub.Affine.BaseField.of_string x1 in
-      let y1 = Ec_babyjubjub.Affine.BaseField.of_string y1 in
-      let x2 = Ec_babyjubjub.Affine.BaseField.of_string x2 in
-      let y2 = Ec_babyjubjub.Affine.BaseField.of_string y2 in
-      let x3 = Ec_babyjubjub.Affine.BaseField.of_string x3 in
-      let y3 = Ec_babyjubjub.Affine.BaseField.of_string y3 in
-      let p1 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
-      let p2 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
-      let p3 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x3 ~v:y3 in
-      assert (Ec_babyjubjub.Affine.(eq (add p1 p2) p3)) ;
-      assert (Ec_babyjubjub.Affine.(eq (add p2 p1) p3)) ;
-      assert (Ec_babyjubjub.Affine.(not (eq (add p1 p2) p1))))
+      let x1 = Mec.Curve.BabyJubjub.Affine.Base.of_string x1 in
+      let y1 = Mec.Curve.BabyJubjub.Affine.Base.of_string y1 in
+      let x2 = Mec.Curve.BabyJubjub.Affine.Base.of_string x2 in
+      let y2 = Mec.Curve.BabyJubjub.Affine.Base.of_string y2 in
+      let x3 = Mec.Curve.BabyJubjub.Affine.Base.of_string x3 in
+      let y3 = Mec.Curve.BabyJubjub.Affine.Base.of_string y3 in
+      let p1 = Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
+      let p2 = Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
+      let p3 = Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u:x3 ~v:y3 in
+      assert (Mec.Curve.BabyJubjub.Affine.(eq (add p1 p2) p3)) ;
+      assert (Mec.Curve.BabyJubjub.Affine.(eq (add p2 p1) p3)) ;
+      assert (Mec.Curve.BabyJubjub.Affine.(not (eq (add p1 p2) p1))))
     vectors
 
 let test_mul_scalar () =
@@ -64,48 +66,49 @@ let test_mul_scalar () =
   in
   List.iter
     (fun ((x1, y1), n, (x2, y2)) ->
-      let x1 = Ec_babyjubjub.Affine.BaseField.of_string x1 in
-      let y1 = Ec_babyjubjub.Affine.BaseField.of_string y1 in
-      let x2 = Ec_babyjubjub.Affine.BaseField.of_string x2 in
-      let y2 = Ec_babyjubjub.Affine.BaseField.of_string y2 in
-      let n = Ec_babyjubjub.Affine.ScalarField.of_string n in
-      let p1 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
-      let p2 = Ec_babyjubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
-      assert (Ec_babyjubjub.Affine.(eq (mul p1 n) p2)))
+      let x1 = Mec.Curve.BabyJubjub.Affine.Base.of_string x1 in
+      let y1 = Mec.Curve.BabyJubjub.Affine.Base.of_string y1 in
+      let x2 = Mec.Curve.BabyJubjub.Affine.Base.of_string x2 in
+      let y2 = Mec.Curve.BabyJubjub.Affine.Base.of_string y2 in
+      let n = Mec.Curve.BabyJubjub.Affine.Scalar.of_string n in
+      let p1 = Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u:x1 ~v:y1 in
+      let p2 = Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u:x2 ~v:y2 in
+      assert (Mec.Curve.BabyJubjub.Affine.(eq (mul p1 n) p2)))
     vectors
 
 let test_random_is_not_small_order () =
-  assert (not Ec_babyjubjub.Affine.(is_small_order (random ())))
+  assert (not Mec.Curve.BabyJubjub.Affine.(is_small_order (random ())))
 
 let test_random_points_not_on_curve () =
   (* pick random values u and v and test constructors fail *)
-  let u = Ec_babyjubjub.Affine.BaseField.random () in
-  let v = Ec_babyjubjub.Affine.BaseField.random () in
+  let u = Mec.Curve.BabyJubjub.Affine.Base.random () in
+  let v = Mec.Curve.BabyJubjub.Affine.Base.random () in
   let bytes =
     Bytes.concat
       Bytes.empty
-      [ Ec_babyjubjub.Affine.BaseField.to_bytes u;
-        Ec_babyjubjub.Affine.BaseField.to_bytes v ]
+      [ Mec.Curve.BabyJubjub.Affine.Base.to_bytes u;
+        Mec.Curve.BabyJubjub.Affine.Base.to_bytes v ]
   in
   (* check_bytes *)
-  assert (not (Ec_babyjubjub.Affine.check_bytes bytes)) ;
+  assert (not (Mec.Curve.BabyJubjub.Affine.check_bytes bytes)) ;
   (* of_bytes_opt *)
-  assert (Option.is_none (Ec_babyjubjub.Affine.of_bytes_opt bytes)) ;
+  assert (Option.is_none (Mec.Curve.BabyJubjub.Affine.of_bytes_opt bytes)) ;
   (* of_bytes_exn *)
   ( try
-      ignore (Ec_babyjubjub.Affine.of_bytes_exn bytes) ;
+      ignore (Mec.Curve.BabyJubjub.Affine.of_bytes_exn bytes) ;
       assert false
     with
-  | Ec_babyjubjub.Affine.Not_on_curve _ -> ()
+  | Mec.Curve.BabyJubjub.Affine.Not_on_curve _ -> ()
   | _ -> assert false ) ;
   (* from_coordinates_opt *)
-  assert (Option.is_none (Ec_babyjubjub.Affine.from_coordinates_opt ~u ~v)) ;
+  assert (
+    Option.is_none (Mec.Curve.BabyJubjub.Affine.from_coordinates_opt ~u ~v) ) ;
   (* from_coordinates_exn *)
   try
-    ignore (Ec_babyjubjub.Affine.from_coordinates_exn ~u ~v) ;
+    ignore (Mec.Curve.BabyJubjub.Affine.from_coordinates_exn ~u ~v) ;
     assert false
   with
-  | Ec_babyjubjub.Affine.Not_on_curve _ -> ()
+  | Mec.Curve.BabyJubjub.Affine.Not_on_curve _ -> ()
   | _ -> assert false
 
 let () =
@@ -119,11 +122,11 @@ let () =
           Alcotest.test_case
             "test random elements are in the prime subgroup"
             `Quick
-            (Ec_pbt.repeat 100 test_random_is_not_small_order);
+            (Mec.Curve.Utils.PBT.repeat 100 test_random_is_not_small_order);
           Alcotest.test_case
             "test random coordinates u, v do not give a point on the curve"
             `Quick
-            (Ec_pbt.repeat 100 test_random_points_not_on_curve);
+            (Mec.Curve.Utils.PBT.repeat 100 test_random_points_not_on_curve);
           Alcotest.test_case "test vectors doubling" `Quick test_doubling ] );
       ValueGeneration.get_tests ();
       Properties.get_tests ();

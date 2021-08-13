@@ -22,6 +22,9 @@
 (*                                                                           *)
 (*****************************************************************************)
 
+open Mec.Curve
+open Mec.Signature
+
 let rec repeat n f =
   if n <= 0 then
     let f () = () in
@@ -39,17 +42,17 @@ let (u, v) =
     "0x57a1019e6de9b67553bb37d0c21cfd056d65674dcedbddbc305632adaaf2b530" )
 
 let generator =
-  Ec_jubjub.Affine.from_coordinates_exn
-    ~u:(Ec_jubjub.Affine.BaseField.of_string u)
-    ~v:(Ec_jubjub.Affine.BaseField.of_string v)
+  Jubjub.Affine.from_coordinates_exn
+    ~u:(Jubjub.Affine.Base.of_string u)
+    ~v:(Jubjub.Affine.Base.of_string v)
 
-module RedJubjub = Redjubjub.Make (struct
+module RedJubjub = RedJubjub.Make (struct
   let generator = generator
 end)
 
 let test_sign_and_verify_random_message () =
-  let sk = Ec_jubjub.Affine.ScalarField.random () in
-  let vk = Ec_jubjub.Affine.(mul generator sk) in
+  let sk = Jubjub.Affine.Scalar.random () in
+  let vk = Jubjub.Affine.(mul generator sk) in
   let message =
     Bytes.init (Random.int 100) (fun _ -> char_of_int (Random.int 256))
   in
@@ -58,8 +61,8 @@ let test_sign_and_verify_random_message () =
 
 let test_sign_and_verify_wrong_message () =
   (* Sign a message and use the signature with a different message *)
-  let sk = Ec_jubjub.Affine.ScalarField.random () in
-  let vk = Ec_jubjub.Affine.(mul generator sk) in
+  let sk = Jubjub.Affine.Scalar.random () in
+  let vk = Jubjub.Affine.(mul generator sk) in
   let correct_message = Bytes.of_string "Correct message" in
   let incorrect_message = Bytes.of_string "Incorrect message" in
   let signature = RedJubjub.sign sk correct_message in
@@ -70,10 +73,8 @@ let test_sign_and_verify_wrong_vk_because_of_different_sk () =
      verifying key is computed using a different secret key, but the same generator
      than the scheme
   *)
-  let sk = Ec_jubjub.Affine.ScalarField.random () in
-  let vk =
-    Ec_jubjub.Affine.(mul generator (Ec_jubjub.Affine.ScalarField.random ()))
-  in
+  let sk = Jubjub.Affine.Scalar.random () in
+  let vk = Jubjub.Affine.(mul generator (Jubjub.Affine.Scalar.random ())) in
   let message = Bytes.of_string "Message" in
   let signature = RedJubjub.sign sk message in
   assert (not (RedJubjub.verify vk message signature))
@@ -83,8 +84,8 @@ let test_sign_and_verify_wrong_vk_because_of_different_generator () =
      is generated using the correct secret key but using a different generator than
      the one used in the scheme.
   *)
-  let sk = Ec_jubjub.Affine.ScalarField.random () in
-  let vk = Ec_jubjub.Affine.(mul one sk) in
+  let sk = Jubjub.Affine.Scalar.random () in
+  let vk = Jubjub.Affine.(mul one sk) in
   let message = Bytes.of_string "Message" in
   let signature = RedJubjub.sign sk message in
   assert (not (RedJubjub.verify vk message signature))
@@ -120,7 +121,7 @@ let test_vectors () =
     (fun (msg, sk, randomness, (rbar, sbar)) ->
       let msg = Bytes.of_string msg in
       let sk = Hex.to_bytes (`Hex sk) in
-      let sk = Ec_jubjub.Affine.ScalarField.of_bytes_exn sk in
+      let sk = Jubjub.Affine.Scalar.of_bytes_exn sk in
       (* reconstruct expected signature *)
       let rbar = Hex.to_bytes (`Hex rbar) in
       let sbar = Hex.to_bytes (`Hex sbar) in
@@ -138,14 +139,14 @@ let test_vectors () =
           Hex.(show (of_bytes expected_signature))
           Hex.(show (of_bytes signature_bytes)) ;
       (* Let's verify at the same time *)
-      assert (RedJubjub.verify (Ec_jubjub.Affine.mul generator sk) msg signature))
+      assert (RedJubjub.verify (Jubjub.Affine.mul generator sk) msg signature))
     vectors
 
 let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Redjubjub"
+    "RedJubjub"
     [ ( "Signature scheme properties",
         [ Alcotest.test_case
             "Sign and verify random message"

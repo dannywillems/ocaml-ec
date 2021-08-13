@@ -1,8 +1,10 @@
-module ValueGeneration = Ec_pbt.MakeValueGeneration (Ec_jubjub.Affine)
-module Equality = Ec_pbt.MakeEquality (Ec_jubjub.Affine)
-module Properties = Ec_pbt.MakeECProperties (Ec_jubjub.Affine)
+module ValueGeneration =
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Jubjub.Affine)
+module Equality = Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Jubjub.Affine)
+module Properties =
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Jubjub.Affine)
 module EdwardsCurveProperties =
-  Ec_pbt.MakeEdwardsCurveProperties (Ec_jubjub.Affine)
+  Mec.Curve.Utils.PBT.MakeEdwardsCurveProperties (Mec.Curve.Jubjub.Affine)
 
 let test_vectors () =
   (* Coming from
@@ -26,15 +28,15 @@ let test_vectors () =
     (fun (u, v) ->
       (* from_coordinates_exn *)
       ignore
-      @@ Ec_jubjub.Affine.from_coordinates_exn
-           ~u:(Ec_jubjub.Affine.BaseField.of_string u)
-           ~v:(Ec_jubjub.Affine.BaseField.of_string v) ;
+      @@ Mec.Curve.Jubjub.Affine.from_coordinates_exn
+           ~u:(Mec.Curve.Jubjub.Affine.Base.of_string u)
+           ~v:(Mec.Curve.Jubjub.Affine.Base.of_string v) ;
       (* from_coordinates_opt *)
       assert (
         Option.is_some
-          (Ec_jubjub.Affine.from_coordinates_opt
-             ~u:(Ec_jubjub.Affine.BaseField.of_string u)
-             ~v:(Ec_jubjub.Affine.BaseField.of_string v)) ) ;
+          (Mec.Curve.Jubjub.Affine.from_coordinates_opt
+             ~u:(Mec.Curve.Jubjub.Affine.Base.of_string u)
+             ~v:(Mec.Curve.Jubjub.Affine.Base.of_string v)) ) ;
       (* convert to bytes. Use Zarith for simplicity as points are given in hexa *)
       let bytes =
         Bytes.concat
@@ -43,87 +45,88 @@ let test_vectors () =
             (Bytes.of_string @@ Z.(to_bits (of_string v))) ]
       in
       (* of_bytes_opt *)
-      assert (Option.is_some (Ec_jubjub.Affine.of_bytes_opt bytes)) ;
+      assert (Option.is_some (Mec.Curve.Jubjub.Affine.of_bytes_opt bytes)) ;
       (* of_bytes_exn *)
-      ignore @@ Ec_jubjub.Affine.of_bytes_exn bytes ;
+      ignore @@ Mec.Curve.Jubjub.Affine.of_bytes_exn bytes ;
       (* check_bytes *)
-      assert (Ec_jubjub.Affine.check_bytes bytes))
+      assert (Mec.Curve.Jubjub.Affine.check_bytes bytes))
     points
 
 let test_random_is_not_small_order () =
-  assert (not Ec_jubjub.Affine.(is_small_order (random ())))
+  assert (not Mec.Curve.Jubjub.Affine.(is_small_order (random ())))
 
 let test_random_points_not_on_curve () =
   (* pick random values u and v and test constructors fail *)
-  let u = Ec_jubjub.Affine.BaseField.random () in
-  let v = Ec_jubjub.Affine.BaseField.random () in
+  let u = Mec.Curve.Jubjub.Affine.Base.random () in
+  let v = Mec.Curve.Jubjub.Affine.Base.random () in
   let bytes =
     Bytes.concat
       Bytes.empty
-      [ Ec_jubjub.Affine.BaseField.to_bytes u;
-        Ec_jubjub.Affine.BaseField.to_bytes v ]
+      [ Mec.Curve.Jubjub.Affine.Base.to_bytes u;
+        Mec.Curve.Jubjub.Affine.Base.to_bytes v ]
   in
   (* check_bytes *)
-  assert (not (Ec_jubjub.Affine.check_bytes bytes)) ;
+  assert (not (Mec.Curve.Jubjub.Affine.check_bytes bytes)) ;
   (* of_bytes_opt *)
-  assert (Option.is_none (Ec_jubjub.Affine.of_bytes_opt bytes)) ;
+  assert (Option.is_none (Mec.Curve.Jubjub.Affine.of_bytes_opt bytes)) ;
   (* of_bytes_exn *)
   ( try
-      ignore (Ec_jubjub.Affine.of_bytes_exn bytes) ;
+      ignore (Mec.Curve.Jubjub.Affine.of_bytes_exn bytes) ;
       assert false
     with
-  | Ec_jubjub.Affine.Not_on_curve _ -> ()
+  | Mec.Curve.Jubjub.Affine.Not_on_curve _ -> ()
   | _ -> assert false ) ;
   (* from_coordinates_opt *)
-  assert (Option.is_none (Ec_jubjub.Affine.from_coordinates_opt ~u ~v)) ;
+  assert (Option.is_none (Mec.Curve.Jubjub.Affine.from_coordinates_opt ~u ~v)) ;
   (* from_coordinates_exn *)
   try
-    ignore (Ec_jubjub.Affine.from_coordinates_exn ~u ~v) ;
+    ignore (Mec.Curve.Jubjub.Affine.from_coordinates_exn ~u ~v) ;
     assert false
   with
-  | Ec_jubjub.Affine.Not_on_curve _ -> ()
+  | Mec.Curve.Jubjub.Affine.Not_on_curve _ -> ()
   | _ -> assert false
 
 let test_compressed_uncompressed_zero () =
   let expected_encoding_of_zero =
-    Bytes.sub Ec_jubjub.Affine.(to_bytes zero) 32 32
+    Bytes.sub Mec.Curve.Jubjub.Affine.(to_bytes zero) 32 32
   in
   assert (
-    Ec_jubjub.Affine.(
+    Mec.Curve.Jubjub.Affine.(
       Bytes.equal (to_compressed zero) expected_encoding_of_zero) ) ;
   assert (
-    Ec_jubjub.Affine.(eq zero (of_compressed_exn expected_encoding_of_zero)) ) ;
+    Mec.Curve.Jubjub.Affine.(
+      eq zero (of_compressed_exn expected_encoding_of_zero)) ) ;
   assert (
-    Ec_jubjub.Affine.(
+    Mec.Curve.Jubjub.Affine.(
       eq zero (Option.get @@ of_compressed_opt expected_encoding_of_zero)) )
 
 let test_compressed_and_uncompressed_exn () =
-  let p = Ec_jubjub.Affine.random () in
-  let compressed_p = Ec_jubjub.Affine.to_compressed p in
-  let uncompressed_p = Ec_jubjub.Affine.of_compressed_exn compressed_p in
-  assert (Ec_jubjub.Affine.eq p uncompressed_p)
+  let p = Mec.Curve.Jubjub.Affine.random () in
+  let compressed_p = Mec.Curve.Jubjub.Affine.to_compressed p in
+  let uncompressed_p = Mec.Curve.Jubjub.Affine.of_compressed_exn compressed_p in
+  assert (Mec.Curve.Jubjub.Affine.eq p uncompressed_p)
 
 let test_compressed_gives_32_bytes () =
-  let compressed_p = Ec_jubjub.Affine.(to_compressed (random ())) in
+  let compressed_p = Mec.Curve.Jubjub.Affine.(to_compressed (random ())) in
   assert (Bytes.length compressed_p = 32)
 
 let test_compressed_and_uncompressed_opt () =
-  let p = Ec_jubjub.Affine.random () in
-  let compressed_p = Ec_jubjub.Affine.to_compressed p in
+  let p = Mec.Curve.Jubjub.Affine.random () in
+  let compressed_p = Mec.Curve.Jubjub.Affine.to_compressed p in
   let uncompressed_p =
-    Option.get @@ Ec_jubjub.Affine.of_compressed_opt compressed_p
+    Option.get @@ Mec.Curve.Jubjub.Affine.of_compressed_opt compressed_p
   in
-  assert (Ec_jubjub.Affine.eq p uncompressed_p)
+  assert (Mec.Curve.Jubjub.Affine.eq p uncompressed_p)
 
 let rec test_uncompressed_fail_on_random_values () =
-  let nb_bytes = Random.int (Ec_jubjub.Affine.size_in_bytes * 10) in
-  if nb_bytes = Ec_jubjub.Affine.size_in_bytes then
+  let nb_bytes = Random.int (Mec.Curve.Jubjub.Affine.size_in_bytes * 10) in
+  if nb_bytes = Mec.Curve.Jubjub.Affine.size_in_bytes then
     test_uncompressed_fail_on_random_values ()
   else
     let b = Bytes.create nb_bytes in
-    assert (Option.is_none (Ec_jubjub.Affine.of_compressed_opt b)) ;
-    try ignore @@ Ec_jubjub.Affine.of_compressed_exn b with
-    | Ec_jubjub.Affine.Not_on_curve exn_b -> assert (Bytes.equal b exn_b)
+    assert (Option.is_none (Mec.Curve.Jubjub.Affine.of_compressed_opt b)) ;
+    try ignore @@ Mec.Curve.Jubjub.Affine.of_compressed_exn b with
+    | Mec.Curve.Jubjub.Affine.Not_on_curve exn_b -> assert (Bytes.equal b exn_b)
     | _ -> assert false
 
 let test_vector_compressed_and_uncompressed () =
@@ -132,14 +135,14 @@ let test_vector_compressed_and_uncompressed () =
       "0x000000000000000000000000000000000000000000000000000000000000000b" )
   in
   let full_generator =
-    Ec_jubjub.Affine.from_coordinates_exn
-      ~u:(Ec_jubjub.Affine.BaseField.of_string u_bytes)
-      ~v:(Ec_jubjub.Affine.BaseField.of_string v_bytes)
+    Mec.Curve.Jubjub.Affine.from_coordinates_exn
+      ~u:(Mec.Curve.Jubjub.Affine.Base.of_string u_bytes)
+      ~v:(Mec.Curve.Jubjub.Affine.Base.of_string v_bytes)
   in
   let gen =
-    Ec_jubjub.Affine.mul
+    Mec.Curve.Jubjub.Affine.mul
       full_generator
-      (Ec_jubjub.Affine.ScalarField.of_z Ec_jubjub.Affine.cofactor)
+      (Mec.Curve.Jubjub.Affine.Scalar.of_z Mec.Curve.Jubjub.Affine.cofactor)
   in
   let vectors_as_int =
     [ [ 203;
@@ -667,12 +670,14 @@ let test_vector_compressed_and_uncompressed () =
   @@ List.fold_left
        (fun p expected_bytes ->
          (* Test of_compressed *)
-         let expected_p = Ec_jubjub.Affine.of_compressed_exn expected_bytes in
-         assert (Ec_jubjub.Affine.eq p expected_p) ;
+         let expected_p =
+           Mec.Curve.Jubjub.Affine.of_compressed_exn expected_bytes
+         in
+         assert (Mec.Curve.Jubjub.Affine.eq p expected_p) ;
          (* Test to_compressed *)
-         let serialised_p = Ec_jubjub.Affine.to_compressed p in
+         let serialised_p = Mec.Curve.Jubjub.Affine.to_compressed p in
          assert (Bytes.equal serialised_p expected_bytes) ;
-         Ec_jubjub.Affine.add p gen)
+         Mec.Curve.Jubjub.Affine.add p gen)
        gen
        serialised_vectors
 
@@ -685,7 +690,7 @@ let () =
         [ Alcotest.test_case
             "test random elements are in the prime subgroup"
             `Quick
-            (Ec_pbt.repeat 1000 test_random_is_not_small_order);
+            (Mec.Curve.Utils.PBT.repeat 1000 test_random_is_not_small_order);
           Alcotest.test_case "test vectors elements" `Quick test_vectors ] );
       ( "Compressed/Uncompressed",
         [ Alcotest.test_case
@@ -716,7 +721,8 @@ let () =
         [ Alcotest.test_case
             "test random coordinates do not give a point on the curve"
             `Quick
-            (Ec_pbt.repeat 100 test_random_points_not_on_curve) ] );
+            (Mec.Curve.Utils.PBT.repeat 100 test_random_points_not_on_curve) ]
+      );
       ValueGeneration.get_tests ();
       EdwardsCurveProperties.get_tests ();
       Properties.get_tests ();

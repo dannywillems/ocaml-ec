@@ -1,6 +1,9 @@
-module PallasValueGeneration = Ec_pbt.MakeValueGeneration (Ec_pallas.Projective)
-module PallasEquality = Ec_pbt.MakeEquality (Ec_pallas.Projective)
-module PallasECProperties = Ec_pbt.MakeECProperties (Ec_pallas.Projective)
+module PallasValueGeneration =
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Pallas.Projective)
+module PallasEquality =
+  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Pallas.Projective)
+module PallasECProperties =
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Pallas.Projective)
 
 let () =
   let open Alcotest in

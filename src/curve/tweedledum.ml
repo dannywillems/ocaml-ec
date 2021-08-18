@@ -20,6 +20,8 @@ module Projective =
 
       let b = Fq.of_z (Z.of_int 5)
 
+      let cofactor = Z.one
+
       (* x = -1
          y = 2
       *)
@@ -38,6 +40,8 @@ module Affine =
       let a = Fq.zero
 
       let b = Fq.of_z (Z.of_int 5)
+
+      let cofactor = Z.one
 
       (* x = -1
          y = 2

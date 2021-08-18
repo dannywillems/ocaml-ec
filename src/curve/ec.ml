@@ -5,6 +5,8 @@ module MakeAffineWeierstrass
 
       val b : Fq.t
 
+      val cofactor : Z.t
+
       val bytes_generator : Bytes.t
     end) :
   Ec_sig.AffineWeierstrassT with type Scalar.t = Fp.t and type Base.t = Fq.t =
@@ -19,6 +21,8 @@ struct
   let a = Params.a
 
   let b = Params.b
+
+  let cofactor = Params.cofactor
 
   type t = Infinity | P of (Fq.t * Fq.t)
 
@@ -68,16 +72,6 @@ struct
         buffer
 
   let one = of_bytes_exn Params.bytes_generator
-
-  let random ?state () =
-    (match state with None -> () | Some s -> Random.set_state s) ;
-    let rec aux () =
-      let x = Fq.random () in
-      let y_square = Fq.((x * x * x) + (a * x) + b) in
-      let y_opt = Fq.sqrt_opt y_square in
-      match y_opt with None -> aux () | Some y -> P (x, y)
-    in
-    aux ()
 
   let eq t1 t2 =
     match (t1, t2) with
@@ -145,6 +139,18 @@ struct
     in
     aux x (Scalar.to_z n)
 
+  let random ?state () =
+    (match state with None -> () | Some s -> Random.set_state s) ;
+    let rec aux () =
+      let x = Fq.random () in
+      let y_square = Fq.((x * x * x) + (a * x) + b) in
+      let y_opt = Fq.sqrt_opt y_square in
+      match y_opt with
+      | None -> aux ()
+      | Some y -> mul (P (x, y)) (Scalar.of_z Params.cofactor)
+    in
+    aux ()
+
   let get_x_coordinate t =
     match t with Infinity -> raise (Invalid_argument "Zero") | P (x, _y) -> x
 
@@ -168,6 +174,8 @@ module MakeProjectiveWeierstrass
 
       val b : Fq.t
 
+      val cofactor : Z.t
+
       val bytes_generator : Bytes.t
     end) :
   Ec_sig.ProjectiveWeierstrassT with type Scalar.t = Fp.t and type Base.t = Fq.t =
@@ -182,6 +190,8 @@ struct
   let a = Params.a
 
   let b = Params.b
+
+  let cofactor = Params.cofactor
 
   type t = { x : Fq.t; y : Fq.t; z : Fq.t }
 
@@ -244,16 +254,6 @@ struct
     buffer
 
   let one = of_bytes_exn Params.bytes_generator
-
-  let random ?state () =
-    (match state with None -> () | Some s -> Random.set_state s) ;
-    let rec aux () =
-      let x = Fq.random () in
-      let y_square = Fq.((x * x * x) + (a * x) + b) in
-      let y_opt = Fq.sqrt_opt y_square in
-      match y_opt with None -> aux () | Some y -> { x; y; z = Fq.one }
-    in
-    aux ()
 
   let add t1 t2 =
     (* See https://github.com/o1-labs/snarky/blob/master/snarkette/elliptic_curve.ml *)
@@ -321,6 +321,18 @@ struct
         if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
     aux x (Scalar.to_z n)
+
+  let random ?state () =
+    (match state with None -> () | Some s -> Random.set_state s) ;
+    let rec aux () =
+      let x = Fq.random () in
+      let y_square = Fq.((x * x * x) + (a * x) + b) in
+      let y_opt = Fq.sqrt_opt y_square in
+      match y_opt with
+      | None -> aux ()
+      | Some y -> mul { x; y; z = Fq.one } (Scalar.of_z cofactor)
+    in
+    aux ()
 
   let get_x_coordinate t = t.x
 

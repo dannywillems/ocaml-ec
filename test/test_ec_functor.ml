@@ -10,6 +10,8 @@ let test_b_cannot_be_null_for_weierstrass_form () =
 
           let b = Fq.zero
 
+          let cofactor = Z.one
+
           let bytes_generator = Bytes.make (Fq.size_in_bytes * 3) '\000'
         end)
     in

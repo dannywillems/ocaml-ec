@@ -1,0 +1,14 @@
+module VestaValueGeneration =
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Vesta.Affine)
+module VestaEquality = Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Vesta.Affine)
+module VestaECProperties =
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Vesta.Affine)
+
+let () =
+  let open Alcotest in
+  run
+    ~verbose:true
+    "Vesta affine form"
+    [ VestaValueGeneration.get_tests ();
+      VestaEquality.get_tests ();
+      VestaECProperties.get_tests () ]

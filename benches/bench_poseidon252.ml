@@ -8,7 +8,6 @@ open Core_bench
  * end) *)
 
 module Scalar = Bls12_381.Fr
-
 module Poseidon = Poseidon252.Make (Scalar)
 
 let t1 =

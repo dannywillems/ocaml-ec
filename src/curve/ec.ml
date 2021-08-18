@@ -94,42 +94,45 @@ struct
 
   let add t1 t2 =
     (* See https://github.com/o1-labs/snarky/blob/master/snarkette/elliptic_curve.ml *)
-    let open Fq in
-    let x1z2 = t1.x * t2.z in
-    let x2z1 = t1.z * t2.x in
-    let y1z2 = t1.y * t2.z in
-    let y2z1 = t1.z * t2.y in
-    if x1z2 = x2z1 && y1z2 = y2z1 then
-      (* Double case *)
-      let xx = square t1.x in
-      let zz = square t1.z in
-      let w = (a * zz) + (xx + xx + xx) in
-      let y1z1 = t1.y * t1.z in
-      let s = y1z1 + y1z1 in
-      let ss = square s in
-      let sss = s * ss in
-      let r = t1.y * s in
-      let rr = square r in
-      let b = square (t1.x + r) + negate xx + negate rr in
-      let h = square w + negate (b + b) in
-      let x3 = h * s in
-      let y3 = (w * (b + negate h)) + negate (rr + rr) in
-      let z3 = sss in
-      { x = x3; y = y3; z = z3 }
+    if is_zero t1 then t2
+    else if is_zero t2 then t1
     else
-      (* Generic case *)
-      let z1z2 = t1.z * t2.z in
-      let u = y2z1 + negate y1z2 in
-      let uu = square u in
-      let v = x2z1 + negate x1z2 in
-      let vv = square v in
-      let vvv = v * vv in
-      let r = vv * x1z2 in
-      let a = (uu * z1z2) + negate (vvv + r + r) in
-      let x3 = v * a in
-      let y3 = (u * (r + negate a)) + negate (vvv * y1z2) in
-      let z3 = vvv * z1z2 in
-      { x = x3; y = y3; z = z3 }
+      let open Fq in
+      let x1z2 = t1.x * t2.z in
+      let x2z1 = t1.z * t2.x in
+      let y1z2 = t1.y * t2.z in
+      let y2z1 = t1.z * t2.y in
+      if x1z2 = x2z1 && y1z2 = y2z1 then
+        (* Double case *)
+        let xx = square t1.x in
+        let zz = square t1.z in
+        let w = (a * zz) + (xx + xx + xx) in
+        let y1z1 = t1.y * t1.z in
+        let s = y1z1 + y1z1 in
+        let ss = square s in
+        let sss = s * ss in
+        let r = t1.y * s in
+        let rr = square r in
+        let b = square (t1.x + r) + negate xx + negate rr in
+        let h = square w + negate (b + b) in
+        let x3 = h * s in
+        let y3 = (w * (b + negate h)) + negate (rr + rr) in
+        let z3 = sss in
+        { x = x3; y = y3; z = z3 }
+      else
+        (* Generic case *)
+        let z1z2 = t1.z * t2.z in
+        let u = y2z1 + negate y1z2 in
+        let uu = square u in
+        let v = x2z1 + negate x1z2 in
+        let vv = square v in
+        let vvv = v * vv in
+        let r = vv * x1z2 in
+        let a = (uu * z1z2) + negate (vvv + r + r) in
+        let x3 = v * a in
+        let y3 = (u * (r + negate a)) + negate (vvv * y1z2) in
+        let z3 = vvv * z1z2 in
+        { x = x3; y = y3; z = z3 }
 
   let double t = add t t
 

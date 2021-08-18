@@ -282,6 +282,11 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
     (* (g * a) * a^(-1) = g *)
     assert (G.(eq res3 g))
 
+  let zero_is_the_identity () =
+    let g = G.random () in
+    assert (G.(eq (add g zero) (add zero g))) ;
+    assert (G.(eq (add g zero) g))
+
   (** Returns the tests to be used with Alcotest *)
   let get_tests () =
     let open Alcotest in
@@ -338,6 +343,10 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
           `Quick
           (repeat 1 opposite_of_opposite_of_one_is_one);
         test_case "opposite_equality" `Quick (repeat 1 opposite_equality);
+        test_case
+          "zero is the identity"
+          `Quick
+          (repeat 100 zero_is_the_identity);
         test_case "distributivity" `Quick (repeat 100 distributivity);
         test_case
           "opposite_of_scalar_is_opposite_of_ec"

@@ -64,6 +64,8 @@ module type WeierstrassT = sig
   val a : Base.t
 
   val b : Base.t
+
+  val cofactor : Z.t
 end
 
 module type AffineWeierstrassT = sig

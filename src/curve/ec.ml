@@ -1,3 +1,166 @@
+module MakeAffineWeierstrass
+    (Fq : Ff_sig.PRIME)
+    (Fp : Ff_sig.PRIME) (Params : sig
+      val a : Fq.t
+
+      val b : Fq.t
+
+      val bytes_generator : Bytes.t
+    end) :
+  Ec_sig.AffineWeierstrassT with type Scalar.t = Fp.t and type Base.t = Fq.t =
+struct
+  let () = assert (not (Fq.is_zero Params.b))
+
+  exception Not_on_curve of Bytes.t
+
+  module Base = Fq
+  module Scalar = Fp
+
+  let a = Params.a
+
+  let b = Params.b
+
+  type t = Infinity | P of (Fq.t * Fq.t)
+
+  let size_in_bytes = Fq.size_in_bytes * 2
+
+  let zero = Infinity
+
+  let buffer_zero = Bytes.make size_in_bytes '\000'
+
+  let is_zero t = match t with Infinity -> true | _ -> false
+
+  let is_on_curve x y = Fq.((x * x * x) + (a * x) + b = y * y)
+
+  let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    if Bytes.length bytes <> size_in_bytes then None
+    else
+      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
+      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
+      if Bytes.equal buffer_zero bytes then Some Infinity
+      else
+        let x = Fq.of_bytes_opt x_bytes in
+        let y = Fq.of_bytes_opt y_bytes in
+        match (x, y) with
+        | (None, _) | (_, None) -> None
+        (* Verify it is on the curve *)
+        | (Some x, Some y) ->
+            if Fq.((x * x * x) + (a * x) + b = y * y) then Some (P (x, y))
+            else None
+
+  let check_bytes bytes =
+    match of_bytes_opt bytes with Some _ -> true | None -> false
+
+  let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+
+  let to_bytes g =
+    let buffer = Bytes.make size_in_bytes '\000' in
+    match g with
+    | Infinity -> buffer
+    | P (x, y) ->
+        Bytes.blit (Fq.to_bytes x) 0 buffer 0 Fq.size_in_bytes ;
+        Bytes.blit (Fq.to_bytes y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
+        buffer
+
+  let one = of_bytes_exn Params.bytes_generator
+
+  let random ?state () =
+    (match state with None -> () | Some s -> Random.set_state s) ;
+    let rec aux () =
+      let x = Fq.random () in
+      let y_square = Fq.((x * x * x) + (a * x) + b) in
+      let y_opt = Fq.sqrt_opt y_square in
+      match y_opt with None -> aux () | Some y -> P (x, y)
+    in
+    aux ()
+
+  let eq t1 t2 =
+    match (t1, t2) with
+    | (Infinity, Infinity) -> true
+    | (Infinity, _) | (_, Infinity) -> false
+    | (P (x1, y1), P (x2, y2)) -> Fq.(x1 = x2 && y1 = y2)
+
+  let double t =
+    match t with
+    | Infinity -> Infinity
+    | P (x, y) ->
+        let xx = Fq.(square x) in
+        let xx_3_plus_a = Fq.(double xx + xx + a) in
+        let double_x = Fq.(double x) in
+        let double_y = Fq.(double y) in
+        let square_double_y = Fq.(square double_y) in
+        let x3 =
+          Fq.((square xx_3_plus_a / square_double_y) + negate double_x)
+        in
+        let triple_x = Fq.(x + double_x) in
+        let y3 =
+          Fq.(
+            (triple_x * xx_3_plus_a / double_y)
+            + ( negate (square xx_3_plus_a * xx_3_plus_a)
+                / (square_double_y * double_y)
+              + negate y ))
+        in
+        P (x3, y3)
+
+  (* https://hyperelliptic.org/EFD/g1p/auto-shortw.html *)
+  let add t1 t2 =
+    match (t1, t2) with
+    | (Infinity, t2) -> t2
+    | (t1, Infinity) -> t1
+    | (t1, t2) when eq t1 t2 -> double t1
+    | (P (x1, y1), P (x2, y2)) ->
+        if Fq.(x1 = x2 && y1 = negate y2) then Infinity
+        else
+          let y2_min_y1 = Fq.(y2 + negate y1) in
+          let x2_min_x1 = Fq.(x2 + negate x1) in
+          let slope = Fq.(y2_min_y1 / x2_min_x1) in
+          let square_slope = Fq.(square slope) in
+          let x3 = Fq.(square_slope + negate x1 + negate x2) in
+          let double_x1 = Fq.(double x1) in
+          let double_x1_plus_x2 = Fq.(double_x1 + x2) in
+          let y3 =
+            Fq.(
+              (double_x1_plus_x2 * slope)
+              + negate (square_slope * slope)
+              + negate y1)
+          in
+          P (x3, y3)
+
+  let negate p =
+    match p with Infinity -> Infinity | P (x, y) -> P (x, Fq.negate y)
+
+  let mul x n =
+    let rec aux x n =
+      let two_z = Z.succ Z.one in
+      if Z.equal n Z.zero then zero
+      else if Z.equal n Z.one then x
+      else
+        let (a, r) = Z.ediv_rem n two_z in
+        if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
+    in
+    aux x (Scalar.to_z n)
+
+  let get_x_coordinate t =
+    match t with Infinity -> raise (Invalid_argument "Zero") | P (x, _y) -> x
+
+  let get_y_coordinate t =
+    match t with Infinity -> raise (Invalid_argument "Zero") | P (_x, y) -> y
+
+  let from_coordinates_exn ~x ~y =
+    if is_on_curve x y then P (x, y)
+    else
+      raise
+        (Not_on_curve (Bytes.concat Bytes.empty [Fq.to_bytes x; Fq.to_bytes y]))
+
+  let from_coordinates_opt ~x ~y =
+    if is_on_curve x y then Some (P (x, y)) else None
+end
+
 module MakeProjectiveWeierstrass
     (Fq : Ff_sig.PRIME)
     (Fp : Ff_sig.PRIME) (Params : sig

@@ -1,9 +1,9 @@
 module Secp256k1ValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Secp256k1.Projective)
+  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Secp256k1.Affine)
 module Secp256k1Equality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Secp256k1.Projective)
+  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Secp256k1.Affine)
 module Secp256k1ECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Secp256k1.Projective)
+  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Secp256k1.Affine)
 
 let test_vectors () =
   (* http://point-at-infinity.org/ecc/nisttv *)
@@ -42,21 +42,20 @@ let test_vectors () =
           Bytes.empty
           (List.map
              (fun x ->
-               Mec.Curve.Secp256k1.Projective.Base.to_bytes
-                 (Mec.Curve.Secp256k1.Projective.Base.of_z
-                    (Z.of_string_base 16 x)))
-             [x; y; "1"]))
+               Mec.Curve.Secp256k1.Affine.Base.to_bytes
+                 (Mec.Curve.Secp256k1.Affine.Base.of_z (Z.of_string_base 16 x)))
+             [x; y]))
       vectors
   in
   List.iter
-    (fun bytes -> assert (Mec.Curve.Secp256k1.Projective.check_bytes bytes))
+    (fun bytes -> assert (Mec.Curve.Secp256k1.Affine.check_bytes bytes))
     bytes
 
 let () =
   let open Alcotest in
   run
     ~verbose:true
-    "secp256k1"
+    "secp256k1 affine form"
     [ ("Vectors", [Alcotest.test_case "test vectors" `Quick test_vectors]);
       Secp256k1ValueGeneration.get_tests ();
       Secp256k1Equality.get_tests ();

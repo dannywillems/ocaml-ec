@@ -1,10 +1,13 @@
 (copy_files res/test_vector_pedersen_hash.ml)
 
 (tests
- (names test_babyjubjub test_babyjubjub_reduced test_bn254 test_curve25519
-   test_curve448 test_digestif test_ec_functor test_find_group_hash
-   test_iterator test_jubjub test_pallas test_pedersen_hash test_poseidon128
-   test_poseidon252 test_redjubjub test_secp256k1 test_secp256r1
-   test_tweedledee test_tweedledum test_vesta)
+ (names test_babyjubjub test_babyjubjub_reduced test_bn254_affine
+   test_bn254_projective test_curve25519 test_curve448 test_digestif
+   test_ec_functor test_find_group_hash test_iterator test_jubjub
+   test_pallas_affine test_pallas_projective test_pedersen_hash
+   test_poseidon128 test_poseidon252 test_redjubjub test_secp256k1_affine
+   test_secp256k1_projective test_secp256r1_affine test_secp256r1_projective
+   test_tweedledee_affine test_tweedledee_projective test_tweedledum_affine
+   test_tweedledum_projective test_vesta_affine test_vesta_projective)
  (libraries mec)
  (package mec))

@@ -7,12 +7,9 @@ stages:
 
 lint:
   stage: lint
-  image: registry.gitlab.com/dannywillems/docker-ocamlformat:0.15.0
+  image: ocaml/opam:debian-ocaml-4.11
   before_script:
-    - eval $(opam env)
-    # FIXME: dune must be upgraded upsteam on docker-ocamlformat
-    - opam update
-    - opam upgrade dune
+    - opam install ocamlformat.0.15.0 -y
   script:
     - dune build @fmt
   rules:
@@ -38,23 +35,27 @@ lint:
 
 build-ocaml-4.08:
   <<: *build_definition
-  image: ocaml/opam2:4.08
+  image: ocaml/opam:debian-ocaml-4.08
 
 build-ocaml-4.09:
   <<: *build_definition
-  image: ocaml/opam2:4.09
+  image: ocaml/opam:debian-ocaml-4.09
 
 build-ocaml-4.10:
   <<: *build_definition
-  image: ocaml/opam2:4.10
+  image: ocaml/opam:debian-ocaml-4.10
 
 build-ocaml-4.11:
   <<: *build_definition
-  image: ocaml/opam2:4.11
+  image: ocaml/opam:debian-ocaml-4.11
+
+build-ocaml-4.12:
+  <<: *build_definition
+  image: ocaml/opam:debian-ocaml-4.12
 
 doc:
   stage: doc
-  image: ocaml/opam2:4.09
+  image: ocaml/opam:debian-ocaml-4.09
   before_script:
     - sudo apt-get update && sudo apt-get upgrade -y
     - eval $(opam env)
@@ -76,7 +77,7 @@ doc:
 # Coverage
 coverage:
   stage: coverage
-  image: ocaml/opam2:4.10
+  image: ocaml/opam:debian-ocaml-4.10
   rules:
     - when: always
   before_script:
@@ -94,7 +95,7 @@ coverage:
 
 pages:
   stage: deploy
-  image: ocaml/opam2:4.09
+  image: ocaml/opam:debian-ocaml-4.09
   script:
     - cp -r _odoc public/
   artifacts:

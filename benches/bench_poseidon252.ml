@@ -1,5 +1,6 @@
 open Core
 open Core_bench
+open Mec.Hash
 
 (* module Scalar = Ff.MakeFp (struct
  *   let prime_order =
@@ -15,7 +16,7 @@ let t1 =
   let inputs = Array.init n ~f:(fun _i -> Scalar.random ()) in
   Bench.Test.create ~name:"Benchmark Poseidon with blst backend" (fun () ->
       let ctxt = Poseidon.Hash.init () in
-      let ctxt = Poseidon.Hash.hash ctxt inputs in
+      let ctxt = Poseidon.Hash.digest ctxt inputs in
       let _v = Poseidon.Hash.get ctxt in
       ())
 

@@ -4,8 +4,8 @@
  (names test_babyjubjub test_babyjubjub_reduced test_bls12_381_affine
    test_bls12_381_projective test_bn254_affine test_bn254_jacobian
    test_bn254_projective test_curve25519 test_curve448 test_digestif
-   test_ec_functor test_find_group_hash test_iterator test_jubjub
-   test_pallas_affine test_pallas_jacobian test_pallas_projective
+   test_ec_functor test_find_group_hash test_iso_pallas_affine test_iterator
+   test_jubjub test_pallas_affine test_pallas_jacobian test_pallas_projective
    test_pedersen_hash test_poseidon128 test_poseidon252 test_redjubjub
    test_secp256k1_affine test_secp256k1_jacobian test_secp256k1_projective
    test_secp256r1_affine test_secp256r1_jacobian test_secp256r1_projective

@@ -1,3 +1,206 @@
+module MakeJacobianWeierstrass
+    (Fq : Ff_sig.PRIME)
+    (Fp : Ff_sig.PRIME) (Params : sig
+      val a : Fq.t
+
+      val b : Fq.t
+
+      val bytes_generator : Bytes.t
+    end) :
+  Ec_sig.JacobianWeierstrassT with type Scalar.t = Fp.t and type Base.t = Fq.t =
+struct
+  let () = assert (not (Fq.is_zero Params.b))
+
+  exception Not_on_curve of Bytes.t
+
+  module Base = Fq
+  module Scalar = Fp
+
+  let a = Params.a
+
+  let b = Params.b
+
+  type t = { x : Fq.t; y : Fq.t; z : Fq.t }
+
+  let size_in_bytes = Fq.size_in_bytes * 3
+
+  let zero = { x = Fq.zero; y = Fq.one; z = Fq.zero }
+
+  let is_zero t = Fq.(t.x = zero) && Fq.(t.z = zero)
+
+  let is_on_curve x y z =
+    if Fq.is_zero x && Fq.is_zero z then true
+    else if Fq.is_zero z then false
+    else
+      let z2 = Fq.(square z) in
+      let z3 = Fq.(z * z2) in
+      let x' = Fq.(x / z2) in
+      let y' = Fq.(y / z3) in
+      Fq.((x' * x' * x') + (a * x') + b = y' * y')
+
+  let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    if Bytes.length bytes <> size_in_bytes then None
+    else
+      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
+      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
+      let z_bytes = Bytes.sub bytes (2 * Fq.size_in_bytes) Fq.size_in_bytes in
+      let x = Fq.of_bytes_opt x_bytes in
+      let y = Fq.of_bytes_opt y_bytes in
+      let z = Fq.of_bytes_opt z_bytes in
+      match (x, y, z) with
+      | (None, _, _) | (_, None, _) | (_, _, None) -> None
+      (* Verify it is on the curve *)
+      | (Some x, Some y, Some z) ->
+          if Fq.is_zero x && Fq.is_zero z then Some zero
+          else if Fq.is_zero z then None
+          else
+            let z2 = Fq.(square z) in
+            let z3 = Fq.(z2 * z) in
+            let x' = Fq.(x / z2) in
+            let y' = Fq.(y / z3) in
+            if Fq.((x' * x' * x') + (a * x') + b = y' * y') then
+              Some { x; y; z }
+            else None
+
+  let check_bytes bytes =
+    match of_bytes_opt bytes with Some _ -> true | None -> false
+
+  let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+
+  let to_bytes g =
+    let buffer = Bytes.make size_in_bytes '\000' in
+    Bytes.blit (Fq.to_bytes g.x) 0 buffer 0 Fq.size_in_bytes ;
+    Bytes.blit (Fq.to_bytes g.y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
+    Bytes.blit
+      (Fq.to_bytes g.z)
+      0
+      buffer
+      (2 * Fq.size_in_bytes)
+      Fq.size_in_bytes ;
+    buffer
+
+  let one = of_bytes_exn Params.bytes_generator
+
+  let random ?state () =
+    (match state with None -> () | Some s -> Random.set_state s) ;
+    let rec aux () =
+      let x = Fq.random () in
+      let y_square = Fq.((x * x * x) + (a * x) + b) in
+      let y_opt = Fq.sqrt_opt y_square in
+      match y_opt with None -> aux () | Some y -> { x; y; z = Fq.one }
+    in
+    aux ()
+
+  let eq t1 t2 =
+    if Fq.(is_zero t1.z) && Fq.(is_zero t2.z) then true
+    else if Fq.is_zero t1.z || Fq.is_zero t2.z then false
+    else
+      let t1z2 = Fq.(square t1.z) in
+      let t1z3 = Fq.(t1z2 * t1.z) in
+      let t2z2 = Fq.(square t2.z) in
+      let t2z3 = Fq.(t2z2 * t2.z) in
+      let x1 = Fq.(t1.x / t1z2) in
+      let x2 = Fq.(t2.x / t2z2) in
+      let y1 = Fq.(t1.y / t1z3) in
+      let y2 = Fq.(t2.y / t2z3) in
+      Fq.(x1 = x2 && y1 = y2)
+
+  (* https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html#doubling-dbl-2007-bl *)
+  let double t =
+    if is_zero t then zero
+    else
+      let { x; y; z } = t in
+      let xx = Fq.(square x) in
+      let yy = Fq.(square y) in
+      let yyyy = Fq.(square yy) in
+      let zz = Fq.(square z) in
+      let s = Fq.(double (square (x + yy) + negate xx + negate yyyy)) in
+      let m = Fq.(xx + xx + xx + (a * square zz)) in
+      let t = Fq.(square m + negate (double s)) in
+      let x3 = t in
+      let y3 =
+        Fq.((m * (s + negate t)) + negate (double (double (double yyyy))))
+      in
+      let z3 = Fq.(square (y + z) + negate yy + negate zz) in
+      { x = x3; y = y3; z = z3 }
+
+  (* https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html#addition-add-2007-bl *)
+  let add t1 t2 =
+    if is_zero t1 then t2
+    else if is_zero t2 then t1
+    else if eq t1 t2 then double t1
+    else
+      let { x = x1; y = y1; z = z1 } = t1 in
+      let { x = x2; y = y2; z = z2 } = t2 in
+      let z1z1 = Fq.(z1 * z1) in
+      let z2z2 = Fq.(z2 * z2) in
+      let u1 = Fq.(x1 * z2z2) in
+      let u2 = Fq.(x2 * z1z1) in
+      let s1 = Fq.(y1 * z2 * z2z2) in
+      let s2 = Fq.(y2 * z1 * z1z1) in
+      let h = Fq.(u2 + negate u1) in
+      let i = Fq.(square (double h)) in
+      let j = Fq.(h * i) in
+      let r = Fq.(double (s2 + negate s1)) in
+      let v = Fq.(u1 * i) in
+      let x3 = Fq.(square r + negate j + negate (double v)) in
+      let y3 = Fq.((r * (v + negate x3)) + negate (double (s1 * j))) in
+      let z3 = Fq.((square (z1 + z2) + negate z1z1 + negate z2z2) * h) in
+      { x = x3; y = y3; z = z3 }
+
+  let negate { x; y; z } = { x; y = Fq.negate y; z }
+
+  let mul x n =
+    let rec aux x n =
+      let two_z = Z.succ Z.one in
+      if Z.equal n Z.zero then zero
+      else if Z.equal n Z.one then x
+      else
+        let (a, r) = Z.ediv_rem n two_z in
+        if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
+    in
+    aux x (Scalar.to_z n)
+
+  let get_x_coordinate t = t.x
+
+  let get_y_coordinate t = t.y
+
+  let get_z_coordinate t = t.z
+
+  let from_coordinates_exn ~x ~y ~z =
+    if is_on_curve x y z then { x; y; z }
+    else
+      raise
+        (Not_on_curve
+           (Bytes.concat
+              Bytes.empty
+              [Fq.to_bytes x; Fq.to_bytes y; Fq.to_bytes z]))
+
+  let from_coordinates_opt ~x ~y ~z =
+    if is_on_curve x y z then Some { x; y; z } else None
+
+  let get_affine_x_coordinate t =
+    if is_zero t then failwith "Zero"
+    else
+      let z2 = Fq.(square t.z) in
+      Fq.(t.x / z2)
+
+  let get_affine_y_coordinate t =
+    if is_zero t then failwith "Zero"
+    else
+      let z3 = Fq.(square t.z * t.z) in
+      Fq.(t.y / z3)
+
+  let from_affine_coordinates_exn ~x ~y = from_coordinates_exn ~x ~y ~z:Fq.one
+
+  let from_affine_coordinates_opt ~x ~y = from_coordinates_exn ~x ~y ~z:Fq.one
+end
+
 module MakeAffineWeierstrass
     (Fq : Ff_sig.PRIME)
     (Fp : Ff_sig.PRIME) (Params : sig

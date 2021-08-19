@@ -114,6 +114,34 @@ module type ProjectiveWeierstrassT = sig
   val from_affine_coordinates_opt : x:Base.t -> y:Base.t -> t
 end
 
+module type JacobianWeierstrassT = sig
+  include WeierstrassT
+
+  val get_x_coordinate : t -> Base.t
+
+  val get_y_coordinate : t -> Base.t
+
+  val get_z_coordinate : t -> Base.t
+
+  (** Build a point from the projective coordinates. If the point is not on the curve
+      and in the subgroup, returns [None]
+  *)
+  val from_coordinates_opt : x:Base.t -> y:Base.t -> z:Base.t -> t option
+
+  (** Build a point from the projective coordinates. If the point is not on the curve
+      and in the subgroup, raise [Not_on_curve].
+  *)
+  val from_coordinates_exn : x:Base.t -> y:Base.t -> z:Base.t -> t
+
+  val get_affine_x_coordinate : t -> Base.t
+
+  val get_affine_y_coordinate : t -> Base.t
+
+  val from_affine_coordinates_exn : x:Base.t -> y:Base.t -> t
+
+  val from_affine_coordinates_opt : x:Base.t -> y:Base.t -> t
+end
+
 module type AffineEdwardsT = sig
   (** au^2 + v^2 = 1 + du^2v^2 *)
   include BASE

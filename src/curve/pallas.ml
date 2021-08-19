@@ -81,3 +81,15 @@ module Affine =
           Bytes.empty
           [Fq.(to_bytes (negate (of_string "1"))); Fq.(to_bytes (of_string "2"))]
     end)
+
+let from_affine_to_jacobian p =
+  Ec.from_affine_to_jacobian (module Affine) (module Jacobian) p
+
+let from_affine_to_projective p =
+  Ec.from_affine_to_projective (module Affine) (module Projective) p
+
+let from_jacobian_to_affine p =
+  Ec.from_jacobian_to_affine (module Jacobian) (module Affine) p
+
+let from_projective_to_affine p =
+  Ec.from_projective_to_affine (module Projective) (module Affine) p

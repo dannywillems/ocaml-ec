@@ -90,3 +90,15 @@ module Affine =
                    "0x2523648240000001BA344D80000000086121000000000013A700000000000012"));
             Fq.(to_bytes (of_string "1")) ]
     end)
+
+let from_affine_to_jacobian p =
+  Ec.from_affine_to_jacobian (module Affine) (module Jacobian) p
+
+let from_affine_to_projective p =
+  Ec.from_affine_to_projective (module Affine) (module Projective) p
+
+let from_jacobian_to_affine p =
+  Ec.from_jacobian_to_affine (module Jacobian) (module Affine) p
+
+let from_projective_to_affine p =
+  Ec.from_projective_to_affine (module Projective) (module Affine) p

@@ -39,3 +39,25 @@ struct
   let hash_opt iterator =
     try Some (hash_exn iterator) with Bottom -> None | e -> raise e
 end
+
+module Zcash = struct
+  let hash_exn iv iterator =
+    let module Sinsemilla = MakeSinsemilla (struct
+      let iv = iv
+
+      let generators = Sinsemilla_zcash_generators.generators_zcash
+
+      let chunk_size = 10
+    end) in
+    Sinsemilla.hash_exn iterator
+
+  let hash_opt iv iterator =
+    let module Sinsemilla = MakeSinsemilla (struct
+      let iv = iv
+
+      let generators = Sinsemilla_zcash_generators.generators_zcash
+
+      let chunk_size = 10
+    end) in
+    Sinsemilla.hash_opt iterator
+end

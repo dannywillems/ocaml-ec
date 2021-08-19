@@ -9,7 +9,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Vesta projective form"
+    "Vesta projective coordinates"
     [ VestaValueGeneration.get_tests ();
       VestaEquality.get_tests ();
       VestaECProperties.get_tests () ]

@@ -9,7 +9,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Tweedledum affine form"
+    "Tweedledum affine coordinates"
     [ TweedledumValueGeneration.get_tests ();
       TweedledumEquality.get_tests ();
       TweedledumECProperties.get_tests () ]

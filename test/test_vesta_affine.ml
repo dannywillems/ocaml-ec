@@ -8,7 +8,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Vesta affine form"
+    "Vesta affine coordinates"
     [ VestaValueGeneration.get_tests ();
       VestaEquality.get_tests ();
       VestaECProperties.get_tests () ]

@@ -9,7 +9,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Pallas"
+    "Pallas projective coordinates"
     [ PallasValueGeneration.get_tests ();
       PallasEquality.get_tests ();
       PallasECProperties.get_tests () ]

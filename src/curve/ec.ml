@@ -724,3 +724,71 @@ struct
 
   let unsafe_from_coordinates ~u ~v = { u; v }
 end
+
+let from_affine_to_jacobian (type affine jacobian base scalar)
+    (module Affine : Ec_sig.AffineWeierstrassT
+      with type t = affine
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Jacobian : Ec_sig.JacobianWeierstrassT
+      with type t = jacobian
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_affine : affine) : jacobian =
+  if Affine.is_zero p_affine then Jacobian.zero
+  else
+    let x = Affine.get_x_coordinate p_affine in
+    let y = Affine.get_y_coordinate p_affine in
+    Jacobian.from_affine_coordinates_exn ~x ~y
+
+let from_jacobian_to_affine (type affine jacobian base scalar)
+    (module Jacobian : Ec_sig.JacobianWeierstrassT
+      with type t = jacobian
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Affine : Ec_sig.AffineWeierstrassT
+      with type t = affine
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_jacobian : jacobian) : affine =
+  if Jacobian.is_zero p_jacobian then Affine.zero
+  else
+    let x = Jacobian.get_x_coordinate p_jacobian in
+    let y = Jacobian.get_y_coordinate p_jacobian in
+    let z = Jacobian.get_z_coordinate p_jacobian in
+    let zz = Jacobian.Base.square z in
+    let zzz = Jacobian.Base.(z * zz) in
+    let x' = Jacobian.Base.(x / zz) in
+    let y' = Jacobian.Base.(y / zzz) in
+    Affine.from_coordinates_exn ~x:x' ~y:y'
+
+let from_affine_to_projective (type affine projective base scalar)
+    (module Affine : Ec_sig.AffineWeierstrassT
+      with type t = affine
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Projective : Ec_sig.ProjectiveWeierstrassT
+      with type t = projective
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_affine : affine) : projective =
+  if Affine.is_zero p_affine then Projective.zero
+  else
+    let x = Affine.get_x_coordinate p_affine in
+    let y = Affine.get_y_coordinate p_affine in
+    Projective.from_affine_coordinates_exn ~x ~y
+
+let from_projective_to_affine (type affine projective base scalar)
+    (module Projective : Ec_sig.ProjectiveWeierstrassT
+      with type t = projective
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Affine : Ec_sig.AffineWeierstrassT
+      with type t = affine
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_projective : projective) : affine =
+  if Projective.is_zero p_projective then Affine.zero
+  else
+    let x = Projective.get_x_coordinate p_projective in
+    let y = Projective.get_y_coordinate p_projective in
+    let z = Projective.get_z_coordinate p_projective in
+    let x' = Projective.Base.(x / z) in
+    let y' = Projective.Base.(y / z) in
+    Affine.from_coordinates_exn ~x:x' ~y:y'

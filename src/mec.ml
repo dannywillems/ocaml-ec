@@ -25,6 +25,7 @@ module Hash = struct
   module Poseidon252 = Poseidon252
   module Poseidon128 = Orchard
   module PedersenHash = Pedersen_hash
+  module Sinsemilla = Sinsemilla
 end
 
 module Signature = struct

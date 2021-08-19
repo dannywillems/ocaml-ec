@@ -23,6 +23,26 @@ module Fp = Ff.MakeFp (struct
     Z.((two_z ** 254) + Z.of_string "4707489544292117082687961190295928833")
 end)
 
+module Jacobian =
+  Ec.MakeJacobianWeierstrass (Fq) (Fp)
+    (struct
+      let a = Fq.zero
+
+      let b = Fq.of_z (Z.of_int 5)
+
+      let cofactor = Z.one
+
+      (* x = -1
+         y = 2
+      *)
+      let bytes_generator =
+        Bytes.concat
+          Bytes.empty
+          [ Fq.(to_bytes (negate (of_string "1")));
+            Fq.(to_bytes (of_string "2"));
+            Fq.(to_bytes one) ]
+    end)
+
 module Projective =
   Ec.MakeProjectiveWeierstrass (Fq) (Fp)
     (struct

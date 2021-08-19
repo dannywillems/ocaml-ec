@@ -176,3 +176,69 @@ let iso_map p =
           + csts_iso_map.(12) ))
     in
     Affine.from_coordinates_exn ~x:x' ~y:y'
+
+module Blake2b = Digestif.Make_BLAKE2B (struct
+  let digest_size = 64
+end)
+
+let hash_blake2s personalisation msg =
+  Hex.to_bytes
+    (`Hex Blake2b.(to_hex (get (feed_bytes (init ~personalisation ()) msg))))
+
+let xor b0 b1 =
+  let rec aux acc i i0 i1 =
+    if i = 8 then
+      fst
+      @@ List.fold_left
+           (fun (acc, exp) bi ->
+             ((acc + ((1 lsl exp) * if bi then 1 else 0)), exp + 1))
+           (0, 0)
+           (List.rev acc)
+    else
+      let r0 = i0 mod 2 = 1 in
+      let r1 = i1 mod 2 = 0 in
+      let b = r0 <> r1 in
+      aux (b :: acc) (i + 1) (i0 / 2) (i1 / 2)
+  in
+  let b0 = List.map int_of_char (List.of_seq (Bytes.to_seq b0)) in
+  let b1 = List.map int_of_char (List.of_seq (Bytes.to_seq b1)) in
+  let res = List.map2 (fun b0 b1 -> aux [] 0 b0 b1) b0 b1 in
+  let res = List.map char_of_int res in
+  Bytes.of_seq (List.to_seq res)
+
+let hash_to_field msg dst =
+  assert (Bytes.length dst < 256) ;
+  let dst' =
+    Bytes.concat Bytes.empty [dst; Bytes.make 1 (char_of_int (Bytes.length dst))]
+  in
+  let msg' =
+    Bytes.concat
+      Bytes.empty
+      [ Bytes.make 128 (char_of_int 0);
+        msg;
+        Bytes.make 1 (char_of_int 0);
+        Bytes.make 1 (char_of_int 128);
+        Bytes.make 1 (char_of_int 0);
+        dst' ]
+  in
+  let b0 = hash_blake2s (Bytes.make 16 (char_of_int 0)) msg' in
+  let b1 =
+    hash_blake2s
+      (Bytes.make 16 (char_of_int 0))
+      (Bytes.concat Bytes.empty [b0; Bytes.make 1 (char_of_int 1); dst'])
+  in
+  let b0_xor_b1 = xor b0 b1 in
+  let b2 =
+    hash_blake2s
+      (Bytes.make 16 (char_of_int 0))
+      (Bytes.concat Bytes.empty [b0_xor_b1; Bytes.make 1 (char_of_int 2); dst'])
+  in
+  let b1_le =
+    Bytes.(to_string (init 64 (fun i -> Bytes.get b1 (64 - i - 1))))
+  in
+  let b2_le =
+    Bytes.(to_string (init 64 (fun i -> Bytes.get b2 (64 - i - 1))))
+  in
+  (Fq.of_z (Z.of_bits b1_le), Fq.of_z (Z.of_bits b2_le))
+
+(* let z_iso = Iso.Affine.Base.of_z (Z.(neg (of_int 13))) *)

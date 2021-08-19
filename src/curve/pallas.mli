@@ -17,3 +17,5 @@ module Iso : sig
 end
 
 val iso_map : Iso.Affine.t -> Affine.t
+
+val hash_to_field : Bytes.t -> Bytes.t -> Affine.Base.t * Affine.Base.t

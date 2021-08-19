@@ -56,7 +56,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "secp256k1 projective form"
+    "secp256k1 projective coordinates"
     [ ("Vectors", [Alcotest.test_case "test vectors" `Quick test_vectors]);
       Secp256k1ValueGeneration.get_tests ();
       Secp256k1Equality.get_tests ();

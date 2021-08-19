@@ -9,7 +9,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Tweedledee projective form"
+    "Tweedledee projective coordinates"
     [ TweedledeeValueGeneration.get_tests ();
       TweedledeeEquality.get_tests ();
       TweedledeeECProperties.get_tests () ]

@@ -9,7 +9,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "secp256r1 projective form"
+    "secp256r1 projective coordinates"
     [ Secp256r1ValueGeneration.get_tests ();
       Secp256r1Equality.get_tests ();
       Secp256r1ECProperties.get_tests () ]

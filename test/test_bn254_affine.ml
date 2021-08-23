@@ -1,9 +1,9 @@
 module BN254AffineValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.BN254.Affine)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.BN254.Affine)
 module BN254AffineEquality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.BN254.Affine)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.BN254.Affine)
 module BN254AffineECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.BN254.Affine)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.BN254.Affine)
 
 let () =
   let open Alcotest in

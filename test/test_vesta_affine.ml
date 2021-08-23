@@ -1,8 +1,8 @@
 module VestaValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Vesta.Affine)
-module VestaEquality = Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Vesta.Affine)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.Vesta.Affine)
+module VestaEquality = Mec.Curve.PBT.MakeEquality (Mec.Curve.Vesta.Affine)
 module VestaECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Vesta.Affine)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.Vesta.Affine)
 
 let () =
   let open Alcotest in

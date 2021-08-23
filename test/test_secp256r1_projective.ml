@@ -1,9 +1,9 @@
 module Secp256r1ValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Secp256r1.Projective)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.Secp256r1.Projective)
 module Secp256r1Equality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Secp256r1.Projective)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.Secp256r1.Projective)
 module Secp256r1ECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Secp256r1.Projective)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.Secp256r1.Projective)
 
 let () =
   let open Alcotest in

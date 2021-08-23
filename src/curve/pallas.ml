@@ -177,7 +177,7 @@ let iso_map p =
     in
     Affine.from_coordinates_exn ~x:x' ~y:y'
 
-module Blake2b = Digestif.Make_BLAKE2B (struct
+module Blake2b = Mec_digestif.Digestif.Make_BLAKE2B (struct
   let digest_size = 64
 end)
 

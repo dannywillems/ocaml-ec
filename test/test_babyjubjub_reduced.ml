@@ -1,11 +1,11 @@
 module ValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.BabyJubjubReduced.Affine)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.BabyJubjubReduced.Affine)
 module Equality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.BabyJubjubReduced.Affine)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.BabyJubjubReduced.Affine)
 module Properties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.BabyJubjubReduced.Affine)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.BabyJubjubReduced.Affine)
 module EdwardsCurveProperties =
-  Mec.Curve.Utils.PBT.MakeEdwardsCurveProperties
+  Mec.Curve.PBT.MakeEdwardsCurveProperties
     (Mec.Curve.BabyJubjubReduced.Affine)
 
 let test_random_is_not_small_order () =
@@ -53,11 +53,11 @@ let () =
         [ Alcotest.test_case
             "test random elements are in the prime subgroup"
             `Quick
-            (Mec.Curve.Utils.PBT.repeat 100 test_random_is_not_small_order);
+            (Mec.Curve.PBT.repeat 100 test_random_is_not_small_order);
           Alcotest.test_case
             "test random coordinates u, v do not give a point on the curve"
             `Quick
-            (Mec.Curve.Utils.PBT.repeat 100 test_random_points_not_on_curve) ]
+            (Mec.Curve.PBT.repeat 100 test_random_points_not_on_curve) ]
       );
       ValueGeneration.get_tests ();
       EdwardsCurveProperties.get_tests ();

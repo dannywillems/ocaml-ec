@@ -1,0 +1,6 @@
+(library
+ (name mec_hash_poseidon)
+ (instrumentation
+  (backend bisect_ppx))
+ (public_name mec.hash.poseidon)
+ (libraries hex alcotest ff-sig mec_digestif))

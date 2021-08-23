@@ -1,9 +1,9 @@
 module BN254ProjectiveValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.BN254.Projective)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.BN254.Projective)
 module BN254ProjectiveEquality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.BN254.Projective)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.BN254.Projective)
 module BN254ProjectiveECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.BN254.Projective)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.BN254.Projective)
 
 let () =
   let open Alcotest in

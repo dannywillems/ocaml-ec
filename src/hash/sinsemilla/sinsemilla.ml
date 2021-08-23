@@ -1,4 +1,5 @@
-open Pallas
+open Mec_curve.Pallas
+open Mec_utils
 
 exception Bottom
 

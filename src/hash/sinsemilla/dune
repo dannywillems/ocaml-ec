@@ -1,0 +1,7 @@
+(library
+ (name mec_hash_sinsemilla)
+ (instrumentation
+  (backend bisect_ppx))
+ (public_name mec.hash.sinsemilla)
+ (libraries hex alcotest ff-sig ff mec_curve mec_utils)
+ (flags :standard -open Mec_utils))

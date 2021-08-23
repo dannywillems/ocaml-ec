@@ -1,10 +1,10 @@
 module ValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.BabyJubjub.Affine)
-module Equality = Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.BabyJubjub.Affine)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.BabyJubjub.Affine)
+module Equality = Mec.Curve.PBT.MakeEquality (Mec.Curve.BabyJubjub.Affine)
 module Properties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.BabyJubjub.Affine)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.BabyJubjub.Affine)
 module EdwardsCurveProperties =
-  Mec.Curve.Utils.PBT.MakeEdwardsCurveProperties (Mec.Curve.BabyJubjub.Affine)
+  Mec.Curve.PBT.MakeEdwardsCurveProperties (Mec.Curve.BabyJubjub.Affine)
 
 let test_doubling () =
   let vectors =
@@ -122,11 +122,11 @@ let () =
           Alcotest.test_case
             "test random elements are in the prime subgroup"
             `Quick
-            (Mec.Curve.Utils.PBT.repeat 100 test_random_is_not_small_order);
+            (Mec.Curve.PBT.repeat 100 test_random_is_not_small_order);
           Alcotest.test_case
             "test random coordinates u, v do not give a point on the curve"
             `Quick
-            (Mec.Curve.Utils.PBT.repeat 100 test_random_points_not_on_curve);
+            (Mec.Curve.PBT.repeat 100 test_random_points_not_on_curve);
           Alcotest.test_case "test vectors doubling" `Quick test_doubling ] );
       ValueGeneration.get_tests ();
       Properties.get_tests ();

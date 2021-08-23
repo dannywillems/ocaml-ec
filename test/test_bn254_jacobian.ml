@@ -1,9 +1,9 @@
 module BN254JacobianValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.BN254.Jacobian)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.BN254.Jacobian)
 module BN254JacobianEquality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.BN254.Jacobian)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.BN254.Jacobian)
 module BN254JacobianECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.BN254.Jacobian)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.BN254.Jacobian)
 
 let () =
   let open Alcotest in

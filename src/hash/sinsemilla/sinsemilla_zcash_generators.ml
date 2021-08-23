@@ -1,4 +1,4 @@
-open Pallas
+open Mec_curve.Pallas
 
 let generators_zcash_coordinates =
   [| ( Hex.to_bytes

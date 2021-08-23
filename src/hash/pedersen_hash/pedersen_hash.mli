@@ -1,3 +1,5 @@
+open Mec_curve
+
 module MakePedersenHash : functor
   (Ec : Ec_sig.BASE)
   (Params : sig

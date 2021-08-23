@@ -1,9 +1,9 @@
 module TweedledumValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Tweedledum.Affine)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.Tweedledum.Affine)
 module TweedledumEquality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Tweedledum.Affine)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.Tweedledum.Affine)
 module TweedledumECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Tweedledum.Affine)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.Tweedledum.Affine)
 
 let () =
   let open Alcotest in

@@ -1,9 +1,9 @@
 module PallasValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Pallas.Affine)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.Pallas.Affine)
 module PallasEquality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Pallas.Affine)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.Pallas.Affine)
 module PallasECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Pallas.Affine)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.Pallas.Affine)
 
 let () =
   let open Alcotest in

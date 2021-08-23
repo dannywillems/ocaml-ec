@@ -1,0 +1,7 @@
+(library
+ (name mec_digestif)
+ (public_name mec.digestif)
+ (libraries
+  ; For digestif, see https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44
+  eqaf
+  bigarray-compat))

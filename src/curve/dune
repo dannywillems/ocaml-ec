@@ -1,0 +1,28 @@
+(library
+ (name mec_curve)
+ (instrumentation
+  (backend bisect_ppx))
+ (public_name mec.curve)
+ (modules babyjubjub babyjubjub_reduced bls12_381 curve25519 curve448 ec
+   jubjub pallas secp256k1 secp256r1 tweedledee tweedledum vesta)
+ (libraries hex alcotest ff-sig ff mec_digestif mec_curve_sig)
+ (flags
+  (:standard -open Mec_curve_sig)))
+
+(library
+ (name mec_curve_sig)
+ (instrumentation
+  (backend bisect_ppx))
+ (public_name mec.curve_sig)
+ (modules ec_sig)
+ (libraries ff-sig))
+
+(library
+ (name mec_curve_pbt)
+ (instrumentation
+  (backend bisect_ppx))
+ (public_name mec.curve.PBT)
+ (modules ec_pbt)
+ (libraries hex alcotest ff-sig ff mec_curve_sig)
+ (flags
+  (:standard -open Mec_curve_sig)))

@@ -1,50 +1,24 @@
 ; Digestif fork
 
-(copy_files curve/{*.ml*})
+; (copy_files curve/{*.ml*})
 
-(copy_files digestif/{*.ml*})
+; (copy_files digestif/{*.ml*})
 
-(copy_files hash/{*.ml*})
+; (copy_files hash/{*.ml*})
 
-(copy_files hash/poseidon/{*.ml*})
+; (copy_files hash/poseidon/{*.ml*})
 
-(copy_files signature/{*.ml*})
+; (copy_files signature/{*.ml*})
 
-(copy_files signature/group_hash/{*.ml*})
+; (copy_files signature/group_hash/{*.ml*})
 
-(copy_files signature/redjubjub/{*.ml*})
+; (copy_files signature/redjubjub/{*.ml*})
 
 (library
  (name mec)
  (instrumentation
   (backend bisect_ppx))
  (public_name mec)
- ; (modules
- ;  reddsa
- ;  ; Digestif fork, copied from the directory digestif
- ;  digestif
- ;  digestif_conv
- ;  digestif_eq
- ;  xor
- ;  digestif_bi
- ;  digestif_by
- ;  baijiu_blake2s
- ;  baijiu_blake2b)
- (private_modules
-  ; Digestif fork, copied from the directory digestif
-  ; digestif
-  digestif_conv
-  digestif_eq
-  xor
-  digestif_bi
-  digestif_by
-  baijiu_blake2s
-  baijiu_blake2b)
- (libraries
-  hex
-  alcotest
-  ff-sig
-  ff
-  ; For digestif, see https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44
-  eqaf
-  bigarray-compat))
+ (flags
+  (:standard -w -49))
+ (libraries mec.curve mec.utils))

@@ -1,9 +1,9 @@
 module Secp256k1ValueGeneration =
-  Mec.Curve.Utils.PBT.MakeValueGeneration (Mec.Curve.Secp256k1.Affine)
+  Mec.Curve.PBT.MakeValueGeneration (Mec.Curve.Secp256k1.Affine)
 module Secp256k1Equality =
-  Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Secp256k1.Affine)
+  Mec.Curve.PBT.MakeEquality (Mec.Curve.Secp256k1.Affine)
 module Secp256k1ECProperties =
-  Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Secp256k1.Affine)
+  Mec.Curve.PBT.MakeECProperties (Mec.Curve.Secp256k1.Affine)
 
 let test_vectors () =
   (* http://point-at-infinity.org/ecc/nisttv *)

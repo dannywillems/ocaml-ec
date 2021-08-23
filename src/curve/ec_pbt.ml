@@ -500,3 +500,91 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
           `Quick
           test_of_bytes_and_check_bytes_with_different_size_of_bytes ] )
 end
+
+module MakeCompressedSerialisationAffine (G : sig
+  include Ec_sig.BASE
+
+  val of_compressed_bytes_exn : Bytes.t -> t
+
+  val of_compressed_bytes_opt : Bytes.t -> t option
+
+  val to_compressed_bytes : t -> Bytes.t
+end) =
+struct
+  let test_of_compressed_bytes_exn_recover_correct_point_from_uncompressed_representation
+      () =
+    let g = G.random () in
+    let compressed_bytes = G.to_compressed_bytes g in
+    let uncompressed_g = G.of_compressed_bytes_exn compressed_bytes in
+    assert (G.eq g uncompressed_g)
+
+  let test_of_compressed_bytes_opt_recover_correct_point_from_uncompressed_representation
+      () =
+    let g = G.random () in
+    let compressed_bytes = G.to_compressed_bytes g in
+    let uncompressed_g =
+      Option.get (G.of_compressed_bytes_opt compressed_bytes)
+    in
+    assert (G.eq g uncompressed_g)
+
+  (* it is correct to test this for BLS12-381 *)
+  let test_compressed_version_is_half_the_size () =
+    let g = G.random () in
+    assert (Bytes.length (G.to_compressed_bytes g) = G.size_in_bytes / 2)
+
+  let test_of_compressed_bytes_exn_and_opt_do_not_accept_uncompressed_bytes_representation
+      () =
+    let x = G.random () in
+    let x_uncompressed_bytes = G.to_bytes x in
+    assert (Option.is_none (G.of_compressed_bytes_opt x_uncompressed_bytes)) ;
+    try
+      ignore @@ G.of_compressed_bytes_exn x_uncompressed_bytes ;
+      assert false
+    with G.Not_on_curve _b -> ()
+
+  let test_of_bytes_exn_and_opt_do_not_accept_compressed_bytes_representation ()
+      =
+    let x = G.random () in
+    let x_compressed_bytes = G.to_compressed_bytes x in
+    assert (Option.is_none (G.of_bytes_opt x_compressed_bytes)) ;
+    try
+      ignore @@ G.of_bytes_exn x_compressed_bytes ;
+      assert false
+    with G.Not_on_curve _b -> ()
+
+  let get_tests () =
+    let open Alcotest in
+    ( "Compressed representation",
+      [ test_case
+          "of_compressed_bytes_exn recovers correct point from uncompressed \
+           representation"
+          `Quick
+          (repeat
+             100
+             test_of_compressed_bytes_exn_recover_correct_point_from_uncompressed_representation);
+        test_case
+          "of_compressed_bytes_opt recovers correct point from uncompressed \
+           representation"
+          `Quick
+          (repeat
+             100
+             test_of_compressed_bytes_opt_recover_correct_point_from_uncompressed_representation);
+        test_case
+          "Compressed version is half the size"
+          `Quick
+          test_compressed_version_is_half_the_size;
+        test_case
+          "of_compressed_bytes_exn/opt do not accept uncompressed bytes \
+           representation"
+          `Quick
+          (repeat
+             100
+             test_of_compressed_bytes_exn_and_opt_do_not_accept_uncompressed_bytes_representation);
+        test_case
+          "of_bytes_exn/opt do not accept compressed bytes representation"
+          `Quick
+          (repeat
+             100
+             test_of_bytes_exn_and_opt_do_not_accept_compressed_bytes_representation)
+      ] )
+end

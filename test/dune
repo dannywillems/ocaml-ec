@@ -9,8 +9,9 @@
    test_pedersen_hash test_poseidon128 test_poseidon252 test_redjubjub
    test_secp256k1_affine test_secp256k1_jacobian test_secp256k1_projective
    test_secp256r1_affine test_secp256r1_jacobian test_secp256r1_projective
-   test_tweedledee_affine test_tweedledee_jacobian test_tweedledee_projective
-   test_tweedledum_affine test_tweedledum_jacobian test_tweedledum_projective
-   test_vesta_affine test_vesta_jacobian test_vesta_projective)
+   test_sinsemilla test_tweedledee_affine test_tweedledee_jacobian
+   test_tweedledee_projective test_tweedledum_affine test_tweedledum_jacobian
+   test_tweedledum_projective test_vesta_affine test_vesta_jacobian
+   test_vesta_projective)
  (libraries mec)
  (package mec))

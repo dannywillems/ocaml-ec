@@ -177,6 +177,45 @@ let test_vectors_sinsemilla_orchard () =
     test_inputs
     test_outputs
 
+module Properties = struct
+  let test_collision_when_padding_with_zeroes_last_chunk () =
+    let chunk_size = 1 + Random.int 10 in
+    let generators =
+      Array.init (1 lsl chunk_size) (fun _ -> Pallas.Affine.random ())
+    in
+    let iv = Pallas.Affine.random () in
+    let module Sinsemilla = Mec.Hash.Sinsemilla.MakeSinsemilla (struct
+      let chunk_size = chunk_size
+
+      let generators = generators
+
+      let iv = iv
+    end) in
+    let nb_chunk_input = 1 + Random.int 10 in
+    let input =
+      List.init ((nb_chunk_input * chunk_size) + 1) (fun _ -> Random.bool ())
+    in
+    let exp_output =
+      Sinsemilla.hash_exn (Iterator.Bit.create_from_bool_list input)
+    in
+    for i = 0 to chunk_size - 1 do
+      let input_padded = input @ List.init i (fun _ -> false) in
+      let output =
+        Sinsemilla.hash_exn (Iterator.Bit.create_from_bool_list input_padded)
+      in
+      assert (Pallas.Affine.Base.eq output exp_output)
+    done
+
+  let get_tests () =
+    ( "Properties",
+      [ Alcotest.test_case
+          "Collision when padding last chunk with zeroes"
+          `Quick
+          (Mec.Curve.Utils.PBT.repeat
+             100
+             test_collision_when_padding_with_zeroes_last_chunk) ] )
+end
+
 let () =
   Alcotest.run
     ~verbose:true
@@ -185,4 +224,5 @@ let () =
         [ Alcotest.test_case
             "Test vectors from zcash-ochard/zcash-test-vectors"
             `Quick
-            test_vectors_sinsemilla_orchard ] ) ]
+            test_vectors_sinsemilla_orchard ] );
+      Properties.get_tests () ]

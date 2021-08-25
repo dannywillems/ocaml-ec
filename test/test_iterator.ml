@@ -25,7 +25,7 @@ let test_from_bool_list () =
   in
   List.iter
     (fun (b, expected_l) ->
-      let iterator = Iterator.Bit.create_from_bool_list b in
+      let iterator = Iterator.Bit.of_bool_list b in
       List.iter
         (fun exp_b -> assert (Iterator.Bit.next iterator = Some exp_b))
         expected_l ;
@@ -106,7 +106,7 @@ let test_is_processed () =
     (fun (v, iterations) ->
       List.iter
         (fun (n, expected_value) ->
-          let iterator = Iterator.Bit.create_from_bool_list v in
+          let iterator = Iterator.Bit.of_bool_list v in
           for _ = 0 to n - 1 do
             ignore @@ Iterator.Bit.next iterator
           done ;
@@ -125,7 +125,7 @@ let test_get_chunk () =
   in
   List.iter
     (fun (l, chunk_size, exp_values) ->
-      let iterator = Iterator.Bit.create_from_bool_list l in
+      let iterator = Iterator.Bit.of_bool_list l in
       List.iter
         (fun exp_value ->
           let chunk = Iterator.Bit.get_chunk iterator chunk_size in

@@ -163,7 +163,7 @@ let test_vectors_sinsemilla_orchard () =
   let open Sinsemilla in
   List.iter2
     (fun input expected_output ->
-      let it = Iterator.Bit.create_from_bool_list input in
+      let it = Iterator.Bit.of_bool_list input in
       let expected_output = Hex.to_bytes (`Hex expected_output) in
       let expected_output = inverse_endianness expected_output in
       let output = hash_exn iv it in
@@ -195,13 +195,11 @@ module Properties = struct
     let input =
       List.init ((nb_chunk_input * chunk_size) + 1) (fun _ -> Random.bool ())
     in
-    let exp_output =
-      Sinsemilla.hash_exn (Iterator.Bit.create_from_bool_list input)
-    in
+    let exp_output = Sinsemilla.hash_exn (Iterator.Bit.of_bool_list input) in
     for i = 0 to chunk_size - 1 do
       let input_padded = input @ List.init i (fun _ -> false) in
       let output =
-        Sinsemilla.hash_exn (Iterator.Bit.create_from_bool_list input_padded)
+        Sinsemilla.hash_exn (Iterator.Bit.of_bool_list input_padded)
       in
       assert (Pallas.Affine.Base.eq output exp_output)
     done

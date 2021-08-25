@@ -27,7 +27,7 @@ module Bit = struct
 
   let is_processed { f = _; size; i } = size = i
 
-  let create_from_bool_list bs =
+  let of_bool_list bs =
     let bs_ref = ref bs in
     let length = List.length bs in
     if length = 0 then { f = (fun () -> None); size = length; i = 0 }

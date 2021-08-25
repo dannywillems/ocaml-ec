@@ -15,7 +15,7 @@ let test_vector_from_zcash_primitives () =
   in
   List.iter
     (fun (input, expected_output) ->
-      let iterator = Iterator.Bit.create_from_bool_list input in
+      let iterator = Iterator.Bit.of_bool_list input in
       let output = PedersenHash.Zcash.hash iterator in
       if not (Jubjub.Affine.eq output expected_output) then
         Alcotest.failf
@@ -37,7 +37,7 @@ let test_zcash_bitstring_too_long () =
   let n = Random.int 1_000_000 in
   let max_bitstring_zcash = 6 * 3 * 63 in
   let bitstring = List.init (n + max_bitstring_zcash + 1) (fun _ -> false) in
-  let iterator = Iterator.Bit.create_from_bool_list bitstring in
+  let iterator = Iterator.Bit.of_bool_list bitstring in
   try
     ignore @@ PedersenHash.Zcash.hash iterator ;
     assert false

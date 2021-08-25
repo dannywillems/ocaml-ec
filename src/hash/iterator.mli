@@ -7,7 +7,7 @@ module Bit : sig
 
   val is_processed : t -> bool
 
-  val create_from_bool_list : bool list -> t
+  val of_bool_list : bool list -> t
 
   val next : t -> bit option
 

@@ -7,6 +7,9 @@ module Properties =
 module EdwardsCurveProperties =
   Mec.Curve.Utils.PBT.MakeEdwardsCurveProperties
     (Mec.Curve.BabyJubjubReduced.Affine)
+module Serialisation =
+  Mec.Curve.Utils.PBT.MakeSerialisationProperties
+    (Mec.Curve.BabyJubjubReduced.Affine)
 
 let test_random_is_not_small_order () =
   assert (not Mec.Curve.BabyJubjubReduced.Affine.(is_small_order (random ())))
@@ -62,4 +65,5 @@ let () =
       ValueGeneration.get_tests ();
       EdwardsCurveProperties.get_tests ();
       Properties.get_tests ();
+      Serialisation.get_tests ();
       Equality.get_tests () ]

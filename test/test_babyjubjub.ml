@@ -5,6 +5,8 @@ module Properties =
   Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.BabyJubjub.Affine)
 module EdwardsCurveProperties =
   Mec.Curve.Utils.PBT.MakeEdwardsCurveProperties (Mec.Curve.BabyJubjub.Affine)
+module Serialisation =
+  Mec.Curve.Utils.PBT.MakeSerialisationProperties (Mec.Curve.BabyJubjub.Affine)
 
 let test_doubling () =
   let vectors =
@@ -130,5 +132,6 @@ let () =
           Alcotest.test_case "test vectors doubling" `Quick test_doubling ] );
       ValueGeneration.get_tests ();
       Properties.get_tests ();
+      Serialisation.get_tests ();
       EdwardsCurveProperties.get_tests ();
       Equality.get_tests () ]

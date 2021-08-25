@@ -4,6 +4,9 @@ module Secp256k1Equality =
   Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Secp256k1.Affine)
 module Secp256k1ECProperties =
   Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Secp256k1.Affine)
+module CompressedRepresentation =
+  Mec.Curve.Utils.PBT.MakeCompressedSerialisationAffine
+    (Mec.Curve.Secp256k1.Affine)
 
 let test_vectors () =
   (* http://point-at-infinity.org/ecc/nisttv *)
@@ -59,4 +62,5 @@ let () =
     [ ("Vectors", [Alcotest.test_case "test vectors" `Quick test_vectors]);
       Secp256k1ValueGeneration.get_tests ();
       Secp256k1Equality.get_tests ();
-      Secp256k1ECProperties.get_tests () ]
+      Secp256k1ECProperties.get_tests ();
+      CompressedRepresentation.get_tests () ]

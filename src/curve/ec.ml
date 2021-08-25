@@ -374,6 +374,71 @@ struct
 
   let from_coordinates_opt ~x ~y =
     if is_on_curve x y then Some (P (x, y)) else None
+
+  let of_compressed_bytes_opt bs =
+    (* required to avoid side effect! *)
+    let bs = Bytes.copy bs in
+    let length = Bytes.length bs in
+    if length <> Base.size_in_bytes then None
+    else if bs = Bytes.make Base.size_in_bytes '\000' then Some Infinity
+    else
+      (* We get the last bit of the input, representing the bit of u. We also
+         remove the last bit from the bytes we received
+      *)
+      let last_byte = int_of_char @@ Bytes.get bs (length - 1) in
+      let sign = last_byte lsr 7 in
+      let last_byte_without_sign = last_byte land 0b01111111 in
+      Bytes.set bs (length - 1) (char_of_int last_byte_without_sign) ;
+      (* We compute u *)
+      let x = Base.of_bytes_opt bs in
+      match x with
+      | None -> None
+      | Some x -> (
+          let yy = Base.((x * x * x) + (a * x) + b) in
+          let y_opt = Base.sqrt_opt yy in
+          let y =
+            match y_opt with
+            | None -> None
+            | Some y ->
+                (* computed before for constant time *)
+                let negated_y = Base.negate y in
+                let y_first_byte = Bytes.get (Base.to_bytes y) 0 in
+                let is_sign_flipped =
+                  int_of_char y_first_byte lxor sign land 1
+                in
+                Some (if is_sign_flipped = 0 then y else negated_y)
+          in
+          match y with
+          | Some y ->
+              let p = P (x, y) in
+              if is_zero (mul p (Scalar.of_z (Z.pred cofactor))) then Some p
+              else None
+          | None -> None )
+
+  let of_compressed_bytes_exn b =
+    match of_compressed_bytes_opt b with
+    | None -> raise (Not_on_curve b)
+    | Some p -> p
+
+  let to_compressed_bytes p =
+    match p with
+    | Infinity -> Bytes.make Base.size_in_bytes '\000'
+    | P (x, y) ->
+        let x_bytes = Base.to_bytes x in
+        let y_bytes = Base.to_bytes y in
+        let y_first_byte = int_of_char (Bytes.get y_bytes 0) in
+        let x_last_byte =
+          int_of_char (Bytes.get x_bytes (Base.size_in_bytes - 1))
+        in
+        (* Get the first bit of y, i.e. the sign of y *)
+        let sign_of_y = y_first_byte land 0b00000001 in
+        (* Set the last bit of the last byte of x to the sign of y *)
+        let x_last_byte_with_y = x_last_byte lor (sign_of_y lsl 7) in
+        Bytes.set
+          x_bytes
+          (Base.size_in_bytes - 1)
+          (char_of_int x_last_byte_with_y) ;
+        x_bytes
 end
 
 module MakeProjectiveWeierstrass

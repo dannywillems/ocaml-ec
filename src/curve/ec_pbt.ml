@@ -501,6 +501,28 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
           test_of_bytes_and_check_bytes_with_different_size_of_bytes ] )
 end
 
+module MakeSerialisationProperties (G : Ec_sig.BASE) = struct
+  let test_of_bytes_exn_to_bytes_are_inverse_functions () =
+    let r = G.random () in
+    assert (G.(eq (of_bytes_exn (to_bytes r)) r))
+
+  let test_of_bytes_opt_to_bytes_are_inverse_functions () =
+    let r = G.random () in
+    assert (G.(eq (Option.get (of_bytes_opt (to_bytes r))) r))
+
+  let get_tests () =
+    let open Alcotest in
+    ( "Serialisation",
+      [ test_case
+          "of_bytes_exn and to_bytes are inverse functions"
+          `Quick
+          test_of_bytes_exn_to_bytes_are_inverse_functions;
+        test_case
+          "of_bytes_opt and to_bytes are inverse functions"
+          `Quick
+          test_of_bytes_opt_to_bytes_are_inverse_functions ] )
+end
+
 module MakeCompressedSerialisationAffine (G : sig
   include Ec_sig.BASE
 
@@ -511,6 +533,14 @@ module MakeCompressedSerialisationAffine (G : sig
   val to_compressed_bytes : t -> Bytes.t
 end) =
 struct
+  let test_zero () =
+    let expected_zero_bytes_compressed =
+      Bytes.make (G.size_in_bytes / 2) '\000'
+    in
+    assert (
+      Bytes.(
+        equal (G.to_compressed_bytes G.zero) expected_zero_bytes_compressed) )
+
   let test_of_compressed_bytes_exn_recover_correct_point_from_uncompressed_representation
       () =
     let g = G.random () in
@@ -556,6 +586,10 @@ struct
     let open Alcotest in
     ( "Compressed representation",
       [ test_case
+          "Compressed representation of zero is the bs with zeroes"
+          `Quick
+          test_zero;
+        test_case
           "of_compressed_bytes_exn recovers correct point from uncompressed \
            representation"
           `Quick

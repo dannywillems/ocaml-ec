@@ -4,7 +4,7 @@ module Secp256k1Equality =
   Mec.Curve.Utils.PBT.MakeEquality (Mec.Curve.Secp256k1.Affine)
 module Secp256k1ECProperties =
   Mec.Curve.Utils.PBT.MakeECProperties (Mec.Curve.Secp256k1.Affine)
-module Secp256k1Representation =
+module CompressedRepresentation =
   Mec.Curve.Utils.PBT.MakeCompressedSerialisationAffine
     (Mec.Curve.Secp256k1.Affine)
 
@@ -63,4 +63,4 @@ let () =
       Secp256k1ValueGeneration.get_tests ();
       Secp256k1Equality.get_tests ();
       Secp256k1ECProperties.get_tests ();
-      Secp256k1Representation.get_tests () ]
+      CompressedRepresentation.get_tests () ]

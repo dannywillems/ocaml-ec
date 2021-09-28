@@ -1,0 +1,5 @@
+(executable
+ (name main)
+ (libraries zarith core)
+ (preprocess
+  (pps ppx_jane)))

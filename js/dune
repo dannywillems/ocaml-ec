@@ -1,0 +1,28 @@
+(executable
+ (name test)
+ (libraries zarith_stubs_js
+            js_of_ocaml
+            mec
+            js_of_ocaml-compiler
+            hex
+ )
+ (modes byte)
+ (js_of_ocaml)
+ (preprocess (pps js_of_ocaml-ppx))
+ (flags (:standard ))
+)
+
+(rule
+ (targets test.js)
+ (action
+  (run %{bin:js_of_ocaml}
+    %{lib:js_of_ocaml-compiler:toplevel.js}
+    %{lib:js_of_ocaml-compiler:dynlink.js}
+    %{lib:zarith_stubs_js:biginteger.js}
+    %{lib:zarith_stubs_js:runtime.js}
+    %{dep:test.bc} -o test.js
+  )
+ )
+)
+
+(alias (name default) (deps test.js))

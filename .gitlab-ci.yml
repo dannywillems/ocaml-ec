@@ -30,6 +30,9 @@ lint:
     - opam install . -y
     # Run tests
     - dune runtest
+    # Test JS build
+    - opam install zarith.1.11 js_of_ocaml js_of_ocaml-ppx zarith_stubs_js -y
+    - dune build ./js/test.js
   rules:
     - when: always
 

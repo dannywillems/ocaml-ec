@@ -11,3 +11,10 @@
  (libraries zarith core ff digestif hex)
  (preprocess
   (pps ppx_jane)))
+
+(executable
+ (name generate_mds)
+ (modules generate_mds)
+ (libraries zarith core ff digestif hex)
+ (preprocess
+  (pps ppx_jane)))

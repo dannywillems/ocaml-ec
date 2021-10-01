@@ -1,5 +1,13 @@
 (executable
  (name security_parameters)
+ (modules security_parameters)
  (libraries zarith core)
+ (preprocess
+  (pps ppx_jane)))
+
+(executable
+ (name generate_ark)
+ (modules generate_ark)
+ (libraries zarith core ff digestif hex)
  (preprocess
   (pps ppx_jane)))

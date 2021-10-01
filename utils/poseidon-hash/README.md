@@ -3,7 +3,7 @@
 ### Generate the number of rounds
 
 ```
-dune exec ./main.exe security-level alpha width field-size
+dune exec ./security_parameters.exe security-level alpha width field-size
 ```
 
 Based on the attacks given in [this paper](https://eprint.iacr.org/eprint-bin/getfile.pl?entry=2019/458&version=20201216:132935&file=458.pdf).

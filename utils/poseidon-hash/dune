@@ -1,5 +1,5 @@
 (executable
- (name main)
+ (name security_parameters)
  (libraries zarith core)
  (preprocess
   (pps ppx_jane)))

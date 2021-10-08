@@ -43,7 +43,7 @@ build-ocaml-4.12:
 
 doc:
   stage: doc
-  image: ocaml/opam:debian-ocaml-4.09
+  image: ocaml/opam:debian-ocaml-4.12
   before_script:
     - sudo apt-get update && sudo apt-get upgrade -y
     - eval $(opam env)
@@ -65,7 +65,7 @@ doc:
 # Coverage
 coverage:
   stage: coverage
-  image: ocaml/opam:debian-ocaml-4.10
+  image: ocaml/opam:debian-ocaml-4.12
   rules:
     - when: always
   before_script:
@@ -83,7 +83,7 @@ coverage:
 
 pages:
   stage: deploy
-  image: ocaml/opam:debian-ocaml-4.09
+  image: ocaml/opam:debian-ocaml-4.12
   script:
     - cp -r _odoc public/
   artifacts:

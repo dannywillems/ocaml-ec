@@ -21,8 +21,11 @@ let test_perm_is_consistent () =
   Poseidon.Strategy.apply_perm state_y ;
   Poseidon.Strategy.apply_perm state_z ;
 
-  assert (Poseidon.Strategy.(get state_x = get state_y)) ;
-  assert (Poseidon.Strategy.(get state_x <> get state_z))
+  let res_x = Poseidon.Strategy.get state_x in
+  let res_y = Poseidon.Strategy.get state_y in
+  let res_z = Poseidon.Strategy.get state_z in
+  assert (Array.for_all2 Scalar.eq res_x res_y) ;
+  assert (not @@ Array.for_all2 Scalar.eq res_x res_z)
 
 let test_vectors_hades252 () =
   let vectors =
@@ -51,7 +54,7 @@ let test_vectors_hades252 () =
           (fun s -> Scalar.of_bytes_exn (Hex.to_bytes (`Hex s)))
           expected_output
       in
-      if res <> expected_output then
+      if not (Array.for_all2 Scalar.eq res expected_output) then
         let res =
           String.concat
             "; "

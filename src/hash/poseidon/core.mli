@@ -57,3 +57,19 @@ module Make : functor (C : PARAMETERS) (Scalar : Ff_sig.PRIME) -> sig
 
   module Hash : HASH with type scalar = Scalar.t
 end
+
+module type FF_WITH_INPLACE = sig
+  include Ff_sig.PRIME
+
+  val copy : t -> t
+
+  val add_inplace : t -> t -> unit
+
+  val mul_inplace : t -> t -> unit
+end
+
+module MakeInplace : functor (C : PARAMETERS) (Scalar : FF_WITH_INPLACE) -> sig
+  module Strategy : STRATEGY with type scalar = Scalar.t
+
+  module Hash : HASH with type scalar = Scalar.t
+end

@@ -14,3 +14,5 @@ module Constant : Core.PARAMETERS = struct
 end
 
 module Make (Scalar : Ff_sig.PRIME) = Core.Make (Constant) (Scalar)
+module MakeInplace (Scalar : Core.FF_WITH_INPLACE) =
+  Core.MakeInplace (Constant) (Scalar)

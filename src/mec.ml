@@ -24,6 +24,7 @@ module CurveSig = Ec_sig
 module Hash = struct
   module Poseidon252 = Poseidon252
   module Poseidon128 = Orchard
+  module Neptunus = Neptunus
   module PedersenHash = Pedersen_hash
   module Sinsemilla = Sinsemilla
 end

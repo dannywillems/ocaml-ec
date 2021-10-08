@@ -22,8 +22,11 @@ let test_perm_is_consistent () =
   Poseidon.Strategy.apply_perm state_y ;
   Poseidon.Strategy.apply_perm state_z ;
 
-  assert (Poseidon.Strategy.(get state_x = get state_y)) ;
-  assert (Poseidon.Strategy.(get state_x <> get state_z))
+  let res_x = Poseidon.Strategy.get state_x in
+  let res_y = Poseidon.Strategy.get state_y in
+  let res_z = Poseidon.Strategy.get state_z in
+  assert (Array.for_all2 Scalar.eq res_x res_y) ;
+  assert (not @@ Array.for_all2 Scalar.eq res_x res_z)
 
 let test_vectors_hades_orchard () =
   let vectors =

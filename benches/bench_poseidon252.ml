@@ -11,7 +11,7 @@ end)
 module Poseidon = Poseidon252.Make (Scalar)
 
 let t1 =
-  let n = 5 in
+  let n = 3 in
   let inputs = Array.init n ~f:(fun _i -> Scalar.random ()) in
   let name =
     Printf.sprintf

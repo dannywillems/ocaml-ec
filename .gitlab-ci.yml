@@ -33,18 +33,6 @@ lint:
   rules:
     - when: always
 
-build-ocaml-4.08:
-  <<: *build_definition
-  image: ocaml/opam:debian-ocaml-4.08
-
-build-ocaml-4.09:
-  <<: *build_definition
-  image: ocaml/opam:debian-ocaml-4.09
-
-build-ocaml-4.10:
-  <<: *build_definition
-  image: ocaml/opam:debian-ocaml-4.10
-
 build-ocaml-4.11:
   <<: *build_definition
   image: ocaml/opam:debian-ocaml-4.11

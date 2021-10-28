@@ -366,6 +366,50 @@ struct
   let get_y_coordinate t =
     match t with Infinity -> raise (Invalid_argument "Zero") | P (_x, y) -> y
 
+  (* To have functions to Montgomery, we need to be able to compute alpha which is a root of the equation: z^3 + a*z + b = 0 which requires the cubic root operation in F_q.
+
+     let alpha =
+       let two = Fq.of_string "2" in
+       let four = Fq.of_string "4" in
+       let twenty_seven = Fq.of_string "27" in
+       let a_cube = Fq.(mul a (square a)) in
+       let b_square = Fq.square b in
+       let delta = Fq.( b_square + negate ( (4 * a_cube ) / twenty_seven) ) in
+       let sqrt_delta = Fq.sqrt_opt delta in
+       if Option.is_none sqr_delta then assert (1=0);
+       let sqrt_delta = Option.get sqr_delta in
+       let u = Fq.(negate ((sqrt_delta + b) / two) ) in
+       let v = Fq.( (sqrt_delta + negate b) / two) in
+       let u_cbrt = Fq.cbrt_opt u in
+       let v_cbrt = Fq.cbrt_opt v in
+       if Option.(is_none u_cbrt || is_none v_cbrt) then assert (1=0);
+       Fq.(u_cbrt + v_cbrt)
+
+     let s =
+       let three = Fq.of_string "3" in
+       let aux = Fq.(three * (square alpha) + a)
+       let sqrt_aux = Fq.sqrt_opt aux in
+       if Option.is_none sqrt_aux then assert (1=0);
+       Fq.( 1 / (Option.get sqrt_aux) )
+
+     (* https://en.wikipedia.org/wiki/Montgomery_curve *)
+     let to_montgomery t =
+       match t with
+         | Infinity -> raise (Invalid_argument "Zero")
+         | P (x, y) ->
+           Some (Fq.(s * (x - alpha)), Fq.(s*y))
+
+     let to_montgomery_curve_parameters () =
+       let three = Fr.of_string "3" in
+       let cond = Fq.(three * (square alpha) * a) in
+       if not (Fq.is_quadratic_residue cond) then None
+       else
+         let gen = Option.get (to_montgomery one) in
+         let a = Fq.( three * alpha * s) in
+         let b = s in
+         Some (a, b, Params.cofactor, gen)
+  *)
+
   let from_coordinates_exn ~x ~y =
     if is_on_curve x y then P (x, y)
     else

@@ -75,6 +75,10 @@ module type AffineWeierstrassT = sig
 
   val get_y_coordinate : t -> Base.t
 
+  (* val to_montgomery_curve_parameters : unit -> (Base.t * Base.t * Z.t * (Base.t * Base.t)) option
+
+     val to_montgomery : t -> (Base.t * Base.t) option *)
+
   (** Build a point from the affine coordinates. If the point is not on the curve
       and in the subgroup, returns [None]
   *)

@@ -1220,3 +1220,51 @@ let from_projective_to_affine (type affine projective base scalar)
     let x' = Projective.Base.(x / z) in
     let y' = Projective.Base.(y / z) in
     Affine.from_coordinates_exn ~x:x' ~y:y'
+
+let from_montgomery_to_weierstrass (type affine_mt affine_wt base scalar)
+    (module Affine_mt : Ec_sig.AffineMontgomeryT
+      with type t = affine_mt
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Affine_wt : Ec_sig.AffineWeierstrassT
+      with type t = affine_wt
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_mt : affine_mt) : affine_wt option =
+  let coords_opt = Affine_mt.to_weierstrass p_mt in
+  Option.bind coords_opt (fun (x, y) -> Affine_wt.from_coordinates_opt ~x ~y)
+
+(* let from_weierstrass_montgomery (type affine_wt affine_mt base scalar)
+    (module Affine_wt : Ec_sig.AffineWeierstrassT
+      with type t = affine_wt
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Affine_mt : Ec_sig.AffineMontgomeryT
+      with type t = affine_mt
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_wt : affine_wt) : affine_mt option =
+       let coords_opt = Affine_wt.to_montgomery p_wt in
+       Option.bind coords_opt (fun (x, y) -> Affine_mt.from_coordinates_opt ~x ~y) *)
+
+let from_montgomery_to_twisted (type affine_mt affine_tw base scalar)
+    (module Affine_mt : Ec_sig.AffineMontgomeryT
+      with type t = affine_mt
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Affine_tw : Ec_sig.AffineEdwardsT
+      with type t = affine_tw
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_mt : affine_mt) : affine_tw option =
+  let coords_opt = Affine_mt.to_twisted p_mt in
+  Option.bind coords_opt (fun (u, v) -> Affine_tw.from_coordinates_opt ~u ~v)
+
+let from_twisted_to_montgomery (type affine_tw affine_mt base scalar)
+    (module Affine_tw : Ec_sig.AffineEdwardsT
+      with type t = affine_tw
+       and type Base.t = base
+       and type Scalar.t = scalar)
+    (module Affine_mt : Ec_sig.AffineMontgomeryT
+      with type t = affine_mt
+       and type Base.t = base
+       and type Scalar.t = scalar) (p_tw : affine_tw) : affine_mt option =
+  let coords_opt = Affine_tw.to_montgomery p_tw in
+  Option.bind coords_opt (fun (x, y) -> Affine_mt.from_coordinates_opt ~x ~y)

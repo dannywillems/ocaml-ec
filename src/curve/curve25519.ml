@@ -63,11 +63,15 @@ module Affine =
 module AffineMontgomery =
   Ec.MakeAffineMontgomery (Base) (Scalar)
     (struct
-      (* https://www.rfc-editor.org/rfc/rfc7748#section-4.1 *)
+      (* Parameters generated with function to_montgomery_curve_parameters ().
+         The RFC (https://www.rfc-editor.org/rfc/rfc7748#section-4.1) uses a different mapping,
+         the Montgomery v coordinate being multiplied by sqrt(-486664), to get "Edwards25519" *)
 
       let a = Base.of_string "486662"
 
-      let b = Base.of_string "1"
+      let b =
+        Base.of_string
+          "57896044618658097711785492504343953926634992332820282019728792003956564333285"
 
       let cofactor = Z.of_string "8"
 
@@ -78,6 +82,12 @@ module AffineMontgomery =
             Base.(
               to_bytes
                 (of_string
-                   "14781619447589544791020593568409986887264606134616475288964881837755586237401"))
+                   "46155036877857898950720737868668298259344786430663990124372813544693780678454"))
           ]
     end)
+
+let from_twisted_to_montgomery p =
+  Ec.from_twisted_to_montgomery (module Affine) (module AffineMontgomery) p
+
+let from_montgomery_to_twisted p =
+  Ec.from_montgomery_to_twisted (module AffineMontgomery) (module Affine) p

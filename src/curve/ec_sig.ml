@@ -79,6 +79,8 @@ module type AffineWeierstrassT = sig
 
      val to_montgomery : t -> (Base.t * Base.t) option *)
 
+  val is_in_prime_subgroup : t -> bool
+
   (** Build a point from the affine coordinates. If the point is not on the curve
       and in the subgroup, returns [None]
   *)
@@ -188,6 +190,8 @@ module type AffineMontgomeryT = sig
     unit -> (Base.t * Base.t * Z.t * (Base.t * Base.t)) option
 
   val to_weierstrass : t -> (Base.t * Base.t) option
+
+  val is_in_prime_subgroup : t -> bool
 
   (** Build a point from the affine coordinates. If the point is not on the curve
       and in the subgroup, returns [None]

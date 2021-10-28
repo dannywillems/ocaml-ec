@@ -348,6 +348,8 @@ struct
     in
     aux x (Scalar.to_z n)
 
+  let is_in_prime_subgroup p = not (is_zero (mul p (Scalar.of_z cofactor)))
+
   let random ?state () =
     (match state with None -> () | Some s -> Random.set_state s) ;
     let rec aux () =
@@ -455,8 +457,7 @@ struct
           match y with
           | Some y ->
               let p = P (x, y) in
-              if is_zero (mul p (Scalar.of_z (Z.pred cofactor))) then Some p
-              else None
+              if is_in_prime_subgroup p then Some p else None
           | None -> None )
 
   let of_compressed_bytes_exn b =
@@ -835,6 +836,8 @@ struct
     in
     aux x (Scalar.to_z n)
 
+  let is_in_prime_subgroup p = not (is_zero (mul p (Scalar.of_z cofactor)))
+
   let random ?state () =
     (match state with None -> () | Some s -> Random.set_state s) ;
     let rec aux () =
@@ -941,8 +944,7 @@ struct
           match y with
           | Some y ->
               let p = P (x, y) in
-              if is_zero (mul p (Scalar.of_z (Z.pred cofactor))) then Some p
-              else None
+              if is_in_prime_subgroup p then Some p else None
           | None -> None )
 
   let of_compressed_bytes_exn b =

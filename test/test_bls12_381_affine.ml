@@ -12,5 +12,5 @@ let () =
     "BLS12-381 G1 affine form"
     [ G1ValueGeneration.get_tests ();
       G1Equality.get_tests ();
-      G1ECProperties.get_tests ()
-      (* G1Representation.get_tests (); *) ]
+      G1ECProperties.get_tests ();
+      G1Representation.get_tests () ]

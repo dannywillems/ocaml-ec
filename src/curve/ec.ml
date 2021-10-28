@@ -1039,6 +1039,33 @@ struct
 
   let get_v_coordinate p = p.v
 
+  (* https://en.wikipedia.org/wiki/Montgomery_curve *)
+  let to_montgomery p =
+    match (p.u, p.v) with
+    | (u, v) when Base.(is_zero u && is_one v) ->
+        raise (Invalid_argument "Zero")
+    | (u, v) ->
+        assert (not Base.(eq a d)) ;
+        if Base.is_zero u || Base.(is_zero (one + v)) then None
+        else
+          let one_plus_v = Base.(one + v) in
+          let one_minus_v = Base.(one + negate v) in
+          let x = Base.(one_plus_v / one_minus_v) in
+          let y = Base.(x / u) in
+          Some (x, y)
+
+  let to_montgomery_curve_parameters () =
+    let gen = to_montgomery one in
+    if Option.is_none gen then None
+    else
+      let gen = Option.get gen in
+      let two = Base.of_string "2" in
+      let four = Base.of_string "4" in
+      let a_min_d = Base.(a + negate d) in
+      let b = Base.(four / a_min_d) in
+      let a = Base.(two * (a + d) / a_min_d) in
+      Some (a, b, Params.cofactor, gen)
+
   let from_coordinates_opt ~u ~v =
     let p = { u; v } in
     if is_on_curve u v then Some p else None

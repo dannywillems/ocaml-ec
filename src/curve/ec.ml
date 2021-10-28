@@ -808,6 +808,23 @@ struct
   let get_y_coordinate t =
     match t with Infinity -> raise (Invalid_argument "Zero") | P (_x, y) -> y
 
+  (* https://en.wikipedia.org/wiki/Montgomery_curve *)
+  let to_twisted t =
+    match t with
+    | Infinity -> raise (Invalid_argument "Zero")
+    | P (x, y) ->
+        if Fq.is_zero y || Fq.(is_zero (one + x)) then None
+        else Some Fq.(x / y, (x + negate one) / (x + one))
+
+  let to_twisted_curve_parameters () =
+    let gen = to_twisted one in
+    if Option.is_none gen then None
+    else
+      let two = Fq.of_string "2" in
+      let a = Fq.((Params.a + two) / Params.b) in
+      let d = Fq.((Params.a + negate two) / Params.b) in
+      Some (a, d, Params.cofactor, Option.get gen)
+
   let from_coordinates_exn ~x ~y =
     if is_on_curve x y then P (x, y)
     else

@@ -677,6 +677,8 @@ struct
 
   let two_b = Fq.mul two b
 
+  let three_b = Fq.mul three b
+
   let cofactor = Params.cofactor
 
   type t = Infinity | P of (Fq.t * Fq.t)
@@ -820,9 +822,33 @@ struct
     let gen = to_twisted one in
     if Option.is_none gen then None
     else
-      let two = Fq.of_string "2" in
       let a = Fq.((Params.a + two) / Params.b) in
       let d = Fq.((Params.a + negate two) / Params.b) in
+      Some (a, d, Params.cofactor, Option.get gen)
+
+  (* https://en.wikipedia.org/wiki/Montgomery_curve *)
+  let to_weierstrass t =
+    match t with
+    | Infinity -> raise (Invalid_argument "Zero")
+    | P (x, y) ->
+        let x = Fq.((x / b) + (a / three_b)) in
+        let y = Fq.(y / b) in
+        Some (x, y)
+
+  let to_weierstrass_curve_parameters () =
+    let gen = to_weierstrass one in
+    if Option.is_none gen then None
+    else
+      let nine = Fq.of_string "9" in
+      let twenty_seven = Fq.of_string "27" in
+      let a_square = Fq.square Params.a in
+      let a_cube = Fq.mul a a_square in
+      let b_square = Fq.square Params.b in
+      let b_cube = Fq.mul b b_square in
+      let d =
+        Fq.(((two * a_cube) + (negate nine * a)) / (twenty_seven * b_cube))
+      in
+      let a = Fq.((three + negate a_square) / (three * b_square)) in
       Some (a, d, Params.cofactor, Option.get gen)
 
   let from_coordinates_exn ~x ~y =

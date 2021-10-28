@@ -121,3 +121,30 @@ end = struct
     Bytes.set v_bytes (Base.size_in_bytes - 1) (char_of_int v_last_byte_with_u) ;
     v_bytes
 end
+
+module AffineWeierstrass =
+  Ec.MakeAffineWeierstrass (Base) (Scalar)
+    (struct
+      let a =
+        Base.of_string
+          "52296097456646850916096512823759002727550416093741407922227928430486925478210"
+
+      let b =
+        Base.of_string
+          "48351165704696163914533707656614864561753505123260775585269522553028192119009"
+
+      let cofactor = Z.of_int 8
+
+      let bytes_generator =
+        Bytes.concat
+          Bytes.empty
+          [ Base.(
+              to_bytes
+                (of_string
+                   "33835869156188682335217394949746694649676633840125476177319971163079011318731"));
+            Base.(
+              to_bytes
+                (of_string
+                   "43777270878440091394432848052353307184915192688165709016756678962558652055320"))
+          ]
+    end)

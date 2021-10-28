@@ -7,3 +7,5 @@ module Affine : sig
 
   val to_compressed : t -> Bytes.t
 end
+
+module AffineWeierstrass : Ec_sig.AffineWeierstrassT

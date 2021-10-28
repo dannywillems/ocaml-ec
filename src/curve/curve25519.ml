@@ -55,4 +55,29 @@ module Affine =
                 (of_string
                    "15112221349535400772501151409588531511454012693041857206046113283949847762202"));
             Base.(to_bytes (of_string "4" / of_string "5")) ]
+
+      (* 4/5 = 463168356949264781694283940034751631413079938662562256157830336
+         03165251855960 *)
+    end)
+
+module AffineMontgomery =
+  Ec.MakeAffineMontgomery (Base) (Scalar)
+    (struct
+      (* https://www.rfc-editor.org/rfc/rfc7748#section-4.1 *)
+
+      let a = Base.of_string "486662"
+
+      let b = Base.of_string "1"
+
+      let cofactor = Z.of_string "8"
+
+      let bytes_generator =
+        Bytes.concat
+          Bytes.empty
+          [ Base.(to_bytes (of_string "9"));
+            Base.(
+              to_bytes
+                (of_string
+                   "14781619447589544791020593568409986887264606134616475288964881837755586237401"))
+          ]
     end)

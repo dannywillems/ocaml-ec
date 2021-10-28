@@ -637,6 +637,253 @@ struct
   let from_affine_coordinates_opt ~x ~y = from_coordinates_exn ~x ~y ~z:Fq.one
 end
 
+module MakeAffineMontgomery
+    (Fq : Ff_sig.PRIME)
+    (Fp : Ff_sig.PRIME) (Params : sig
+      val a : Fq.t
+
+      val b : Fq.t
+
+      val cofactor : Z.t
+
+      val bytes_generator : Bytes.t
+    end) :
+  Ec_sig.AffineMontgomeryT with type Scalar.t = Fp.t and type Base.t = Fq.t =
+struct
+  (* Costello, Craig, and Benjamin Smith. "Montgomery curves and their arithmetic."
+     Journal of Cryptographic Engineering 8.3 (2018): 227-240. (https://arxiv.org/pdf/1703.01863.pdf) *)
+
+  (* Checking non-singularity:
+     - if b=0 then the Curve is a union of 3 lines;
+       if a^2=4 then the curve is a nodal cubic. *)
+  let () = assert (not Fq.(eq (square Params.a) (Fq.of_string "4")))
+
+  let () = assert (not (Fq.is_zero Params.b))
+
+  exception Not_on_curve of Bytes.t
+
+  module Base = Fq
+  module Scalar = Fp
+
+  let two = Fq.(one + one)
+
+  let three = Fq.(one + two)
+
+  let a = Params.a
+
+  let two_a = Fq.mul two a
+
+  let b = Params.b
+
+  let two_b = Fq.mul two b
+
+  let cofactor = Params.cofactor
+
+  type t = Infinity | P of (Fq.t * Fq.t)
+
+  let size_in_bytes = Fq.size_in_bytes * 2
+
+  let zero = Infinity
+
+  let buffer_zero = Bytes.make size_in_bytes '\000'
+
+  let is_zero t = match t with Infinity -> true | _ -> false
+
+  let is_on_curve x y =
+    let xx = Fq.mul x x in
+    Fq.((x * xx) + (a * xx) + x = b * y * y)
+
+  let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    if Bytes.length bytes <> size_in_bytes then None
+    else
+      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
+      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
+      if Bytes.equal buffer_zero bytes then Some Infinity
+      else
+        let x = Fq.of_bytes_opt x_bytes in
+        let y = Fq.of_bytes_opt y_bytes in
+        match (x, y) with
+        | (None, _) | (_, None) -> None
+        (* Verify it is on the curve *)
+        | (Some x, Some y) -> if is_on_curve x y then Some (P (x, y)) else None
+
+  let check_bytes bytes =
+    match of_bytes_opt bytes with Some _ -> true | None -> false
+
+  let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+
+  let to_bytes g =
+    let buffer = Bytes.make size_in_bytes '\000' in
+    match g with
+    | Infinity -> buffer
+    | P (x, y) ->
+        Bytes.blit (Fq.to_bytes x) 0 buffer 0 Fq.size_in_bytes ;
+        Bytes.blit (Fq.to_bytes y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
+        buffer
+
+  let one = of_bytes_exn Params.bytes_generator
+
+  let eq t1 t2 =
+    match (t1, t2) with
+    | (Infinity, Infinity) -> true
+    | (Infinity, _) | (_, Infinity) -> false
+    | (P (x1, y1), P (x2, y2)) -> Fq.(x1 = x2 && y1 = y2)
+
+  (* The operation for adding two points are the same whether we add the same or distinct points
+     except for the calculus of the slope. (https://arxiv.org/pdf/1703.01863.pdf)
+     Let P(x_p, y_p) + P(x_q, y_q) = P(x_r, y_r), then
+       x_r = Params.b * slope^2 - (x_p + x_q) - Params.a
+       y_r = (2 * x_p + x_ q + Params.a) * slope - Params.b * slope^3 - y_p
+           = slope * (x_p - x_q) - y_p
+  *)
+
+  let double t =
+    match t with
+    | Infinity -> Infinity
+    | P (x, y) ->
+        let xx = Fq.(square x) in
+        (* slope = (3 * x^2 + 2 * Params.a * x + 1) / (2 * Params.b * y) *)
+        let l = Fq.(((three * xx) + (two_a * x) + Fq.one) / (two_b * y)) in
+        let ll = Fq.square l in
+        let lll = Fq.mul ll l in
+        let two_x = Fq.add x x in
+        let x3 = Fq.((b * ll) + negate (a + two_x)) in
+        let y3 = Fq.(((two_x + x + a) * l) + negate ((b * lll) + y)) in
+        P (x3, y3)
+
+  let add t1 t2 =
+    match (t1, t2) with
+    | (Infinity, t2) -> t2
+    | (t1, Infinity) -> t1
+    | (t1, t2) when eq t1 t2 -> double t1
+    | (P (x1, y1), P (x2, y2)) ->
+        if Fq.(x1 = x2 && y1 = negate y2) then Infinity
+        else
+          (* slope = (y2 - y1) / (x2 - x1) *)
+          let y2_min_y1 = Fq.(y2 + negate y1) in
+          let x2_min_x1 = Fq.(x2 + negate x1) in
+          let l = Fq.(y2_min_y1 / x2_min_x1) in
+          let ll = Fq.(square l) in
+          let lll = Fq.(mul ll l) in
+          let x2_plus_x1 = Fq.(x1 + x2) in
+          let x3 = Fq.((b * ll) + negate (x2_plus_x1 + a)) in
+          let y3 = Fq.(((x2_plus_x1 + x1 + a) * l) + negate ((b * lll) + y1)) in
+          P (x3, y3)
+
+  let negate p =
+    match p with Infinity -> Infinity | P (x, y) -> P (x, Fq.negate y)
+
+  let mul x n =
+    let rec aux x n =
+      let two_z = Z.succ Z.one in
+      if Z.equal n Z.zero then zero
+      else if Z.equal n Z.one then x
+      else
+        let (a, r) = Z.ediv_rem n two_z in
+        if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
+    in
+    aux x (Scalar.to_z n)
+
+  let random ?state () =
+    (match state with None -> () | Some s -> Random.set_state s) ;
+    let rec aux () =
+      let x = Fq.random () in
+      let xx = Fq.mul x x in
+      let y_square = Fq.(((x * xx) + (a * xx) + x) / b) in
+      let y_opt = Fq.sqrt_opt y_square in
+      match y_opt with
+      | None -> aux ()
+      | Some y -> mul (P (x, y)) (Scalar.of_z Params.cofactor)
+    in
+    aux ()
+
+  let get_x_coordinate t =
+    match t with Infinity -> raise (Invalid_argument "Zero") | P (x, _y) -> x
+
+  let get_y_coordinate t =
+    match t with Infinity -> raise (Invalid_argument "Zero") | P (_x, y) -> y
+
+  let from_coordinates_exn ~x ~y =
+    if is_on_curve x y then P (x, y)
+    else
+      raise
+        (Not_on_curve (Bytes.concat Bytes.empty [Fq.to_bytes x; Fq.to_bytes y]))
+
+  let from_coordinates_opt ~x ~y =
+    if is_on_curve x y then Some (P (x, y)) else None
+
+  let of_compressed_bytes_opt bs =
+    (* required to avoid side effect! *)
+    let bs = Bytes.copy bs in
+    let length = Bytes.length bs in
+    if length <> Base.size_in_bytes then None
+    else if bs = Bytes.make Base.size_in_bytes '\000' then Some Infinity
+    else
+      (* We get the last bit of the input, representing the bit of u. We also
+         remove the last bit from the bytes we received
+      *)
+      let last_byte = int_of_char @@ Bytes.get bs (length - 1) in
+      let sign = last_byte lsr 7 in
+      let last_byte_without_sign = last_byte land 0b01111111 in
+      Bytes.set bs (length - 1) (char_of_int last_byte_without_sign) ;
+      (* We compute u *)
+      let x = Base.of_bytes_opt bs in
+      match x with
+      | None -> None
+      | Some x -> (
+          let xx = Base.mul x x in
+          let yy = Base.(((x * xx) + (a * xx) + x) / b) in
+          let y_opt = Base.sqrt_opt yy in
+          let y =
+            match y_opt with
+            | None -> None
+            | Some y ->
+                (* computed before for constant time *)
+                let negated_y = Base.negate y in
+                let y_first_byte = Bytes.get (Base.to_bytes y) 0 in
+                let is_sign_flipped =
+                  int_of_char y_first_byte lxor sign land 1
+                in
+                Some (if is_sign_flipped = 0 then y else negated_y)
+          in
+          match y with
+          | Some y ->
+              let p = P (x, y) in
+              if is_zero (mul p (Scalar.of_z (Z.pred cofactor))) then Some p
+              else None
+          | None -> None )
+
+  let of_compressed_bytes_exn b =
+    match of_compressed_bytes_opt b with
+    | None -> raise (Not_on_curve b)
+    | Some p -> p
+
+  let to_compressed_bytes p =
+    match p with
+    | Infinity -> Bytes.make Base.size_in_bytes '\000'
+    | P (x, y) ->
+        let x_bytes = Base.to_bytes x in
+        let y_bytes = Base.to_bytes y in
+        let y_first_byte = int_of_char (Bytes.get y_bytes 0) in
+        let x_last_byte =
+          int_of_char (Bytes.get x_bytes (Base.size_in_bytes - 1))
+        in
+        (* Get the first bit of y, i.e. the sign of y *)
+        let sign_of_y = y_first_byte land 0b00000001 in
+        (* Set the last bit of the last byte of x to the sign of y *)
+        let x_last_byte_with_y = x_last_byte lor (sign_of_y lsl 7) in
+        Bytes.set
+          x_bytes
+          (Base.size_in_bytes - 1)
+          (char_of_int x_last_byte_with_y) ;
+        x_bytes
+end
+
 module MakeAffineEdwards
     (Base : Ff_sig.PRIME)
     (Scalar : Ff_sig.PRIME) (Params : sig

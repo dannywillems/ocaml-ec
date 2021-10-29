@@ -1,7 +1,9 @@
 (copy_files res/test_vector_pedersen_hash.ml)
 
 (tests
- (names test_babyjubjub test_babyjubjub_reduced test_bls12_381_affine
+ (names test_babyjubjub test_babyjubjub_reduced test_bandersnatch_all
+   test_bandersnatch_edwards test_bandersnatch_montgomery
+   test_bandersnatch_weierstrass test_bls12_381_affine
    test_bls12_381_projective test_bn254_affine test_bn254_jacobian
    test_bn254_projective test_curve25519_affine_edwards
    test_curve25519_conversions_between_forms test_curve25519_montgomery

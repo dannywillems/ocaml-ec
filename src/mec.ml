@@ -1,6 +1,7 @@
 module Curve = struct
   module BabyJubjub = Babyjubjub
   module BabyJubjubReduced = Babyjubjub_reduced
+  module Bandersnatch = Bandersnatch
   module BN254 = Bn254
   module BLS12_381 = Bls12_381
   module Curve25519 = Curve25519

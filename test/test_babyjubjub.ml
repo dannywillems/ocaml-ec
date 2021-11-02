@@ -78,9 +78,6 @@ let test_mul_scalar () =
       assert (Mec.Curve.BabyJubjub.Affine.(eq (mul p1 n) p2)))
     vectors
 
-let test_random_is_not_small_order () =
-  assert (not Mec.Curve.BabyJubjub.Affine.(is_small_order (random ())))
-
 let test_random_points_not_on_curve () =
   (* pick random values u and v and test constructors fail *)
   let u = Mec.Curve.BabyJubjub.Affine.Base.random () in
@@ -121,10 +118,6 @@ let () =
     [ ( "Vectors",
         [ Alcotest.test_case "test vectors addition" `Quick test_addition;
           Alcotest.test_case "test scalar multiplication" `Quick test_mul_scalar;
-          Alcotest.test_case
-            "test random elements are in the prime subgroup"
-            `Quick
-            (Mec.Curve.Utils.PBT.repeat 100 test_random_is_not_small_order);
           Alcotest.test_case
             "test random coordinates u, v do not give a point on the curve"
             `Quick

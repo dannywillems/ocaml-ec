@@ -75,64 +75,6 @@ struct
 
   let is_zero t = Fq.(t.x = zero) && Fq.(t.z = zero)
 
-  let is_on_curve x y z =
-    if Fq.is_zero x && Fq.is_zero z then true
-    else if Fq.is_zero z then false
-    else
-      let z2 = Fq.(square z) in
-      let z3 = Fq.(z * z2) in
-      let x' = Fq.(x / z2) in
-      let y' = Fq.(y / z3) in
-      Fq.((x' * x' * x') + (a * x') + b = y' * y')
-
-  let of_bytes_opt bytes =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    if Bytes.length bytes <> size_in_bytes then None
-    else
-      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
-      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
-      let z_bytes = Bytes.sub bytes (2 * Fq.size_in_bytes) Fq.size_in_bytes in
-      let x = Fq.of_bytes_opt x_bytes in
-      let y = Fq.of_bytes_opt y_bytes in
-      let z = Fq.of_bytes_opt z_bytes in
-      match (x, y, z) with
-      | (None, _, _) | (_, None, _) | (_, _, None) -> None
-      (* Verify it is on the curve *)
-      | (Some x, Some y, Some z) ->
-          if Fq.is_zero x && Fq.is_zero z then Some zero
-          else if Fq.is_zero z then None
-          else
-            let z2 = Fq.(square z) in
-            let z3 = Fq.(z2 * z) in
-            let x' = Fq.(x / z2) in
-            let y' = Fq.(y / z3) in
-            if Fq.((x' * x' * x') + (a * x') + b = y' * y') then
-              Some { x; y; z }
-            else None
-
-  let check_bytes bytes =
-    match of_bytes_opt bytes with Some _ -> true | None -> false
-
-  let of_bytes_exn b =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
-
-  let to_bytes g =
-    let buffer = Bytes.make size_in_bytes '\000' in
-    Bytes.blit (Fq.to_bytes g.x) 0 buffer 0 Fq.size_in_bytes ;
-    Bytes.blit (Fq.to_bytes g.y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
-    Bytes.blit
-      (Fq.to_bytes g.z)
-      0
-      buffer
-      (2 * Fq.size_in_bytes)
-      Fq.size_in_bytes ;
-    buffer
-
-  let one = of_bytes_exn Params.bytes_generator
-
   let eq t1 t2 =
     if Fq.(is_zero t1.z) && Fq.(is_zero t2.z) then true
     else if Fq.is_zero t1.z || Fq.is_zero t2.z then false
@@ -203,6 +145,63 @@ struct
     in
     aux x (Scalar.to_z n)
 
+  let is_on_curve ~x ~y ~z =
+    if Fq.is_zero x && Fq.is_zero z then true
+    else if Fq.is_zero z then false
+    else
+      let z2 = Fq.(square z) in
+      let z3 = Fq.(z * z2) in
+      let x' = Fq.(x / z2) in
+      let y' = Fq.(y / z3) in
+      Fq.((x' * x' * x') + (a * x') + b = y' * y')
+
+  let is_in_prime_subgroup ~x ~y ~z =
+    let p = { x; y; z } in
+    if is_zero p then true else not (is_zero (mul p (Scalar.of_z cofactor)))
+
+  let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    if Bytes.length bytes <> size_in_bytes then None
+    else
+      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
+      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
+      let z_bytes = Bytes.sub bytes (2 * Fq.size_in_bytes) Fq.size_in_bytes in
+      let x = Fq.of_bytes_opt x_bytes in
+      let y = Fq.of_bytes_opt y_bytes in
+      let z = Fq.of_bytes_opt z_bytes in
+      match (x, y, z) with
+      | (None, _, _) | (_, None, _) | (_, _, None) -> None
+      (* Verify it is on the curve *)
+      | (Some x, Some y, Some z) ->
+          if Fq.is_zero x && Fq.is_zero z then Some zero
+          else if Fq.is_zero z then None
+          else if is_on_curve ~x ~y ~z && is_in_prime_subgroup ~x ~y ~z then
+            Some { x; y; z }
+          else None
+
+  let check_bytes bytes =
+    match of_bytes_opt bytes with Some _ -> true | None -> false
+
+  let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+
+  let to_bytes g =
+    let buffer = Bytes.make size_in_bytes '\000' in
+    Bytes.blit (Fq.to_bytes g.x) 0 buffer 0 Fq.size_in_bytes ;
+    Bytes.blit (Fq.to_bytes g.y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
+    Bytes.blit
+      (Fq.to_bytes g.z)
+      0
+      buffer
+      (2 * Fq.size_in_bytes)
+      Fq.size_in_bytes ;
+    buffer
+
+  let one = of_bytes_exn Params.bytes_generator
+
   let random ?state () =
     (match state with None -> () | Some s -> Random.set_state s) ;
     let rec aux () =
@@ -222,7 +221,7 @@ struct
   let get_z_coordinate t = t.z
 
   let from_coordinates_exn ~x ~y ~z =
-    if is_on_curve x y z then { x; y; z }
+    if is_on_curve ~x ~y ~z then { x; y; z }
     else
       raise
         (Not_on_curve
@@ -231,7 +230,7 @@ struct
               [Fq.to_bytes x; Fq.to_bytes y; Fq.to_bytes z]))
 
   let from_coordinates_opt ~x ~y ~z =
-    if is_on_curve x y z then Some { x; y; z } else None
+    if is_on_curve ~x ~y ~z then Some { x; y; z } else None
 
   let get_affine_x_coordinate t =
     if is_zero t then failwith "Zero"
@@ -286,33 +285,7 @@ struct
 
   let is_zero t = match t with Infinity -> true | _ -> false
 
-  let is_on_curve x y = Fq.((x * x * x) + (a * x) + b = y * y)
-
-  let of_bytes_opt bytes =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    if Bytes.length bytes <> size_in_bytes then None
-    else
-      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
-      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
-      if Bytes.equal buffer_zero bytes then Some Infinity
-      else
-        let x = Fq.of_bytes_opt x_bytes in
-        let y = Fq.of_bytes_opt y_bytes in
-        match (x, y) with
-        | (None, _) | (_, None) -> None
-        (* Verify it is on the curve *)
-        | (Some x, Some y) ->
-            if Fq.((x * x * x) + (a * x) + b = y * y) then Some (P (x, y))
-            else None
-
-  let check_bytes bytes =
-    match of_bytes_opt bytes with Some _ -> true | None -> false
-
-  let of_bytes_exn b =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+  let is_on_curve ~x ~y = Fq.((x * x * x) + (a * x) + b = y * y)
 
   let to_bytes g =
     let buffer = Bytes.make size_in_bytes '\000' in
@@ -322,8 +295,6 @@ struct
         Bytes.blit (Fq.to_bytes x) 0 buffer 0 Fq.size_in_bytes ;
         Bytes.blit (Fq.to_bytes y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
         buffer
-
-  let one = of_bytes_exn Params.bytes_generator
 
   let eq t1 t2 =
     match (t1, t2) with
@@ -391,7 +362,38 @@ struct
     in
     aux x (Scalar.to_z n)
 
-  let is_in_prime_subgroup p = not (is_zero (mul p (Scalar.of_z cofactor)))
+  let is_in_prime_subgroup ~x ~y =
+    let p = P (x, y) in
+    if is_zero p then true else not (is_zero (mul p (Scalar.of_z cofactor)))
+
+  let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    if Bytes.length bytes <> size_in_bytes then None
+    else
+      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
+      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
+      if Bytes.equal buffer_zero bytes then Some Infinity
+      else
+        let x = Fq.of_bytes_opt x_bytes in
+        let y = Fq.of_bytes_opt y_bytes in
+        match (x, y) with
+        | (None, _) | (_, None) -> None
+        (* Verify it is on the curve *)
+        | (Some x, Some y) ->
+            if is_on_curve ~x ~y && is_in_prime_subgroup ~x ~y then
+              Some (P (x, y))
+            else None
+
+  let check_bytes bytes =
+    match of_bytes_opt bytes with Some _ -> true | None -> false
+
+  let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+
+  let one = of_bytes_exn Params.bytes_generator
 
   let random ?state () =
     (match state with None -> () | Some s -> Random.set_state s) ;
@@ -461,13 +463,13 @@ struct
   *)
 
   let from_coordinates_exn ~x ~y =
-    if is_on_curve x y then P (x, y)
+    if is_on_curve ~x ~y then P (x, y)
     else
       raise
         (Not_on_curve (Bytes.concat Bytes.empty [Fq.to_bytes x; Fq.to_bytes y]))
 
   let from_coordinates_opt ~x ~y =
-    if is_on_curve x y then Some (P (x, y)) else None
+    if is_on_curve ~x ~y then Some (P (x, y)) else None
 
   let of_compressed_bytes_opt bs =
     (* required to avoid side effect! *)
@@ -504,8 +506,7 @@ struct
           in
           match y with
           | Some y ->
-              let p = P (x, y) in
-              if is_in_prime_subgroup p then Some p else None
+              if is_in_prime_subgroup ~x ~y then Some (P (x, y)) else None
           | None -> None )
 
   let of_compressed_bytes_exn b =
@@ -568,59 +569,13 @@ struct
 
   let is_zero t = Fq.(t.x = zero) && Fq.(t.z = zero)
 
-  let is_on_curve x y z =
+  let is_on_curve ~x ~y ~z =
     if Fq.is_zero x && Fq.is_zero z then true
     else if Fq.is_zero z then false
     else
       let x' = Fq.(x / z) in
       let y' = Fq.(y / z) in
       Fq.((x' * x' * x') + (a * x') + b = y' * y')
-
-  let of_bytes_opt bytes =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    if Bytes.length bytes <> size_in_bytes then None
-    else
-      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
-      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
-      let z_bytes = Bytes.sub bytes (2 * Fq.size_in_bytes) Fq.size_in_bytes in
-      let x = Fq.of_bytes_opt x_bytes in
-      let y = Fq.of_bytes_opt y_bytes in
-      let z = Fq.of_bytes_opt z_bytes in
-      match (x, y, z) with
-      | (None, _, _) | (_, None, _) | (_, _, None) -> None
-      (* Verify it is on the curve *)
-      | (Some x, Some y, Some z) ->
-          if Fq.is_zero x && Fq.is_zero z then Some zero
-          else if Fq.is_zero z then None
-          else
-            let x' = Fq.(x / z) in
-            let y' = Fq.(y / z) in
-            if Fq.((x' * x' * x') + (a * x') + b = y' * y') then
-              Some { x; y; z }
-            else None
-
-  let check_bytes bytes =
-    match of_bytes_opt bytes with Some _ -> true | None -> false
-
-  let of_bytes_exn b =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
-
-  let to_bytes g =
-    let buffer = Bytes.make size_in_bytes '\000' in
-    Bytes.blit (Fq.to_bytes g.x) 0 buffer 0 Fq.size_in_bytes ;
-    Bytes.blit (Fq.to_bytes g.y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
-    Bytes.blit
-      (Fq.to_bytes g.z)
-      0
-      buffer
-      (2 * Fq.size_in_bytes)
-      Fq.size_in_bytes ;
-    buffer
-
-  let one = of_bytes_exn Params.bytes_generator
 
   let add t1 t2 =
     (* See https://github.com/o1-labs/snarky/blob/master/snarkette/elliptic_curve.ml *)
@@ -689,6 +644,53 @@ struct
     in
     aux x (Scalar.to_z n)
 
+  let is_in_prime_subgroup ~x ~y ~z =
+    let p = { x; y; z } in
+    if is_zero p then true else not (is_zero (mul p (Scalar.of_z cofactor)))
+
+  let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    if Bytes.length bytes <> size_in_bytes then None
+    else
+      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
+      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
+      let z_bytes = Bytes.sub bytes (2 * Fq.size_in_bytes) Fq.size_in_bytes in
+      let x = Fq.of_bytes_opt x_bytes in
+      let y = Fq.of_bytes_opt y_bytes in
+      let z = Fq.of_bytes_opt z_bytes in
+      match (x, y, z) with
+      | (None, _, _) | (_, None, _) | (_, _, None) -> None
+      (* Verify it is on the curve *)
+      | (Some x, Some y, Some z) ->
+          if Fq.is_zero x && Fq.is_zero z then Some zero
+          else if Fq.is_zero z then None
+          else if is_on_curve ~x ~y ~z && is_in_prime_subgroup ~x ~y ~z then
+            Some { x; y; z }
+          else None
+
+  let check_bytes bytes =
+    match of_bytes_opt bytes with Some _ -> true | None -> false
+
+  let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+
+  let to_bytes g =
+    let buffer = Bytes.make size_in_bytes '\000' in
+    Bytes.blit (Fq.to_bytes g.x) 0 buffer 0 Fq.size_in_bytes ;
+    Bytes.blit (Fq.to_bytes g.y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
+    Bytes.blit
+      (Fq.to_bytes g.z)
+      0
+      buffer
+      (2 * Fq.size_in_bytes)
+      Fq.size_in_bytes ;
+    buffer
+
+  let one = of_bytes_exn Params.bytes_generator
+
   let random ?state () =
     (match state with None -> () | Some s -> Random.set_state s) ;
     let rec aux () =
@@ -708,7 +710,7 @@ struct
   let get_z_coordinate t = t.z
 
   let from_coordinates_exn ~x ~y ~z =
-    if is_on_curve x y z then { x; y; z }
+    if is_on_curve ~x ~y ~z && is_in_prime_subgroup ~x ~y ~z then { x; y; z }
     else
       raise
         (Not_on_curve
@@ -717,7 +719,9 @@ struct
               [Fq.to_bytes x; Fq.to_bytes y; Fq.to_bytes z]))
 
   let from_coordinates_opt ~x ~y ~z =
-    if is_on_curve x y z then Some { x; y; z } else None
+    if is_on_curve ~x ~y ~z && is_in_prime_subgroup ~x ~y ~z then
+      Some { x; y; z }
+    else None
 
   let get_affine_x_coordinate t =
     if is_zero t then failwith "Zero" else Fq.(t.x / t.z)
@@ -791,46 +795,6 @@ struct
   let buffer_zero = Bytes.make size_in_bytes '\000'
 
   let is_zero t = match t with Infinity -> true | _ -> false
-
-  let is_on_curve x y =
-    let xx = Fq.mul x x in
-    let yy = Fq.mul y y in
-    Fq.((x * xx) + (a * xx) + x = b * yy)
-
-  let of_bytes_opt bytes =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    if Bytes.length bytes <> size_in_bytes then None
-    else
-      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
-      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
-      if Bytes.equal buffer_zero bytes then Some Infinity
-      else
-        let x = Fq.of_bytes_opt x_bytes in
-        let y = Fq.of_bytes_opt y_bytes in
-        match (x, y) with
-        | (None, _) | (_, None) -> None
-        (* Verify it is on the curve *)
-        | (Some x, Some y) -> if is_on_curve x y then Some (P (x, y)) else None
-
-  let check_bytes bytes =
-    match of_bytes_opt bytes with Some _ -> true | None -> false
-
-  let of_bytes_exn b =
-    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
-       creates a new buffer *)
-    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
-
-  let to_bytes g =
-    let buffer = Bytes.make size_in_bytes '\000' in
-    match g with
-    | Infinity -> buffer
-    | P (x, y) ->
-        Bytes.blit (Fq.to_bytes x) 0 buffer 0 Fq.size_in_bytes ;
-        Bytes.blit (Fq.to_bytes y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
-        buffer
-
-  let one = of_bytes_exn Params.bytes_generator
 
   let eq t1 t2 =
     match (t1, t2) with
@@ -945,7 +909,56 @@ struct
     in
     aux x (Scalar.to_z n)
 
-  let is_in_prime_subgroup p = not (is_zero (mul p (Scalar.of_z cofactor)))
+  let is_on_curve ~x ~y =
+    let xx = Fq.square x in
+    let yy = Fq.square y in
+    Fq.((x * xx) + (a * xx) + x = b * yy)
+
+  let is_in_prime_subgroup ~x ~y =
+    let p = P (x, y) in
+    if is_zero p then true else not (is_zero (mul p (Scalar.of_z cofactor)))
+
+  let of_bytes_opt bytes =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    if Bytes.length bytes <> size_in_bytes then None
+    else
+      let x_bytes = Bytes.sub bytes 0 Fq.size_in_bytes in
+      let y_bytes = Bytes.sub bytes Fq.size_in_bytes Fq.size_in_bytes in
+      if Bytes.equal buffer_zero bytes then Some Infinity
+      else
+        let x = Fq.of_bytes_opt x_bytes in
+        let y = Fq.of_bytes_opt y_bytes in
+        match (x, y) with
+        | (None, _) | (_, None) -> None
+        (* Verify it is on the curve *)
+        | (Some x, Some y) ->
+            if is_on_curve ~x ~y && is_in_prime_subgroup ~x ~y then
+              Some (P (x, y))
+            else None
+
+  let check_bytes bytes =
+    match of_bytes_opt bytes with Some _ -> true | None -> false
+
+  let of_bytes_exn b =
+    (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
+       creates a new buffer *)
+    match of_bytes_opt b with Some g -> g | None -> raise (Not_on_curve b)
+
+  let to_bytes g =
+    let buffer = Bytes.make size_in_bytes '\000' in
+    match g with
+    | Infinity -> buffer
+    | P (x, y) ->
+        Bytes.blit (Fq.to_bytes x) 0 buffer 0 Fq.size_in_bytes ;
+        Bytes.blit (Fq.to_bytes y) 0 buffer Fq.size_in_bytes Fq.size_in_bytes ;
+        buffer
+
+  let one = of_bytes_exn Params.bytes_generator
+
+  let is_in_prime_subgroup ~x ~y =
+    let p = P (x, y) in
+    if is_zero p then true else not (is_zero (mul p (Scalar.of_z cofactor)))
 
   let random ?state () =
     (match state with None -> () | Some s -> Random.set_state s) ;
@@ -1008,13 +1021,14 @@ struct
       Some (a, d, Params.cofactor, Option.get gen)
 
   let from_coordinates_exn ~x ~y =
-    if is_on_curve x y then P (x, y)
+    if is_on_curve ~x ~y && is_in_prime_subgroup ~x ~y then P (x, y)
     else
       raise
         (Not_on_curve (Bytes.concat Bytes.empty [Fq.to_bytes x; Fq.to_bytes y]))
 
   let from_coordinates_opt ~x ~y =
-    if is_on_curve x y then Some (P (x, y)) else None
+    if is_on_curve ~x ~y && is_in_prime_subgroup ~x ~y then Some (P (x, y))
+    else None
 
   let of_compressed_bytes_opt bs =
     (* required to avoid side effect! *)
@@ -1053,7 +1067,7 @@ struct
           match y with
           | Some y ->
               let p = P (x, y) in
-              if is_in_prime_subgroup p then Some p else None
+              if is_in_prime_subgroup ~x ~y then Some p else None
           | None -> None )
 
   let of_compressed_bytes_exn b =
@@ -1115,6 +1129,9 @@ struct
 
   let is_zero { u; v } = Base.(u = zero) && Base.(v = one)
 
+  let to_bytes { u; v } =
+    Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]
+
   let add { u = u1; v = v1 } { u = u2; v = v2 } =
     let u1v2 = Base.(u1 * v2) in
     let v1u2 = Base.(v1 * u2) in
@@ -1156,18 +1173,16 @@ struct
     in
     aux x (Scalar.to_z n)
 
-  let is_small_order p = eq (mul p (Scalar.of_z cofactor)) zero
-
-  let is_torsion_free p = eq (mul p Scalar.(of_z order)) p
-
-  let is_prime_order p = is_torsion_free p && not (is_zero p)
-
-  let is_on_curve u v =
+  let is_on_curve ~u ~v =
     (* a * u^2 + v^2 = 1 + d u^2 v^2 *)
     let uu = Base.square u in
     let vv = Base.square v in
     let uuvv = Base.(uu * vv) in
     Base.((a * uu) + vv = one + (d * uuvv))
+
+  let is_in_prime_subgroup ~u ~v =
+    let p = { u; v } in
+    if is_zero p then true else not (is_zero (mul p (Scalar.of_z cofactor)))
 
   let of_bytes_opt b =
     (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
@@ -1179,7 +1194,9 @@ struct
         Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
       in
       match (u_opt, v_opt) with
-      | (Some u, Some v) -> if is_on_curve u v then Some { u; v } else None
+      | (Some u, Some v) ->
+          if is_on_curve ~u ~v && is_in_prime_subgroup ~u ~v then Some { u; v }
+          else None
       | _ -> None
 
   let of_bytes_exn b =
@@ -1188,9 +1205,6 @@ struct
     match of_bytes_opt b with None -> raise (Not_on_curve b) | Some p -> p
 
   let check_bytes b = match of_bytes_opt b with None -> false | Some _ -> true
-
-  let to_bytes { u; v } =
-    Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]
 
   let one = of_bytes_exn bytes_generator
 
@@ -1248,7 +1262,7 @@ struct
 
   let from_coordinates_opt ~u ~v =
     let p = { u; v } in
-    if is_on_curve u v then Some p else None
+    if is_on_curve ~u ~v && is_in_prime_subgroup ~u ~v then Some p else None
 
   let from_coordinates_exn ~u ~v =
     match from_coordinates_opt ~u ~v with

@@ -749,7 +749,7 @@ struct
      (https://arxiv.org/pdf/1703.01863.pdf) *)
 
   (* Summary for the complexity:
-     Addition: 7A + 2AC + 2M + 2MC + 3N + 1DI
+     Addition: 6A + 1AC + 1M + 1MC + 4N + 1DI
      Doubling: 4A + 2AC + 1M + 4MC + 3N + 1DI + 1DO + 2SQ
   *)
 
@@ -888,16 +888,16 @@ struct
 
   (* Complexity (update above summary if any change):
        (SLOPE COMPUTATION)
-       1N + 1N + 1A + 1A + 1D
+       1N + 1N + 1A + 1A + 1DI
        -> 2A + 2N + 1DI
        (X COMPUTATION)
      + 1SQ + 1A + 1MC + 1AC + 1N + 1A
        -> 2A + 1AC + 1MC + 1N + 1SQ
        (Y COMPUTATION)
-     + 1M + 1MC + 1A + 1N + 1A + 1AC + 1M + 1A
-       -> 3A + 1AC + 2M + 1MC
+     + 1N + 1A + 1M + 1A
+       -> 2A + 1M + 1N
      Total:
-       7A + 2AC + 2M + 2MC + 3N + 1DI
+       6A + 1AC + 1M + 1MC + 4N + 1DI
   *)
   let add t1 t2 =
     match (t1, t2) with
@@ -920,15 +920,15 @@ struct
           let a_plus_x2_plus_x1 = Fq.(a + x2_plus_x1) in
           let neg_a_plus_x2_plus_x1 = Fq.(negate a_plus_x2_plus_x1) in
           let x3 = Fq.(b_ll + neg_a_plus_x2_plus_x1) in
-          (* y computation *)
-          let lll = Fq.(mul ll l) in
-          let b_lll = Fq.(b * lll) in
-          let b_lll_plus_y1 = Fq.(b_lll + y1) in
-          let neg_b_lll_plus_y1 = Fq.(negate b_lll_plus_y1) in
-          let x2_plus_double_x1 = Fq.(x2_plus_x1 + x1) in
-          let x2_plus_double_x1_plus_a = Fq.(x2_plus_double_x1 + a) in
-          let x2_plus_double_x1_plus_a = Fq.(l * x2_plus_double_x1_plus_a) in
-          let y3 = Fq.(x2_plus_double_x1_plus_a + neg_b_lll_plus_y1) in
+          (* y computation
+             Cost improvement by using x3 directly:
+             3A + 1AC + 2M + 1MC -> 2A + 1M + 1N
+             Saving 1A, 1AC, 1M, 1MC and costs 1 extra N
+          *)
+          let neg_x3 = Fq.(negate x3) in
+          let x1_min_x3 = Fq.(x1 + neg_x3) in
+          let l_x1_min_x3 = Fq.(l * x1_min_x3) in
+          let y3 = Fq.(l_x1_min_x3 + neg_y1) in
           P (x3, y3)
 
   let negate p =
@@ -1384,3 +1384,31 @@ let from_affine_edwards_to_affine_montgomery
        and type Scalar.t = scalar) (p_tw : affine_tw) : affine_mt option =
   let coords_opt = Affine_tw.to_montgomery p_tw in
   Option.bind coords_opt (fun (x, y) -> Affine_mt.from_coordinates_opt ~x ~y)
+
+module MakeAffineEdwardsToAffineMontgomery (E : Ec_sig.AffineEdwardsT) :
+  Ec_sig.AffineMontgomeryT
+    with module Base = E.Base
+     and module Scalar = E.Scalar =
+  MakeAffineMontgomery (E.Base) (E.Scalar)
+    (struct
+      let two = E.Base.(double one)
+
+      let four = E.Base.(double two)
+
+      let a_neg_d = E.Base.(E.a + negate E.d)
+
+      let a = E.Base.(two * (E.a + E.d) / a_neg_d)
+
+      let b = E.Base.(four / a_neg_d)
+
+      let cofactor = E.cofactor
+
+      let bytes_generator =
+        let u = E.get_u_coordinate E.one in
+        let v = E.get_v_coordinate E.one in
+        let one_plus_v = E.Base.(one + v) in
+        let one_minus_v = E.Base.(one + negate v) in
+        let x = E.Base.(one_plus_v / one_minus_v) in
+        let y = E.Base.(x / u) in
+        Bytes.concat Bytes.empty [E.Base.to_bytes x; E.Base.to_bytes y]
+    end)

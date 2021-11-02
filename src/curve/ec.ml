@@ -748,6 +748,11 @@ struct
      Journal of Cryptographic Engineering 8.3 (2018): 227-240.
      (https://arxiv.org/pdf/1703.01863.pdf) *)
 
+  (* Summary for the complexity:
+     Addition: 7A + 2AC + 2M + 2MC + 3N + 1DI
+     Doubling: 4A + 2AC + 1M + 4MC + 3N + 1DI + 1DO + 2SQ
+  *)
+
   (* Checking non-singularity:
      - if b=0 then the Curve is a union of 3 lines;
        if a^2=4 then the curve is a nodal cubic. *)
@@ -760,6 +765,7 @@ struct
   module Base = Fq
   module Scalar = Fp
 
+  (* used later in addition and doubling formulas *)
   let two = Fq.(one + one)
 
   let three = Fq.(one + two)
@@ -842,6 +848,14 @@ struct
        y_r = (2 * x_p + x_ q + Params.a) * slope - Params.b * slope^3 - y_p
            = slope * (x_p - x_q) - y_p
   *)
+  (* Complexity (update above summary if any change):
+         1SQ
+       + 1MC + 1MC + 1A + 1AC + 1MC + 1DI   -> 3MC + 1A + 1AC + 1DI (SLOPE COMPUTATION)
+       + 1SQ + 1DO + 1MC + 1AC + 1N + 1A                            (X COMPUTATION)
+       + 1N + 1N + 1A + 1M + 1A             -> 2N + 2A + 1M         (Y COMPUTATION USING X)
+       Total:
+         4A + 2AC + 1M + 4MC + 3N + 1DI + 1DO + 2SQ
+  *)
   let double t =
     match t with
     | Infinity -> Infinity
@@ -872,6 +886,19 @@ struct
         let y3 = Fq.(l_x_plus_neg_x3 + neg_y) in
         P (x3, y3)
 
+  (* Complexity (update above summary if any change):
+       (SLOPE COMPUTATION)
+       1N + 1N + 1A + 1A + 1D
+       -> 2A + 2N + 1DI
+       (X COMPUTATION)
+     + 1SQ + 1A + 1MC + 1AC + 1N + 1A
+       -> 2A + 1AC + 1MC + 1N + 1SQ
+       (Y COMPUTATION)
+     + 1M + 1MC + 1A + 1N + 1A + 1AC + 1M + 1A
+       -> 3A + 1AC + 2M + 1MC
+     Total:
+       7A + 2AC + 2M + 2MC + 3N + 1DI
+  *)
   let add t1 t2 =
     match (t1, t2) with
     | (Infinity, t2) -> t2

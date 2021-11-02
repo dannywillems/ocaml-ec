@@ -403,77 +403,6 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
       | G.Not_on_curve exn_bytes -> assert (Bytes.equal exn_bytes b)
       | _ -> assert false
 
-  let test_elements_of_order_small_order () =
-    (* We check some properties of small order elements. At the same time, we
-       verify the type t represents any point on the curve (or, at least,
-       from_coordinates_exn builds a type t with this property), not only the
-       elements in the subgroup.
-    *)
-    let p1 = G.from_coordinates_exn ~u:G.Base.zero ~v:G.Base.one in
-    (* (0, -1) *)
-    let p2 = G.from_coordinates_exn ~u:G.Base.zero ~v:G.Base.(negate one) in
-    let a_sqrt = Option.value ~default:G.Base.zero (G.Base.sqrt_opt G.a) in
-    (* (a^-1/2, 0) *)
-    let p3 =
-      G.from_coordinates_exn ~u:G.Base.(inverse_exn a_sqrt) ~v:G.Base.zero
-    in
-
-    (* ((-a)^-1/2, 0) *)
-    let p4 =
-      G.from_coordinates_exn
-        ~u:G.Base.(negate (inverse_exn a_sqrt))
-        ~v:G.Base.zero
-    in
-    (* We check the order of the small order elements *)
-    assert (G.(eq (mul p1 Scalar.one) zero)) ;
-    assert (G.(eq (mul p2 (Scalar.of_string "2")) zero)) ;
-    (* We check p3 and p4 are not of order 2 *)
-    assert (G.(not (eq (mul p3 (Scalar.of_string "2")) zero))) ;
-    assert (G.(not (eq (mul p4 (Scalar.of_string "2")) zero))) ;
-    (* But of order 4 *)
-    assert (G.(eq (mul p3 (Scalar.of_string "4")) zero)) ;
-    assert (G.(eq (mul p4 (Scalar.of_string "4")) zero)) ;
-    (* They are all of small order *)
-    assert (G.(is_small_order p1)) ;
-    assert (G.(is_small_order p2)) ;
-    assert (G.(is_small_order p3)) ;
-    assert (G.(is_small_order p4)) ;
-    (* The neutral element is torsion free *)
-    assert (G.(is_torsion_free p1)) ;
-    (* The other special points are not torsion free *)
-    assert (G.(not (is_torsion_free p2))) ;
-    assert (G.(not (is_torsion_free p3))) ;
-    assert (G.(not (is_torsion_free p4)))
-
-  let test_get_coordinates () =
-    (* Test get_u_coordinate and get_v_coordinate on small order elements *)
-    let p1 = G.from_coordinates_exn ~u:G.Base.zero ~v:G.Base.one in
-    (* (0, -1) *)
-    let p2 = G.from_coordinates_exn ~u:G.Base.zero ~v:G.Base.(negate one) in
-    let a_sqrt = Option.value ~default:G.Base.zero (G.Base.sqrt_opt G.a) in
-    (* (a^-1/2, 0) *)
-    let p3 =
-      G.from_coordinates_exn ~u:G.Base.(inverse_exn a_sqrt) ~v:G.Base.zero
-    in
-
-    (* ((-a)^-1/2, 0) *)
-    let p4 =
-      G.from_coordinates_exn
-        ~u:G.Base.(negate (inverse_exn a_sqrt))
-        ~v:G.Base.zero
-    in
-    assert (G.get_u_coordinate p1 = G.Base.zero) ;
-    assert (G.get_v_coordinate p1 = G.Base.one) ;
-
-    assert (G.get_u_coordinate p2 = G.Base.zero) ;
-    assert (G.get_v_coordinate p2 = G.Base.(negate one)) ;
-
-    assert (G.get_u_coordinate p3 = G.Base.(inverse_exn a_sqrt)) ;
-    assert (G.get_v_coordinate p3 = G.Base.zero) ;
-
-    assert (G.get_u_coordinate p4 = G.Base.(negate (inverse_exn a_sqrt))) ;
-    assert (G.get_v_coordinate p4 = G.Base.zero)
-
   let test_unsafe_from_coordinates_do_not_check () =
     let u = G.Base.random () in
     let v = G.Base.random () in
@@ -483,14 +412,6 @@ module MakeEdwardsCurveProperties (G : Ec_sig.AffineEdwardsT) = struct
     let open Alcotest in
     ( "Group properties of Edwards curve",
       [ test_case
-          "check elements of small orders"
-          `Quick
-          test_elements_of_order_small_order;
-        test_case
-          "Get coordinates of small order elements"
-          `Quick
-          test_get_coordinates;
-        test_case
           "unsafe_from_coordinates do not check the point is on the curve"
           `Quick
           test_unsafe_from_coordinates_do_not_check;

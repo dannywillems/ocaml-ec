@@ -788,7 +788,8 @@ struct
 
   let is_on_curve x y =
     let xx = Fq.mul x x in
-    Fq.((x * xx) + (a * xx) + x = b * y * y)
+    let yy = Fq.mul y y in
+    Fq.((x * xx) + (a * xx) + x = b * yy)
 
   let of_bytes_opt bytes =
     (* no need to copy the bytes [p] because [Bytes.sub] is used and [Bytes.sub]
@@ -841,19 +842,34 @@ struct
        y_r = (2 * x_p + x_ q + Params.a) * slope - Params.b * slope^3 - y_p
            = slope * (x_p - x_q) - y_p
   *)
-
   let double t =
     match t with
     | Infinity -> Infinity
     | P (x, y) ->
+        (* Slope computation *)
         let xx = Fq.(square x) in
         (* slope = (3 * x^2 + 2 * Params.a * x + 1) / (2 * Params.b * y) *)
-        let l = Fq.(((three * xx) + (two_a * x) + Fq.one) / (two_b * y)) in
+        let three_xx = Fq.(three * xx) in
+        let two_a_x = Fq.(two_a * x) in
+        let l_num = Fq.(three_xx + two_a_x) in
+        let l_num = Fq.(l_num + Fq.one) in
+        let l_div = Fq.(two_b * y) in
+        let l = Fq.(l_num / l_div) in
+        (* x computation *)
         let ll = Fq.square l in
-        let lll = Fq.mul ll l in
-        let two_x = Fq.add x x in
-        let x3 = Fq.((b * ll) + negate (a + two_x)) in
-        let y3 = Fq.(((two_x + x + a) * l) + negate ((b * lll) + y)) in
+        let two_x = Fq.double x in
+        let b_ll = Fq.(b * ll) in
+        let a_two_x = Fq.(a + two_x) in
+        let neg_a_two_x = Fq.(negate a_two_x) in
+        let x3 = Fq.(b_ll + neg_a_two_x) in
+        (* computing y3 by using x3, see 2.2. There is a typo when giving a
+           shorter formula for y. It must be x_plus instead of x_q
+        *)
+        let neg_x3 = Fq.negate x3 in
+        let neg_y = Fq.negate y in
+        let x_plus_neg_x3 = Fq.(x + neg_x3) in
+        let l_x_plus_neg_x3 = Fq.(l * x_plus_neg_x3) in
+        let y3 = Fq.(l_x_plus_neg_x3 + neg_y) in
         P (x3, y3)
 
   let add t1 t2 =
@@ -865,14 +881,27 @@ struct
         if Fq.(x1 = x2 && y1 = negate y2) then Infinity
         else
           (* slope = (y2 - y1) / (x2 - x1) *)
-          let y2_min_y1 = Fq.(y2 + negate y1) in
-          let x2_min_x1 = Fq.(x2 + negate x1) in
+          let neg_y1 = Fq.(negate y1) in
+          let neg_x1 = Fq.(negate x1) in
+          let y2_min_y1 = Fq.(y2 + neg_y1) in
+          let x2_min_x1 = Fq.(x2 + neg_x1) in
           let l = Fq.(y2_min_y1 / x2_min_x1) in
+          (* x computation *)
           let ll = Fq.(square l) in
-          let lll = Fq.(mul ll l) in
           let x2_plus_x1 = Fq.(x1 + x2) in
-          let x3 = Fq.((b * ll) + negate (x2_plus_x1 + a)) in
-          let y3 = Fq.(((x2_plus_x1 + x1 + a) * l) + negate ((b * lll) + y1)) in
+          let b_ll = Fq.(b * ll) in
+          let a_plus_x2_plus_x1 = Fq.(a + x2_plus_x1) in
+          let neg_a_plus_x2_plus_x1 = Fq.(negate a_plus_x2_plus_x1) in
+          let x3 = Fq.(b_ll + neg_a_plus_x2_plus_x1) in
+          (* y computation *)
+          let lll = Fq.(mul ll l) in
+          let b_lll = Fq.(b * lll) in
+          let b_lll_plus_y1 = Fq.(b_lll + y1) in
+          let neg_b_lll_plus_y1 = Fq.(negate b_lll_plus_y1) in
+          let x2_plus_double_x1 = Fq.(x2_plus_x1 + x1) in
+          let x2_plus_double_x1_plus_a = Fq.(x2_plus_double_x1 + a) in
+          let x2_plus_double_x1_plus_a = Fq.(l * x2_plus_double_x1_plus_a) in
+          let y3 = Fq.(x2_plus_double_x1_plus_a + neg_b_lll_plus_y1) in
           P (x3, y3)
 
   let negate p =

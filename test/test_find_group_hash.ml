@@ -62,13 +62,13 @@ let test_vectors () =
   in
   List.iter
     (fun (personalisation, bytes, (u, v)) ->
-      let u = Jubjub.Affine.Base.of_string u in
-      let v = Jubjub.Affine.Base.of_string v in
-      let expected_p = Jubjub.Affine.from_coordinates_exn ~u ~v in
+      let u = Jubjub.AffineEdwards.Base.of_string u in
+      let v = Jubjub.AffineEdwards.Base.of_string v in
+      let expected_p = Jubjub.AffineEdwards.from_coordinates_exn ~u ~v in
       let p =
         GroupHash.find_group_hash bytes (Bytes.of_string personalisation)
       in
-      assert (Jubjub.Affine.eq p expected_p))
+      assert (Jubjub.AffineEdwards.eq p expected_p))
     v
 
 let () =

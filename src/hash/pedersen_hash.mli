@@ -10,5 +10,5 @@ module MakePedersenHash : functor
 end
 
 module Zcash : sig
-  val hash : Iterator.Bit.t -> Jubjub.Affine.t
+  val hash : Iterator.Bit.t -> Jubjub.AffineEdwards.t
 end

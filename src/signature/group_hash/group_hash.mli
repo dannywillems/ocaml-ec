@@ -22,4 +22,4 @@
 (*                                                                           *)
 (*****************************************************************************)
 
-val find_group_hash : Bytes.t -> Bytes.t -> Jubjub.Affine.t
+val find_group_hash : Bytes.t -> Bytes.t -> Jubjub.AffineEdwards.t

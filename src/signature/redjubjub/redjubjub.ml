@@ -23,10 +23,10 @@
 (*****************************************************************************)
 
 module Make (Param : sig
-  val generator : Jubjub.Affine.t
+  val generator : Jubjub.AffineEdwards.t
 end) =
   Reddsa.MakeRedDSA
-    (Jubjub.Affine)
+    (Jubjub.AffineEdwards)
     (struct
       let length = 512
 
@@ -46,7 +46,7 @@ end) =
         let res_bytes = Hex.to_bytes res_hexa_hex in
         res_bytes
 
-      let to_compressed = Jubjub.Affine.to_compressed
+      let to_compressed = Jubjub.AffineEdwards.to_compressed
 
-      let of_compressed_opt = Jubjub.Affine.of_compressed_opt
+      let of_compressed_opt = Jubjub.AffineEdwards.of_compressed_opt
     end)

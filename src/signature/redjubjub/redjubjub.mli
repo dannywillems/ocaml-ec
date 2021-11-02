@@ -23,8 +23,8 @@
 (*****************************************************************************)
 
 module Make (Param : sig
-  val generator : Jubjub.Affine.t
+  val generator : Jubjub.AffineEdwards.t
 end) :
   Reddsa.SIGNATURE_SCHEME
-    with type secret_key = Jubjub.Affine.Scalar.t
-     and type public_key = Jubjub.Affine.t
+    with type secret_key = Jubjub.AffineEdwards.Scalar.t
+     and type public_key = Jubjub.AffineEdwards.t

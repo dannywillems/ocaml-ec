@@ -75,6 +75,12 @@ module type AffineWeierstrassT = sig
 
   val get_y_coordinate : t -> Base.t
 
+  (* val to_montgomery_curve_parameters : unit -> (Base.t * Base.t * Z.t * (Base.t * Base.t)) option
+
+     val to_montgomery : t -> (Base.t * Base.t) option *)
+
+  val is_in_prime_subgroup : t -> bool
+
   (** Build a point from the affine coordinates. If the point is not on the curve
       and in the subgroup, returns [None]
   *)
@@ -157,6 +163,62 @@ module type JacobianWeierstrassT = sig
   val from_affine_coordinates_opt : x:Base.t -> y:Base.t -> t
 end
 
+module type MontgomeryT = sig
+  include BASE
+
+  val a : Base.t
+
+  val b : Base.t
+
+  val cofactor : Z.t
+end
+
+module type AffineMontgomeryT = sig
+  (** by^2 = x3 + ax^2 + x with b * (a^2 - 4) != 0*)
+  include MontgomeryT
+
+  val get_x_coordinate : t -> Base.t
+
+  val get_y_coordinate : t -> Base.t
+
+  val to_twisted_curve_parameters :
+    unit -> (Base.t * Base.t * Z.t * (Base.t * Base.t)) option
+
+  val to_twisted : t -> (Base.t * Base.t) option
+
+  val to_weierstrass_curve_parameters :
+    unit -> (Base.t * Base.t * Z.t * (Base.t * Base.t)) option
+
+  val to_weierstrass : t -> (Base.t * Base.t) option
+
+  val is_in_prime_subgroup : t -> bool
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, returns [None]
+  *)
+  val from_coordinates_opt : x:Base.t -> y:Base.t -> t option
+
+  (** Build a point from the affine coordinates. If the point is not on the curve
+      and in the subgroup, raise [Not_on_curve].
+  *)
+  val from_coordinates_exn : x:Base.t -> y:Base.t -> t
+
+  (** Build a point from a compressed representation. It supposes the base field
+      leaves at least a free bit in the last byte to encode the sign.
+      Raise [Not_on_curve] if the bytes do not represent a point on the curve
+      and in the prime subgroup.
+  *)
+  val of_compressed_bytes_exn : Bytes.t -> t
+
+  (** Same than [of_compressed_bytes_exn] but returns an option instead of
+      raising an exception
+  *)
+  val of_compressed_bytes_opt : Bytes.t -> t option
+
+  (** Return the compressed representation of the point *)
+  val to_compressed_bytes : t -> Bytes.t
+end
+
 module type AffineEdwardsT = sig
   (** au^2 + v^2 = 1 + du^2v^2 *)
   include BASE
@@ -188,6 +250,11 @@ module type AffineEdwardsT = sig
 
   (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_v_coordinate : t -> Base.t
+
+  val to_montgomery_curve_parameters :
+    unit -> (Base.t * Base.t * Z.t * (Base.t * Base.t)) option
+
+  val to_montgomery : t -> (Base.t * Base.t) option
 
   (** Build a point from the affine coordinates. If the point is not on the curve
       and in the subgroup, returns [None]

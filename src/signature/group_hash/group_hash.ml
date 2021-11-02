@@ -40,12 +40,12 @@ let group_hash message personalisation =
   let h = Blake2s.feed_bytes h message in
   let hash_hex = `Hex Blake2s.(to_hex (get h)) in
   let hash_hex = Hex.to_bytes hash_hex in
-  let p_opt = Jubjub.Affine.of_compressed_opt hash_hex in
+  let p_opt = Jubjub.AffineEdwards.of_compressed_opt hash_hex in
   match p_opt with
   | None -> None
   | Some p ->
-      let p = Jubjub.Affine.(mul p (Scalar.of_z cofactor)) in
-      if Jubjub.Affine.is_zero p then None else Some p
+      let p = Jubjub.AffineEdwards.(mul p (Scalar.of_z cofactor)) in
+      if Jubjub.AffineEdwards.is_zero p then None else Some p
 
 let find_group_hash message personalisation =
   let rec aux i =

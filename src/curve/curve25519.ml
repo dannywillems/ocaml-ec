@@ -23,7 +23,7 @@ module Scalar = Ff.MakeFp (struct
     Z.(pow (of_int 2) 252 + of_string "27742317777372353535851937790883648493")
 end)
 
-module Affine =
+module AffineEdwards =
   Ec.MakeAffineEdwards (Base) (Scalar)
     (struct
       let a = Base.(negate (of_string "1"))
@@ -55,4 +55,45 @@ module Affine =
                 (of_string
                    "15112221349535400772501151409588531511454012693041857206046113283949847762202"));
             Base.(to_bytes (of_string "4" / of_string "5")) ]
+
+      (* 4/5 = 463168356949264781694283940034751631413079938662562256157830336
+         03165251855960 *)
     end)
+
+module AffineMontgomery =
+  Ec.MakeAffineMontgomery (Base) (Scalar)
+    (struct
+      (* Parameters generated with function to_montgomery_curve_parameters ().
+         The RFC (https://www.rfc-editor.org/rfc/rfc7748#section-4.1) uses a different mapping,
+         the Montgomery v coordinate being multiplied by sqrt(-486664), to get "Edwards25519" *)
+
+      let a = Base.of_string "486662"
+
+      let b =
+        Base.of_string
+          "57896044618658097711785492504343953926634992332820282019728792003956564333285"
+
+      let cofactor = Z.of_string "8"
+
+      let bytes_generator =
+        Bytes.concat
+          Bytes.empty
+          [ Base.(to_bytes (of_string "9"));
+            Base.(
+              to_bytes
+                (of_string
+                   "46155036877857898950720737868668298259344786430663990124372813544693780678454"))
+          ]
+    end)
+
+let from_affine_edwards_to_affine_montgomery p =
+  Ec.from_affine_edwards_to_affine_montgomery
+    (module AffineEdwards)
+    (module AffineMontgomery)
+    p
+
+let from_affine_montgomery_to_affine_edwards p =
+  Ec.from_affine_montgomery_to_affine_edwards
+    (module AffineMontgomery)
+    (module AffineEdwards)
+    p

@@ -12,7 +12,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Bandersnatch"
+    "Bandersnatch Edwards form, affine coordinates"
     [ ValueGeneration.get_tests ();
       Properties.get_tests ();
       EdwardsCurveProperties.get_tests ();

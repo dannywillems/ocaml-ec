@@ -13,7 +13,7 @@ let () =
   let open Alcotest in
   run
     ~verbose:true
-    "Bandersnatch affine form"
+    "Bandersnatch Weierstrass form, affine coordinates"
     [ BandersnatchAffineValueGeneration.get_tests ();
       BandersnatchAffineEquality.get_tests ();
       BandersnatchAffineECProperties.get_tests ();

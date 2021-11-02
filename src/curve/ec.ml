@@ -1384,3 +1384,31 @@ let from_affine_edwards_to_affine_montgomery
        and type Scalar.t = scalar) (p_tw : affine_tw) : affine_mt option =
   let coords_opt = Affine_tw.to_montgomery p_tw in
   Option.bind coords_opt (fun (x, y) -> Affine_mt.from_coordinates_opt ~x ~y)
+
+module MakeAffineEdwardsToAffineMontgomery (E : Ec_sig.AffineEdwardsT) :
+  Ec_sig.AffineMontgomeryT
+    with module Base = E.Base
+     and module Scalar = E.Scalar =
+  MakeAffineMontgomery (E.Base) (E.Scalar)
+    (struct
+      let two = E.Base.(double one)
+
+      let four = E.Base.(double two)
+
+      let a_neg_d = E.Base.(E.a + negate E.d)
+
+      let a = E.Base.(two * (E.a + E.d) / a_neg_d)
+
+      let b = E.Base.(four / a_neg_d)
+
+      let cofactor = E.cofactor
+
+      let bytes_generator =
+        let u = E.get_u_coordinate E.one in
+        let v = E.get_v_coordinate E.one in
+        let one_plus_v = E.Base.(one + v) in
+        let one_minus_v = E.Base.(one + negate v) in
+        let x = E.Base.(one_plus_v / one_minus_v) in
+        let y = E.Base.(x / u) in
+        Bytes.concat Bytes.empty [E.Base.to_bytes x; E.Base.to_bytes y]
+    end)

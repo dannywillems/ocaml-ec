@@ -1104,9 +1104,8 @@ struct
   include Params
 
   let () =
-    (* Addition formula is complete if d is a non square and if a is a square *)
-    assert (Option.is_none (Base.sqrt_opt d)) ;
-    assert (Option.is_some (Base.sqrt_opt a))
+    (* Addition formula is complete if d is a not a square *)
+    assert (Option.is_none (Base.sqrt_opt d))
 
   let size_in_bytes = Base.size_in_bytes * 2
 

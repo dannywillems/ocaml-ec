@@ -1,3 +1,46 @@
+(*
+    For each curve form and each coordinates, an external link MUST be given
+    pointing to the addition and doubling formulas. The addition MUST support
+    doubling. It is verified by the ECProperties functor.
+
+    When adding a new curve form/coordinates, it is REQUIRED to add
+    - the number of additions (A),
+    - the number of additions with a constant (AC),
+    - the number of multiplications (M),
+    - the number of multiplications with a constant (MC),
+    - the number of negations (N),
+    - the number of substractions (SU),
+    - the number of divisions (DI),
+    - the number of doublings (DO),
+    - the number of squarings (SQ).
+
+    If there is a requirement for the parameters, it MUST be verified at the
+    module top level. It is RECOMMENDED, but not required, to use a specific
+    exception and raise it with a meaningful message.
+
+    When implementing a new form or new coordinates, it MUST be accompanied by
+    the instantiation of a standard/popular curve and test vectors in addition
+    to the generic PBT on EC properties. The origin of the test vectors MUST be
+    documented.
+
+    If any constant are defined at the top level, it MUST be accompanied by an
+    explanation on where it is used, and why.
+
+    In the case of an optimisation not listed in the associated paper/link
+    describing the formulas, the author MUST add an explanation. If it reduces
+    the number of field operations, the "original" and the "optimised" versions
+    MUST be compared in comments.
+
+    IMPROVEME:
+    - For the moment, there is no ec.mli. When adding a new form or new
+      coordinates, the functor signature MUST be added in the interface. If you
+      read these lines and there is a file ec.mli, please open an issue.
+    - For the moment, it is only RECOMMENDED to use a particular exception when
+      verifying the parameters. It must be changed to a REQUIREMENT.
+    - For the moment, there is no distinction between `not being on the curve`
+      and `not being in the prime subgroup`. This MUST change.
+*)
+
 module MakeJacobianWeierstrass
     (Fq : Ff_sig.PRIME)
     (Fp : Ff_sig.PRIME) (Params : sig

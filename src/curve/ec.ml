@@ -411,7 +411,12 @@ struct
   let get_y_coordinate t =
     match t with Infinity -> raise (Invalid_argument "Zero") | P (_x, y) -> y
 
-  (* To have functions to Montgomery, we need to be able to compute alpha which is a root of the equation: z^3 + a*z + b = 0 which requires the cubic root operation in F_q.
+  (* FIXME:
+     To have functions to Montgomery, we need to be able to compute alpha which
+     is a root of the equation: z^3 + a*z + b = 0 which requires the cubic root
+     operation in F_q.
+     There is an open issue in ocaml-ff:
+     https://gitlab.com/dannywillems/ocaml-ff/-/issues/21
 
      let alpha =
        let two = Fq.of_string "2" in
@@ -738,8 +743,10 @@ module MakeAffineMontgomery
     end) :
   Ec_sig.AffineMontgomeryT with type Scalar.t = Fp.t and type Base.t = Fq.t =
 struct
-  (* Costello, Craig, and Benjamin Smith. "Montgomery curves and their arithmetic."
-     Journal of Cryptographic Engineering 8.3 (2018): 227-240. (https://arxiv.org/pdf/1703.01863.pdf) *)
+  (* Costello, Craig, and Benjamin Smith. "Montgomery curves and their
+     arithmetic."
+     Journal of Cryptographic Engineering 8.3 (2018): 227-240.
+     (https://arxiv.org/pdf/1703.01863.pdf) *)
 
   (* Checking non-singularity:
      - if b=0 then the Curve is a union of 3 lines;
@@ -824,8 +831,11 @@ struct
     | (Infinity, _) | (_, Infinity) -> false
     | (P (x1, y1), P (x2, y2)) -> Fq.(x1 = x2 && y1 = y2)
 
-  (* The operation for adding two points are the same whether we add the same or distinct points
-     except for the calculus of the slope. (https://arxiv.org/pdf/1703.01863.pdf)
+  (* The operation for adding two points are the same whether we add the same or
+     distinct points
+     except for the calculus of the slope.
+     (https://arxiv.org/pdf/1703.01863.pdf)
+
      Let P(x_p, y_p) + P(x_q, y_q) = P(x_r, y_r), then
        x_r = Params.b * slope^2 - (x_p + x_q) - Params.a
        y_r = (2 * x_p + x_ q + Params.a) * slope - Params.b * slope^3 - y_p

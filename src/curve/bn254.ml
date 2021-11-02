@@ -91,14 +91,26 @@ module Affine =
             Fq.(to_bytes (of_string "1")) ]
     end)
 
-let from_affine_to_jacobian p =
-  Ec.from_affine_to_jacobian (module Affine) (module Jacobian) p
+let from_affine_weierstrass_to_jacobian_weierstrass p =
+  Ec.from_affine_weierstrass_to_jacobian_weierstrass
+    (module Affine)
+    (module Jacobian)
+    p
 
-let from_affine_to_projective p =
-  Ec.from_affine_to_projective (module Affine) (module Projective) p
+let from_affine_weierstrass_to_projective_weierstrass p =
+  Ec.from_affine_weierstrass_to_projective_weierstrass
+    (module Affine)
+    (module Projective)
+    p
 
-let from_jacobian_to_affine p =
-  Ec.from_jacobian_to_affine (module Jacobian) (module Affine) p
+let from_jacobian_weierstrass_to_affine_weierstrass p =
+  Ec.from_jacobian_weierstrass_to_affine_weierstrass
+    (module Jacobian)
+    (module Affine)
+    p
 
-let from_projective_to_affine p =
-  Ec.from_projective_to_affine (module Projective) (module Affine) p
+let from_projective_weierstrass_to_affine_weierstrass p =
+  Ec.from_projective_weierstrass_to_affine_weierstrass
+    (module Projective)
+    (module Affine)
+    p

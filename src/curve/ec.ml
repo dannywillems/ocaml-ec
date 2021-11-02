@@ -1262,7 +1262,8 @@ struct
   let unsafe_from_coordinates ~u ~v = { u; v }
 end
 
-let from_affine_to_jacobian (type affine jacobian base scalar)
+let from_affine_weierstrass_to_jacobian_weierstrass
+    (type affine jacobian base scalar)
     (module Affine : Ec_sig.AffineWeierstrassT
       with type t = affine
        and type Base.t = base
@@ -1277,7 +1278,8 @@ let from_affine_to_jacobian (type affine jacobian base scalar)
     let y = Affine.get_y_coordinate p_affine in
     Jacobian.from_affine_coordinates_exn ~x ~y
 
-let from_jacobian_to_affine (type affine jacobian base scalar)
+let from_jacobian_weierstrass_to_affine_weierstrass
+    (type affine jacobian base scalar)
     (module Jacobian : Ec_sig.JacobianWeierstrassT
       with type t = jacobian
        and type Base.t = base
@@ -1297,7 +1299,8 @@ let from_jacobian_to_affine (type affine jacobian base scalar)
     let y' = Jacobian.Base.(y / zzz) in
     Affine.from_coordinates_exn ~x:x' ~y:y'
 
-let from_affine_to_projective (type affine projective base scalar)
+let from_affine_weierstrass_to_projective_weierstrass
+    (type affine projective base scalar)
     (module Affine : Ec_sig.AffineWeierstrassT
       with type t = affine
        and type Base.t = base
@@ -1312,7 +1315,8 @@ let from_affine_to_projective (type affine projective base scalar)
     let y = Affine.get_y_coordinate p_affine in
     Projective.from_affine_coordinates_exn ~x ~y
 
-let from_projective_to_affine (type affine projective base scalar)
+let from_projective_weierstrass_to_affine_weierstrass
+    (type affine projective base scalar)
     (module Projective : Ec_sig.ProjectiveWeierstrassT
       with type t = projective
        and type Base.t = base
@@ -1330,7 +1334,8 @@ let from_projective_to_affine (type affine projective base scalar)
     let y' = Projective.Base.(y / z) in
     Affine.from_coordinates_exn ~x:x' ~y:y'
 
-let from_montgomery_to_weierstrass (type affine_mt affine_wt base scalar)
+let from_affine_montgomery_to_affine_weierstrass
+    (type affine_mt affine_wt base scalar)
     (module Affine_mt : Ec_sig.AffineMontgomeryT
       with type t = affine_mt
        and type Base.t = base
@@ -1354,7 +1359,8 @@ let from_montgomery_to_weierstrass (type affine_mt affine_wt base scalar)
        let coords_opt = Affine_wt.to_montgomery p_wt in
        Option.bind coords_opt (fun (x, y) -> Affine_mt.from_coordinates_opt ~x ~y) *)
 
-let from_montgomery_to_twisted (type affine_mt affine_tw base scalar)
+let from_affine_montgomery_to_affine_edwards
+    (type affine_mt affine_tw base scalar)
     (module Affine_mt : Ec_sig.AffineMontgomeryT
       with type t = affine_mt
        and type Base.t = base
@@ -1366,7 +1372,8 @@ let from_montgomery_to_twisted (type affine_mt affine_tw base scalar)
   let coords_opt = Affine_mt.to_twisted p_mt in
   Option.bind coords_opt (fun (u, v) -> Affine_tw.from_coordinates_opt ~u ~v)
 
-let from_twisted_to_montgomery (type affine_tw affine_mt base scalar)
+let from_affine_edwards_to_affine_montgomery
+    (type affine_tw affine_mt base scalar)
     (module Affine_tw : Ec_sig.AffineEdwardsT
       with type t = affine_tw
        and type Base.t = base

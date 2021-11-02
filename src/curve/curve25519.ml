@@ -23,7 +23,7 @@ module Scalar = Ff.MakeFp (struct
     Z.(pow (of_int 2) 252 + of_string "27742317777372353535851937790883648493")
 end)
 
-module Affine =
+module AffineEdwards =
   Ec.MakeAffineEdwards (Base) (Scalar)
     (struct
       let a = Base.(negate (of_string "1"))
@@ -86,8 +86,14 @@ module AffineMontgomery =
           ]
     end)
 
-let from_twisted_to_montgomery p =
-  Ec.from_twisted_to_montgomery (module Affine) (module AffineMontgomery) p
+let from_affine_edwards_to_affine_montgomery p =
+  Ec.from_affine_edwards_to_affine_montgomery
+    (module AffineEdwards)
+    (module AffineMontgomery)
+    p
 
-let from_montgomery_to_twisted p =
-  Ec.from_montgomery_to_twisted (module AffineMontgomery) (module Affine) p
+let from_affine_montgomery_to_affine_edwards p =
+  Ec.from_affine_montgomery_to_affine_edwards
+    (module AffineMontgomery)
+    (module AffineEdwards)
+    p

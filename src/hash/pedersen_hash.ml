@@ -43,7 +43,7 @@ end
 
 module Zcash =
   MakePedersenHash
-    (Jubjub.Affine)
+    (Jubjub.AffineEdwards)
     (struct
       (* generators from
          https://github.com/zcash/librustzcash/blob/de1345a1c2f10b0843ab1f1ea6463b2330fdc673/zcash_primitives/src/constants.rs#L146 *)
@@ -70,9 +70,9 @@ module Zcash =
         in
         List.map
           (fun (u, v) ->
-            Jubjub.Affine.from_coordinates_exn
-              ~u:(Jubjub.Affine.Base.of_string u)
-              ~v:(Jubjub.Affine.Base.of_string v))
+            Jubjub.AffineEdwards.from_coordinates_exn
+              ~u:(Jubjub.AffineEdwards.Base.of_string u)
+              ~v:(Jubjub.AffineEdwards.Base.of_string v))
           tmp
 
       let chunks_per_generator = 63

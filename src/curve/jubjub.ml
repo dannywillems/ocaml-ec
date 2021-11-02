@@ -22,33 +22,9 @@ module Scalar = Ff.MakeFp (struct
       "6554484396890773809930967563523245729705921265872317281365359162392183254199"
 end)
 
-module AffineEdwards =
-  Ec.MakeAffineEdwards (Base) (Scalar)
-    (struct
-      let a = Base.(negate one)
-
-      let d =
-        Base.of_string
-          "19257038036680949359750312669786877991949435402254120286184196891950884077233"
-
-      let cofactor = Z.of_string "8"
-
-      let bytes_generator =
-        Bytes.concat
-          Bytes.empty
-          [ Base.(
-              to_bytes
-                (of_string
-                   "8076246640662884909881801758704306714034609987455869804520522091855516602923"));
-            Base.(
-              to_bytes
-                (of_string
-                   "13262374693698910701929044844600465831413122818447359594527400194675274060458"))
-          ]
-    end)
-
-module Affine : sig
-  include Ec_sig.AffineEdwardsT
+module AffineEdwards : sig
+  include
+    Ec_sig.AffineEdwardsT with type Base.t = Base.t and type Scalar.t = Scalar.t
 
   val of_compressed_exn : Bytes.t -> t
 
@@ -56,7 +32,29 @@ module Affine : sig
 
   val to_compressed : t -> Bytes.t
 end = struct
-  include AffineEdwards
+  include Ec.MakeAffineEdwards (Base) (Scalar)
+            (struct
+              let a = Base.(negate one)
+
+              let d =
+                Base.of_string
+                  "19257038036680949359750312669786877991949435402254120286184196891950884077233"
+
+              let cofactor = Z.of_string "8"
+
+              let bytes_generator =
+                Bytes.concat
+                  Bytes.empty
+                  [ Base.(
+                      to_bytes
+                        (of_string
+                           "8076246640662884909881801758704306714034609987455869804520522091855516602923"));
+                    Base.(
+                      to_bytes
+                        (of_string
+                           "13262374693698910701929044844600465831413122818447359594527400194675274060458"))
+                  ]
+            end)
 
   let of_compressed_opt b =
     (* required to avoid side effect! *)
@@ -177,28 +175,28 @@ module AffineWeierstrass =
           ]
     end)
 
-let from_twisted_to_montgomery p =
-  Ec.from_twisted_to_montgomery
+let from_affine_edwards_to_affine_montgomery p =
+  Ec.from_affine_edwards_to_affine_montgomery
     (module AffineEdwards)
     (module AffineMontgomery)
     p
 
-let from_montgomery_to_twisted p =
-  Ec.from_montgomery_to_twisted
+let from_affine_montgomery_to_affine_edwards p =
+  Ec.from_affine_montgomery_to_affine_edwards
     (module AffineMontgomery)
     (module AffineEdwards)
     p
 
-let from_montgomery_to_weierstrass p =
-  Ec.from_montgomery_to_weierstrass
+let from_affine_montgomery_to_affine_weierstrass p =
+  Ec.from_affine_montgomery_to_affine_weierstrass
     (module AffineMontgomery)
     (module AffineWeierstrass)
     p
 
-let from_twisted_to_weierstrass p =
-  let p = from_twisted_to_montgomery p in
+let from_affine_edwards_to_affine_weierstrass p =
+  let p = from_affine_edwards_to_affine_montgomery p in
   Option.bind p (fun opt ->
-      Ec.from_montgomery_to_weierstrass
+      Ec.from_affine_montgomery_to_affine_weierstrass
         (module AffineMontgomery)
         (module AffineWeierstrass)
         opt)

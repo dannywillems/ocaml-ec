@@ -8,16 +8,16 @@ let test_vector_from_zcash_primitives () =
     List.map
       (fun (b, (u, v)) ->
         ( b,
-          Jubjub.Affine.from_coordinates_exn
-            ~u:(Jubjub.Affine.Base.of_string u)
-            ~v:(Jubjub.Affine.Base.of_string v) ))
+          Jubjub.AffineEdwards.from_coordinates_exn
+            ~u:(Jubjub.AffineEdwards.Base.of_string u)
+            ~v:(Jubjub.AffineEdwards.Base.of_string v) ))
       vectors
   in
   List.iter
     (fun (input, expected_output) ->
       let iterator = Iterator.Bit.of_bool_list input in
       let output = PedersenHash.Zcash.hash iterator in
-      if not (Jubjub.Affine.eq output expected_output) then
+      if not (Jubjub.AffineEdwards.eq output expected_output) then
         Alcotest.failf
           "On input [%s] (length = %d), expected output (u=%s, v=%s), computed \
            output (u=%s, v=%s)"
@@ -25,12 +25,14 @@ let test_vector_from_zcash_primitives () =
              ", "
              (List.map (fun b -> if b then "1" else "0") input))
           (List.length input)
-          ( Jubjub.Affine.Base.to_string
-          @@ Jubjub.Affine.get_u_coordinate expected_output )
-          ( Jubjub.Affine.Base.to_string
-          @@ Jubjub.Affine.get_v_coordinate expected_output )
-          (Jubjub.Affine.Base.to_string @@ Jubjub.Affine.get_u_coordinate output)
-          (Jubjub.Affine.Base.to_string @@ Jubjub.Affine.get_v_coordinate output))
+          ( Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_u_coordinate expected_output )
+          ( Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_v_coordinate expected_output )
+          ( Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_u_coordinate output )
+          ( Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_v_coordinate output ))
     vectors
 
 let test_zcash_bitstring_too_long () =

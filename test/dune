@@ -3,7 +3,7 @@
 (tests
  (names test_babyjubjub test_babyjubjub_reduced test_bls12_381_affine
    test_bls12_381_projective test_bn254_affine test_bn254_jacobian
-   test_bn254_projective test_curve25519
+   test_bn254_projective test_curve25519_affine_edwards
    test_curve25519_conversions_between_forms test_curve25519_montgomery
    test_curve448 test_digestif test_ec_functor test_find_group_hash
    test_iso_pallas_affine test_iterator test_jubjub

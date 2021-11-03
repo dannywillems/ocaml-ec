@@ -1126,6 +1126,11 @@ module MakeAffineEdwards
 struct
   (* https://www.hyperelliptic.org/EFD/g1p/auto-twisted.html *)
   (* https://en.wikipedia.org/wiki/Twisted_Edwards_curve *)
+
+  (* Summary for the complexity:
+     Addition: 2A + 2AC + 5M + 2MC + 2N + 2DI
+     Doubling: 3A + 1AC + 1M + 1MC + 2N + 2DI + 1DO + 2SQ
+  *)
   exception Not_on_curve of Bytes.t
 
   module Scalar = Scalar
@@ -1147,6 +1152,9 @@ struct
   let to_bytes { u; v } =
     Bytes.concat Bytes.empty [Base.to_bytes u; Base.to_bytes v]
 
+  (* Complexity (update above summary if any change):
+     2A + 2AC + 5M + 2MC + 2N + 2DI
+  *)
   let add { u = u1; v = v1 } { u = u2; v = v2 } =
     let u1v2 = Base.(u1 * v2) in
     let v1u2 = Base.(v1 * u2) in
@@ -1161,15 +1169,22 @@ struct
     in
     { u; v }
 
+  (* used in doubling *)
+  let two = Base.(one + one)
+
+  (* Complexity (update above summary if any change)
+     3A + 1AC + 1M + 1MC + 2N + 2DI + 1DO + 2SQ
+  *)
   let double { u; v } =
     let uv = Base.(u * v) in
     let uu = Base.square u in
     let vv = Base.square v in
     let neg_uu = Base.negate uu in
     let neg_vv = Base.negate vv in
+    let a_neguu = Base.(a * neg_uu) in
     (* a u^2 v^2 = 1 + d u^2 v^2 --> we can skip one multiplication *)
-    let u' = Base.(double uv / ((a * uu) + vv)) in
-    let v' = Base.((vv + (a * neg_uu)) / (one + one + (a * neg_uu) + neg_vv)) in
+    let u' = Base.(double uv / (a_neguu + vv)) in
+    let v' = Base.((vv + a_neguu) / (two + a_neguu + neg_vv)) in
     { u = u'; v = v' }
 
   let negate { u; v } = { u = Base.negate u; v }

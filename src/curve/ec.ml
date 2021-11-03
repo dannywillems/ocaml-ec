@@ -65,6 +65,11 @@ struct
 
   let b = Params.b
 
+  (* checking the curve is non-singular *)
+  let () =
+    if Base.is_zero Base.((a * square a) + (of_string "27" * square b)) then
+      failwith "a^3 + 27 * b^2 must be different than zero"
+
   let cofactor = Params.cofactor
 
   type t = { x : Fq.t; y : Fq.t; z : Fq.t }
@@ -272,6 +277,11 @@ struct
   let a = Params.a
 
   let b = Params.b
+
+  (* checking the curve is non-singular *)
+  let () =
+    if Base.is_zero Base.((a * square a) + (of_string "27" * square b)) then
+      failwith "a^3 + 27 * b^2 must be different than zero"
 
   let cofactor = Params.cofactor
 
@@ -558,6 +568,11 @@ struct
   let a = Params.a
 
   let b = Params.b
+
+  (* checking the curve is non-singular *)
+  let () =
+    if Base.is_zero Base.((a * square a) + (of_string "27" * square b)) then
+      failwith "a^3 + 27 * b^2 must be different than zero"
 
   let cofactor = Params.cofactor
 

@@ -53,9 +53,6 @@ let test_vectors () =
       assert (Mec.Curve.Jubjub.AffineEdwards.check_bytes bytes))
     points
 
-let test_random_is_not_small_order () =
-  assert (not Mec.Curve.Jubjub.AffineEdwards.(is_small_order (random ())))
-
 let test_random_points_not_on_curve () =
   (* pick random values u and v and test constructors fail *)
   let u = Mec.Curve.Jubjub.AffineEdwards.Base.random () in
@@ -698,11 +695,7 @@ let () =
     ~verbose:true
     "Jubjub"
     [ ( "Vectors",
-        [ Alcotest.test_case
-            "test random elements are in the prime subgroup"
-            `Quick
-            (Mec.Curve.Utils.PBT.repeat 1000 test_random_is_not_small_order);
-          Alcotest.test_case "test vectors elements" `Quick test_vectors ] );
+        [Alcotest.test_case "test vectors elements" `Quick test_vectors] );
       ( "Compressed/Uncompressed",
         [ Alcotest.test_case
             "Correct point; uncompressed_exn"

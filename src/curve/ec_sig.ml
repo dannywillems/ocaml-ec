@@ -79,7 +79,16 @@ module type AffineWeierstrassT = sig
 
      val to_montgomery : t -> (Base.t * Base.t) option *)
 
-  val is_in_prime_subgroup : t -> bool
+  (** [is_on_curve ~x ~y] returns [true] if the coordinates [(x, y)] represents
+      a point on the curve. It does not check the point is in the prime subgroup.
+  *)
+  val is_on_curve : x:Base.t -> y:Base.t -> bool
+
+  (** [is_in_prime_subgroup ~x ~y] returns [true] if the coordinates [(x, y)]
+      represents a point in the prime subgroup. The coordinates must be a point
+      on the curve
+  *)
+  val is_in_prime_subgroup : x:Base.t -> y:Base.t -> bool
 
   (** Build a point from the affine coordinates. If the point is not on the curve
       and in the subgroup, returns [None]
@@ -110,6 +119,18 @@ end
 module type ProjectiveWeierstrassT = sig
   include WeierstrassT
 
+  (** [is_on_curve ~x ~y ~z] returns [true] if the coordinates [(x, y, z)]
+      represents a point on the curve. It does not check the point is in the
+      prime subgroup.
+  *)
+  val is_on_curve : x:Base.t -> y:Base.t -> z:Base.t -> bool
+
+  (** [is_in_prime_subgroup ~x ~y ~z] returns [true] if the coordinates
+      [(x, y, z)] represents a point in the prime subgroup. The coordinates must
+      be a point on the curve.
+  *)
+  val is_in_prime_subgroup : x:Base.t -> y:Base.t -> z:Base.t -> bool
+
   val get_x_coordinate : t -> Base.t
 
   val get_y_coordinate : t -> Base.t
@@ -137,6 +158,17 @@ end
 
 module type JacobianWeierstrassT = sig
   include WeierstrassT
+
+  (** [is_on_curve ~x ~y ~z] returns [true] if the coordinates [(x, y, z)] represents
+      a point on the curve. It does not check the point is in the prime subgroup.
+  *)
+  val is_on_curve : x:Base.t -> y:Base.t -> z:Base.t -> bool
+
+  (** [is_in_prime_subgroup ~x ~y ~z] returns [true] if the coordinates [(x, y, z)]
+      represents a point in the prime subgroup. The coordinates must be a point
+      on the curve
+  *)
+  val is_in_prime_subgroup : x:Base.t -> y:Base.t -> z:Base.t -> bool
 
   val get_x_coordinate : t -> Base.t
 
@@ -177,6 +209,17 @@ module type AffineMontgomeryT = sig
   (** by^2 = x3 + ax^2 + x with b * (a^2 - 4) != 0*)
   include MontgomeryT
 
+  (** [is_on_curve ~x ~y] returns [true] if the coordinates [(x, y)] represents
+      a point on the curve. It does not check the point is in the prime subgroup.
+  *)
+  val is_on_curve : x:Base.t -> y:Base.t -> bool
+
+  (** [is_in_prime_subgroup ~x ~y] returns [true] if the coordinates [(x, y)]
+      represents a point in the prime subgroup. The coordinates must be a point
+      on the curve
+  *)
+  val is_in_prime_subgroup : x:Base.t -> y:Base.t -> bool
+
   val get_x_coordinate : t -> Base.t
 
   val get_y_coordinate : t -> Base.t
@@ -190,8 +233,6 @@ module type AffineMontgomeryT = sig
     unit -> (Base.t * Base.t * Z.t * (Base.t * Base.t)) option
 
   val to_weierstrass : t -> (Base.t * Base.t) option
-
-  val is_in_prime_subgroup : t -> bool
 
   (** Build a point from the affine coordinates. If the point is not on the curve
       and in the subgroup, returns [None]
@@ -234,16 +275,16 @@ module type AffineEdwardsT = sig
   *)
   val cofactor : Z.t
 
-  (** [is_small_order p] returns [true] if [p] is of order [cofactor] *)
-  val is_small_order : t -> bool
+  (** [is_on_curve ~u ~v] returns [true] if the coordinates [(u, v)] represents
+      a point on the curve. It does not check the point is in the prime subgroup.
+  *)
+  val is_on_curve : u:Base.t -> v:Base.t -> bool
 
-  (** Returns [true] if the element is torsion free, i.e. is in the prime subgroup *)
-  val is_torsion_free : t -> bool
-
-  (** Returns [true] if the element is of prime order, i.e. is torsion free and
-      is not the identity
-   *)
-  val is_prime_order : t -> bool
+  (** [is_in_prime_subgroup ~u ~v] returns [true] if the coordinates [(u, v)]
+      represents a point in the prime subgroup. The coordinates must be a point
+      on the curve
+  *)
+  val is_in_prime_subgroup : u:Base.t -> v:Base.t -> bool
 
   (** Return the affine coordinate u (such that au^2 + v^2 = 1 + d u^2 v^2 *)
   val get_u_coordinate : t -> Base.t

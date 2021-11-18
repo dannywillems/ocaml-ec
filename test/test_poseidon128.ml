@@ -85,6 +85,20 @@ let test_vectors_poseidon_orchard () =
       assert (Scalar.eq v exp_res))
     test_inputs
 
+let test_no_padding () =
+  List.iter
+    (fun _ ->
+      let x = Scalar.random () in
+      let ctxt = Poseidon.Hash.init () in
+      let ctxt = Poseidon.Hash.digest ctxt [| x |] in
+      let v = Poseidon.Hash.get ctxt in
+
+      let ctxt = Poseidon.Hash.init ~input_length:2 () in
+      let ctxt = Poseidon.Hash.digest ctxt [| x; Scalar.one |] in
+      let v' = Poseidon.Hash.get ctxt in
+      assert (Scalar.eq v v'))
+    (List.init 10 (fun _i -> _i))
+
 let () =
   Alcotest.run
     ~verbose:true
@@ -96,7 +110,9 @@ let () =
         [ Alcotest.test_case
             "Test vectors from zcash-hackworks/zcash-test-vectors"
             `Quick
-            test_vectors_hades_orchard ] )
+            test_vectors_hades_orchard ] );
+      ( "No padding",
+        [Alcotest.test_case "Inputs of length 2" `Quick test_no_padding] )
       (* ( "Test vectors for Poseidon Poseidon128",
        *   [ Alcotest.test_case
        *       "Test vectors from zcash-hackworks/zcash-test-vectors"

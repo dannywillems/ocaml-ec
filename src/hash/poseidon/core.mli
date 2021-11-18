@@ -16,6 +16,9 @@ module type PARAMETERS = sig
 
   (** The index of the element of the state to permute during the partial rounds *)
   val partial_round_idx_to_permute : int
+
+  (** Boolean to specify the use of padding (no padding should only be used on fixed-length inputs) *)
+  val with_padding : bool
 end
 
 (** A HADES strategy, for a constant length construction *)

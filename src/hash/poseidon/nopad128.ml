@@ -11,7 +11,7 @@ module Constant : Core.PARAMETERS = struct
 
   let partial_round_idx_to_permute = 0
 
-  let with_padding = true
+  let with_padding = false
 end
 
 module Make (Scalar : Ff_sig.PRIME) = Core.Make (Constant) (Scalar)

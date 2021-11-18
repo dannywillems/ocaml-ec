@@ -10,6 +10,8 @@ module Constant : Core.PARAMETERS = struct
   let round_constants = Ark_poseidon252.v
 
   let partial_round_idx_to_permute = 4
+
+  let with_padding = true
 end
 
 module Make (Scalar : Ff_sig.PRIME) = Core.Make (Constant) (Scalar)

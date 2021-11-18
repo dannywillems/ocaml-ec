@@ -10,6 +10,8 @@ module type PARAMETERS = sig
   val mds_matrix : string array array
 
   val partial_round_idx_to_permute : int
+
+  val with_padding : bool
 end
 
 module type STRATEGY = sig
@@ -137,7 +139,7 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
     let digest state data =
       let l = Array.length data in
       let chunk_size = width - 1 in
-      let nb_full_chunk = l / chunk_size in
+      let nb_full_chunk = (l - if with_padding then 0 else 1) / chunk_size in
       let r = l mod chunk_size in
       (* we process first all the full chunks *)
       for i = 0 to nb_full_chunk - 1 do
@@ -148,11 +150,12 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
         Strategy.apply_perm state
       done ;
       (* we add the last partial chunk, add pad with one *)
+      let r = if with_padding then r else l - (nb_full_chunk * (width - 1)) in
       for j = 0 to r - 1 do
         let idx = 1 + j in
         Strategy.add_cst state idx data.((nb_full_chunk * chunk_size) + j)
       done ;
-      Strategy.add_cst state (r + 1) Scalar.one ;
+      if with_padding then Strategy.add_cst state (r + 1) Scalar.one ;
       Strategy.apply_perm state ;
       state
 

@@ -1181,9 +1181,10 @@ struct
     let vv = Base.square v in
     let neg_uu = Base.negate uu in
     let neg_vv = Base.negate vv in
+    let a_uu = Base.(a * uu) in
     let a_neguu = Base.(a * neg_uu) in
     (* a u^2 v^2 = 1 + d u^2 v^2 --> we can skip one multiplication *)
-    let u' = Base.(double uv / (a_neguu + vv)) in
+    let u' = Base.(double uv / (a_uu + vv)) in
     let v' = Base.((vv + a_neguu) / (two + a_neguu + neg_vv)) in
     { u = u'; v = v' }
 

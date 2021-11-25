@@ -16,47 +16,40 @@ module type PARAMETERS = sig
 
   (** The index of the element of the state to permute during the partial rounds *)
   val partial_round_idx_to_permute : int
-
-  (** Boolean to specify the use of padding (no padding should only be used on fixed-length inputs) *)
-  val with_padding : bool
 end
 
-(** A HADES strategy, for a constant length construction *)
-module type STRATEGY = sig
-  type scalar
+module type FIXED_INPUT_LENGTH_PARAMETERS = sig
+  include PARAMETERS
 
-  (** The state of the strategy *)
-  type state
-
-  (** Initialize the state with the given input. The input must be the same length than the width *)
-  val init : scalar array -> state
-
-  (** Apply a permutation round *)
-  val apply_perm : state -> unit
-
-  (** Return the current scalar elements in the state *)
-  val get : state -> scalar array
+  val fixed_input_length : int
 end
 
-module type HASH = sig
+module MakeVariableLengthInput : functor
+  (C : PARAMETERS)
+  (Scalar : Ff_sig.PRIME)
+  -> sig
   type scalar
 
   type ctxt
 
-  (** Initialize a raw hash context *)
-  val init : unit -> ctxt
+  val init : scalar array -> ctxt
 
-  (** [hash ctxt input] computes the hash of the given input. The input must be
-      of length [width - 1]
-  *)
-  val digest : ctxt -> scalar array -> ctxt
+  val apply_perm : ctxt -> ctxt
 
-  (** [get ctxt] returns the resulting point after [hash] has been called *)
   val get : ctxt -> scalar
+
+  val digest : scalar array -> scalar
 end
 
-module Make : functor (C : PARAMETERS) (Scalar : Ff_sig.PRIME) -> sig
-  module Strategy : STRATEGY with type scalar = Scalar.t
+module MakeFixedLengthInput : functor
+  (C : FIXED_INPUT_LENGTH_PARAMETERS)
+  (Scalar : Ff_sig.PRIME)
+  -> sig
+  type scalar
 
-  module Hash : HASH with type scalar = Scalar.t
+  type ctxt
+
+  val digest : scalar array -> ctxt
+
+  val get : ctxt -> scalar
 end

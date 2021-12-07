@@ -25,14 +25,17 @@ module type STRATEGY = sig
   (** The state of the strategy *)
   type state
 
-  (** Initialize the state with the given input. The input must be the same length than the width *)
-  val init : scalar array -> state
+  (** Initialize the state with the given input *)
+  val init : ?input_length:int -> scalar array -> state
 
   (** Apply a permutation round *)
   val apply_perm : state -> unit
 
   (** Return the current scalar elements in the state *)
   val get : state -> scalar array
+
+  (** Return the expected input length if specified *)
+  val input_length : state -> int option
 end
 
 module type HASH = sig
@@ -41,18 +44,16 @@ module type HASH = sig
   type ctxt
 
   (** Initialize a raw hash context *)
-  val init : unit -> ctxt
+  val init : ?input_length:int -> unit -> ctxt
 
-  (** [hash ctxt input] computes the hash of the given input. The input must be
-      of length [width - 1]
-  *)
+  (** [digest ctxt input] computes the hash of the given input *)
   val digest : ctxt -> scalar array -> ctxt
 
   (** [get ctxt] returns the resulting point after [hash] has been called *)
   val get : ctxt -> scalar
 end
 
-module Make : functor (C : PARAMETERS) (Scalar : Ff_sig.PRIME) -> sig
+module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) : sig
   module Strategy : STRATEGY with type scalar = Scalar.t
 
   module Hash : HASH with type scalar = Scalar.t

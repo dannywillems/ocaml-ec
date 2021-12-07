@@ -17,11 +17,13 @@ module type STRATEGY = sig
 
   type state
 
-  val init : scalar array -> state
+  val init : ?input_length:int -> scalar array -> state
 
   val apply_perm : state -> unit
 
   val get : state -> scalar array
+
+  val input_length : state -> int option
 end
 
 module type HASH = sig
@@ -29,7 +31,7 @@ module type HASH = sig
 
   type ctxt
 
-  val init : unit -> ctxt
+  val init : ?input_length:int -> unit -> ctxt
 
   val digest : ctxt -> scalar array -> ctxt
 
@@ -54,9 +56,14 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
   module Strategy = struct
     type scalar = Scalar.t
 
-    type state = { mutable i_round_key : int; state : Scalar.t array }
+    type state =
+      { mutable i_round_key : int;
+        state : Scalar.t array;
+        input_length : int option
+      }
 
-    let init state = { i_round_key = 0; state = Array.copy state }
+    let init ?input_length state =
+      { i_round_key = 0; state = Array.copy state; input_length }
 
     let get_next_round_key s =
       let v = round_constants.(s.i_round_key) in
@@ -123,6 +130,8 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
     let add_cst s idx v =
       assert (idx <= width) ;
       s.state.(idx) <- Scalar.(s.state.(idx) + v)
+
+    let input_length s = s.input_length
   end
 
   module Hash = struct
@@ -130,14 +139,26 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
 
     type ctxt = Strategy.state
 
-    let init () =
-      let state = Strategy.init (Array.make width Scalar.zero) in
-      state
+    let init ?input_length () =
+      let state = Array.make width Scalar.zero in
+      match input_length with
+      | None -> Strategy.init state
+      | Some input_length -> Strategy.init ~input_length state
 
     let digest state data =
       let l = Array.length data in
+      let assert_length expected =
+        let error_msg =
+          Format.sprintf "digest expects data of length %d, %d given" expected l
+        in
+        if l <> expected then raise @@ Invalid_argument error_msg
+      in
+      let input_length_opt = Strategy.input_length state in
+      Option.iter assert_length input_length_opt ;
+      let with_padding = Option.is_none input_length_opt in
+
       let chunk_size = width - 1 in
-      let nb_full_chunk = l / chunk_size in
+      let nb_full_chunk = (l - if with_padding then 0 else 1) / chunk_size in
       let r = l mod chunk_size in
       (* we process first all the full chunks *)
       for i = 0 to nb_full_chunk - 1 do
@@ -148,11 +169,12 @@ module Make (C : PARAMETERS) (Scalar : Ff_sig.PRIME) = struct
         Strategy.apply_perm state
       done ;
       (* we add the last partial chunk, add pad with one *)
+      let r = if with_padding then r else l - (nb_full_chunk * (width - 1)) in
       for j = 0 to r - 1 do
         let idx = 1 + j in
         Strategy.add_cst state idx data.((nb_full_chunk * chunk_size) + j)
       done ;
-      Strategy.add_cst state (r + 1) Scalar.one ;
+      if with_padding then Strategy.add_cst state (r + 1) Scalar.one ;
       Strategy.apply_perm state ;
       state
 

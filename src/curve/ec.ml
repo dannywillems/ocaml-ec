@@ -145,7 +145,7 @@ struct
       if Z.equal n Z.zero then zero
       else if Z.equal n Z.one then x
       else
-        let (a, r) = Z.ediv_rem n two_z in
+        let a, r = Z.ediv_rem n two_z in
         if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
     aux x (Scalar.to_z n)
@@ -176,9 +176,9 @@ struct
       let y = Fq.of_bytes_opt y_bytes in
       let z = Fq.of_bytes_opt z_bytes in
       match (x, y, z) with
-      | (None, _, _) | (_, None, _) | (_, _, None) -> None
+      | None, _, _ | _, None, _ | _, _, None -> None
       (* Verify it is on the curve *)
-      | (Some x, Some y, Some z) ->
+      | Some x, Some y, Some z ->
           if Fq.is_zero x && Fq.is_zero z then Some zero
           else if Fq.is_zero z then None
           else if is_on_curve ~x ~y ~z && is_in_prime_subgroup ~x ~y ~z then
@@ -308,9 +308,9 @@ struct
 
   let eq t1 t2 =
     match (t1, t2) with
-    | (Infinity, Infinity) -> true
-    | (Infinity, _) | (_, Infinity) -> false
-    | (P (x1, y1), P (x2, y2)) -> Fq.(x1 = x2 && y1 = y2)
+    | Infinity, Infinity -> true
+    | Infinity, _ | _, Infinity -> false
+    | P (x1, y1), P (x2, y2) -> Fq.(x1 = x2 && y1 = y2)
 
   let double t =
     match t with
@@ -328,19 +328,19 @@ struct
         let y3 =
           Fq.(
             (triple_x * xx_3_plus_a / double_y)
-            + ( negate (square xx_3_plus_a * xx_3_plus_a)
-                / (square_double_y * double_y)
-              + negate y ))
+            + (negate (square xx_3_plus_a * xx_3_plus_a)
+               / (square_double_y * double_y)
+              + negate y))
         in
         P (x3, y3)
 
   (* https://hyperelliptic.org/EFD/g1p/auto-shortw.html *)
   let add t1 t2 =
     match (t1, t2) with
-    | (Infinity, t2) -> t2
-    | (t1, Infinity) -> t1
-    | (t1, t2) when eq t1 t2 -> double t1
-    | (P (x1, y1), P (x2, y2)) ->
+    | Infinity, t2 -> t2
+    | t1, Infinity -> t1
+    | t1, t2 when eq t1 t2 -> double t1
+    | P (x1, y1), P (x2, y2) ->
         if Fq.(x1 = x2 && y1 = negate y2) then Infinity
         else
           let y2_min_y1 = Fq.(y2 + negate y1) in
@@ -367,7 +367,7 @@ struct
       if Z.equal n Z.zero then zero
       else if Z.equal n Z.one then x
       else
-        let (a, r) = Z.ediv_rem n two_z in
+        let a, r = Z.ediv_rem n two_z in
         if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
     aux x (Scalar.to_z n)
@@ -388,9 +388,9 @@ struct
         let x = Fq.of_bytes_opt x_bytes in
         let y = Fq.of_bytes_opt y_bytes in
         match (x, y) with
-        | (None, _) | (_, None) -> None
+        | None, _ | _, None -> None
         (* Verify it is on the curve *)
-        | (Some x, Some y) ->
+        | Some x, Some y ->
             if is_on_curve ~x ~y && is_in_prime_subgroup ~x ~y then
               Some (P (x, y))
             else None
@@ -517,7 +517,7 @@ struct
           match y with
           | Some y ->
               if is_in_prime_subgroup ~x ~y then Some (P (x, y)) else None
-          | None -> None )
+          | None -> None)
 
   let of_compressed_bytes_exn b =
     match of_compressed_bytes_opt b with
@@ -654,7 +654,7 @@ struct
       if Z.equal n Z.zero then zero
       else if Z.equal n Z.one then x
       else
-        let (a, r) = Z.ediv_rem n two_z in
+        let a, r = Z.ediv_rem n two_z in
         if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
     aux x (Scalar.to_z n)
@@ -675,9 +675,9 @@ struct
       let y = Fq.of_bytes_opt y_bytes in
       let z = Fq.of_bytes_opt z_bytes in
       match (x, y, z) with
-      | (None, _, _) | (_, None, _) | (_, _, None) -> None
+      | None, _, _ | _, None, _ | _, _, None -> None
       (* Verify it is on the curve *)
-      | (Some x, Some y, Some z) ->
+      | Some x, Some y, Some z ->
           if Fq.is_zero x && Fq.is_zero z then Some zero
           else if Fq.is_zero z then None
           else if is_on_curve ~x ~y ~z && is_in_prime_subgroup ~x ~y ~z then
@@ -813,9 +813,9 @@ struct
 
   let eq t1 t2 =
     match (t1, t2) with
-    | (Infinity, Infinity) -> true
-    | (Infinity, _) | (_, Infinity) -> false
-    | (P (x1, y1), P (x2, y2)) -> Fq.(x1 = x2 && y1 = y2)
+    | Infinity, Infinity -> true
+    | Infinity, _ | _, Infinity -> false
+    | P (x1, y1), P (x2, y2) -> Fq.(x1 = x2 && y1 = y2)
 
   (* The operation for adding two points are the same whether we add the same or
      distinct points
@@ -880,10 +880,10 @@ struct
   *)
   let add t1 t2 =
     match (t1, t2) with
-    | (Infinity, t2) -> t2
-    | (t1, Infinity) -> t1
-    | (t1, t2) when eq t1 t2 -> double t1
-    | (P (x1, y1), P (x2, y2)) ->
+    | Infinity, t2 -> t2
+    | t1, Infinity -> t1
+    | t1, t2 when eq t1 t2 -> double t1
+    | P (x1, y1), P (x2, y2) ->
         if Fq.(x1 = x2 && y1 = negate y2) then Infinity
         else
           (* slope = (y2 - y1) / (x2 - x1) *)
@@ -919,7 +919,7 @@ struct
       if Z.equal n Z.zero then zero
       else if Z.equal n Z.one then x
       else
-        let (a, r) = Z.ediv_rem n two_z in
+        let a, r = Z.ediv_rem n two_z in
         if Z.equal r Z.zero then aux (double x) a else add x (aux x (Z.pred n))
     in
     aux x (Scalar.to_z n)
@@ -945,9 +945,9 @@ struct
         let x = Fq.of_bytes_opt x_bytes in
         let y = Fq.of_bytes_opt y_bytes in
         match (x, y) with
-        | (None, _) | (_, None) -> None
+        | None, _ | _, None -> None
         (* Verify it is on the curve *)
-        | (Some x, Some y) ->
+        | Some x, Some y ->
             if is_on_curve ~x ~y && is_in_prime_subgroup ~x ~y then
               Some (P (x, y))
             else None
@@ -1083,7 +1083,7 @@ struct
           | Some y ->
               let p = P (x, y) in
               if is_in_prime_subgroup ~x ~y then Some p else None
-          | None -> None )
+          | None -> None)
 
   let of_compressed_bytes_exn b =
     match of_compressed_bytes_opt b with
@@ -1198,7 +1198,7 @@ struct
       if Z.equal n Z.zero then zero
       else if Z.equal n Z.one then x
       else
-        let (q, r) = Z.ediv_rem n two_z in
+        let q, r = Z.ediv_rem n two_z in
         let x_plus_x = double x in
         if Z.equal r Z.zero then aux x_plus_x q else add x (aux x_plus_x q)
     in
@@ -1225,7 +1225,7 @@ struct
         Base.of_bytes_opt (Bytes.sub b Base.size_in_bytes Base.size_in_bytes)
       in
       match (u_opt, v_opt) with
-      | (Some u, Some v) ->
+      | Some u, Some v ->
           if is_on_curve ~u ~v && is_in_prime_subgroup ~u ~v then Some { u; v }
           else None
       | _ -> None
@@ -1267,9 +1267,8 @@ struct
   (* https://en.wikipedia.org/wiki/Montgomery_curve *)
   let to_montgomery p =
     match (p.u, p.v) with
-    | (u, v) when Base.(is_zero u && is_one v) ->
-        raise (Invalid_argument "Zero")
-    | (u, v) ->
+    | u, v when Base.(is_zero u && is_one v) -> raise (Invalid_argument "Zero")
+    | u, v ->
         assert (not Base.(eq a d)) ;
         if Base.is_zero u || Base.(is_zero (one + v)) then None
         else

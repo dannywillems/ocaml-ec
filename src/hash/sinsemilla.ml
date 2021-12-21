@@ -24,7 +24,7 @@ struct
       if Iterator.Bit.is_processed iterator then acc
       else
         let m_j_bits = Iterator.Bit.get_chunk iterator Params.chunk_size in
-        let (m_j, _) =
+        let m_j, _ =
           List.fold_left
             (fun (acc, i) b -> (acc + ((1 lsl i) * b), i + 1))
             (0, 0)

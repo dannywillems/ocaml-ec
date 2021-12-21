@@ -7,7 +7,7 @@ let rec repeat n f =
     f
   else (
     f () ;
-    repeat (n - 1) f )
+    repeat (n - 1) f)
 
 let test_generation () =
   let pt_ed1 = AffineEdwards.random () in

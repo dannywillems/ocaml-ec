@@ -25,14 +25,14 @@ let test_vector_from_zcash_primitives () =
              ", "
              (List.map (fun b -> if b then "1" else "0") input))
           (List.length input)
-          ( Jubjub.AffineEdwards.Base.to_string
-          @@ Jubjub.AffineEdwards.get_u_coordinate expected_output )
-          ( Jubjub.AffineEdwards.Base.to_string
-          @@ Jubjub.AffineEdwards.get_v_coordinate expected_output )
-          ( Jubjub.AffineEdwards.Base.to_string
-          @@ Jubjub.AffineEdwards.get_u_coordinate output )
-          ( Jubjub.AffineEdwards.Base.to_string
-          @@ Jubjub.AffineEdwards.get_v_coordinate output ))
+          (Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_u_coordinate expected_output)
+          (Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_v_coordinate expected_output)
+          (Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_u_coordinate output)
+          (Jubjub.AffineEdwards.Base.to_string
+          @@ Jubjub.AffineEdwards.get_v_coordinate output))
     vectors
 
 let test_zcash_bitstring_too_long () =

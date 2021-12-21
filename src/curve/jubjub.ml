@@ -32,29 +32,30 @@ module AffineEdwards : sig
 
   val to_compressed : t -> Bytes.t
 end = struct
-  include Ec.MakeAffineEdwards (Base) (Scalar)
-            (struct
-              let a = Base.(negate one)
+  include
+    Ec.MakeAffineEdwards (Base) (Scalar)
+      (struct
+        let a = Base.(negate one)
 
-              let d =
-                Base.of_string
-                  "19257038036680949359750312669786877991949435402254120286184196891950884077233"
+        let d =
+          Base.of_string
+            "19257038036680949359750312669786877991949435402254120286184196891950884077233"
 
-              let cofactor = Z.of_string "8"
+        let cofactor = Z.of_string "8"
 
-              let bytes_generator =
-                Bytes.concat
-                  Bytes.empty
-                  [ Base.(
-                      to_bytes
-                        (of_string
-                           "8076246640662884909881801758704306714034609987455869804520522091855516602923"));
-                    Base.(
-                      to_bytes
-                        (of_string
-                           "13262374693698910701929044844600465831413122818447359594527400194675274060458"))
-                  ]
-            end)
+        let bytes_generator =
+          Bytes.concat
+            Bytes.empty
+            [ Base.(
+                to_bytes
+                  (of_string
+                     "8076246640662884909881801758704306714034609987455869804520522091855516602923"));
+              Base.(
+                to_bytes
+                  (of_string
+                     "13262374693698910701929044844600465831413122818447359594527400194675274060458"))
+            ]
+      end)
 
   let of_compressed_opt b =
     (* required to avoid side effect! *)
@@ -99,7 +100,7 @@ end = struct
           in
           match u with
           | Some u -> Some (unsafe_from_coordinates ~u ~v)
-          | None -> None )
+          | None -> None)
 
   let of_compressed_exn b =
     match of_compressed_opt b with

@@ -31,13 +31,13 @@ let rec repeat n f =
     f
   else (
     f () ;
-    repeat (n - 1) f )
+    repeat (n - 1) f)
 
 (*
   Generated using find_group_hash with the personalisation "Zcash_G_". Used by
   Zcash for the nullifiers
 *)
-let (u, v) =
+let u, v =
   ( "0x0926d4f32059c712d418a7ff26753b6ad5b9a7d3ef8e282747bf46920a95a753",
     "0x57a1019e6de9b67553bb37d0c21cfd056d65674dcedbddbc305632adaaf2b530" )
 
@@ -142,8 +142,7 @@ let test_vectors () =
           Hex.(show (of_bytes signature_bytes)) ;
       (* Let's verify at the same time *)
       assert (
-        RedJubjub.verify (Jubjub.AffineEdwards.mul generator sk) msg signature
-      ))
+        RedJubjub.verify (Jubjub.AffineEdwards.mul generator sk) msg signature))
     vectors
 
 let () =

@@ -1,5 +1,5 @@
 (* Test vectors from
-https://github.com/zcash/librustzcash/blob/de1345a1c2f10b0843ab1f1ea6463b2330fdc673/zcash_primitives/src/test_vectors/pedersen_hash_vectors.rs *)
+   https://github.com/zcash/librustzcash/blob/de1345a1c2f10b0843ab1f1ea6463b2330fdc673/zcash_primitives/src/test_vectors/pedersen_hash_vectors.rs *)
 
 let vectors =
   [ ( [true; true; true; true; true; true],

@@ -31,7 +31,7 @@ struct
       match generators with
       | [] -> raise (Invalid_argument "Not enough generators")
       | generator :: generators ->
-          let (sum_m_j, fully_processed) = compute_m_j Ec.Scalar.zero 1 in
+          let sum_m_j, fully_processed = compute_m_j Ec.Scalar.zero 1 in
           (* compute segment i *)
           let m_i = Ec.(mul generator sum_m_j) in
           let acc_res = Ec.(add m_i acc_res) in

@@ -37,7 +37,7 @@ let test_vectors () =
         Option.is_some
           (Mec.Curve.Jubjub.AffineEdwards.from_coordinates_opt
              ~u:(Mec.Curve.Jubjub.AffineEdwards.Base.of_string u)
-             ~v:(Mec.Curve.Jubjub.AffineEdwards.Base.of_string v)) ) ;
+             ~v:(Mec.Curve.Jubjub.AffineEdwards.Base.of_string v))) ;
       (* convert to bytes. Use Zarith for simplicity as points are given in hexa *)
       let bytes =
         Bytes.concat
@@ -68,16 +68,15 @@ let test_random_points_not_on_curve () =
   (* of_bytes_opt *)
   assert (Option.is_none (Mec.Curve.Jubjub.AffineEdwards.of_bytes_opt bytes)) ;
   (* of_bytes_exn *)
-  ( try
-      ignore (Mec.Curve.Jubjub.AffineEdwards.of_bytes_exn bytes) ;
-      assert false
-    with
+  (try
+     ignore (Mec.Curve.Jubjub.AffineEdwards.of_bytes_exn bytes) ;
+     assert false
+   with
   | Mec.Curve.Jubjub.AffineEdwards.Not_on_curve _ -> ()
-  | _ -> assert false ) ;
+  | _ -> assert false) ;
   (* from_coordinates_opt *)
   assert (
-    Option.is_none (Mec.Curve.Jubjub.AffineEdwards.from_coordinates_opt ~u ~v)
-  ) ;
+    Option.is_none (Mec.Curve.Jubjub.AffineEdwards.from_coordinates_opt ~u ~v)) ;
   (* from_coordinates_exn *)
   try
     ignore (Mec.Curve.Jubjub.AffineEdwards.from_coordinates_exn ~u ~v) ;
@@ -92,13 +91,13 @@ let test_compressed_uncompressed_zero () =
   in
   assert (
     Mec.Curve.Jubjub.AffineEdwards.(
-      Bytes.equal (to_compressed zero) expected_encoding_of_zero) ) ;
+      Bytes.equal (to_compressed zero) expected_encoding_of_zero)) ;
   assert (
     Mec.Curve.Jubjub.AffineEdwards.(
-      eq zero (of_compressed_exn expected_encoding_of_zero)) ) ;
+      eq zero (of_compressed_exn expected_encoding_of_zero))) ;
   assert (
     Mec.Curve.Jubjub.AffineEdwards.(
-      eq zero (Option.get @@ of_compressed_opt expected_encoding_of_zero)) )
+      eq zero (Option.get @@ of_compressed_opt expected_encoding_of_zero)))
 
 let test_compressed_and_uncompressed_exn () =
   let p = Mec.Curve.Jubjub.AffineEdwards.random () in
@@ -137,7 +136,7 @@ let rec test_uncompressed_fail_on_random_values () =
     | _ -> assert false
 
 let test_vector_compressed_and_uncompressed () =
-  let (u_bytes, v_bytes) =
+  let u_bytes, v_bytes =
     ( "0x62edcbb8bf3787c88b0f03ddd60a8187caf55d1b29bf81afe4b3d35df1a7adfe",
       "0x000000000000000000000000000000000000000000000000000000000000000b" )
   in

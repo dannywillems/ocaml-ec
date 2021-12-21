@@ -92,7 +92,7 @@ let compute_number_of_rounds p width alpha security_level =
       values
   in
   let l = List.filter (fun (b, _, _, _) -> b) l in
-  let (values_with_minimum_cost, cost) =
+  let values_with_minimum_cost, cost =
     List.fold_left
       (fun (acc, min_cost) (_, cost, r_f, r_p) ->
         if cost > min_cost then (acc, min_cost)
@@ -114,7 +114,7 @@ let command =
       and field_size = anon ("field-size" %: string) in
       fun () ->
         let field_size = Z.of_string field_size in
-        let (values, cost) =
+        let values, cost =
           compute_number_of_rounds field_size width alpha security_level
         in
         Printf.printf "Found values with cost %d:\n" cost ;

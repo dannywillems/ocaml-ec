@@ -16,7 +16,7 @@ module Bit = struct
           i := !i + 1 ;
           current_byte_int := Bytes.get_uint8 b !i ;
           j := 0 ;
-          f () )
+          f ())
         else
           let b = !current_byte_int mod 2 in
           j := !j + 1 ;

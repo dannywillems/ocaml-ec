@@ -4,7 +4,7 @@ let rec repeat n f =
     f
   else (
     f () ;
-    repeat (n - 1) f )
+    repeat (n - 1) f)
 
 module MakeEquality (G : Ec_sig.BASE) = struct
   (** Verify the equality is correct with the value zero *)
@@ -219,7 +219,7 @@ module MakeECProperties (G : Ec_sig.BASE) = struct
       G.(
         eq
           (mul g (Scalar.add a (Scalar.negate a)))
-          (add (mul g a) (mul g (Scalar.negate a)))) )
+          (add (mul g a) (mul g (Scalar.negate a)))))
 
   (** a g + b + g = (a + b) g*)
   let additive_associativity_with_scalar () =
@@ -460,7 +460,7 @@ struct
     in
     assert (
       Bytes.(
-        equal (G.to_compressed_bytes G.zero) expected_zero_bytes_compressed) )
+        equal (G.to_compressed_bytes G.zero) expected_zero_bytes_compressed))
 
   let test_of_compressed_bytes_exn_recover_correct_point_from_uncompressed_representation
       () =

@@ -2,9 +2,8 @@ open Mec.Hash
 
 module Scalar = Ff.MakeFp (struct
   let prime_order =
-    Z.(
-      ((one + one) ** 254)
-      + Z.of_string "45560315531419706090280762371685220353")
+    Z.of_string
+      "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 end)
 
 module Poseidon = Poseidon128.Make (Scalar)
@@ -28,76 +27,58 @@ let test_perm_is_consistent () =
   assert (Array.for_all2 Scalar.eq res_x res_y) ;
   assert (not @@ Array.for_all2 Scalar.eq res_x res_z)
 
-let test_vectors_hades_orchard () =
-  let vectors =
-    [ ( [| Scalar.zero; Scalar.one; Scalar.(one + one) |],
-        [| "11594746544082808193684844477463633150342086886343960773487848974120850181264";
-           "8014665628031024095124899320855562151905643011245776438370704956349329180958";
-           "7719389013904241493524551054574463394884187129046035658329571349046169099816"
-        |] ) ]
-  in
-  List.iter
-    (fun (input, expected_output) ->
-      let s = Poseidon.Strategy.init input in
-      Poseidon.Strategy.apply_perm s ;
-      let res = Poseidon.Strategy.get s in
-      let expected_output =
-        Array.map (fun s -> Scalar.of_string s) expected_output
-      in
-      if
-        not
-          (List.for_all2
-             Scalar.eq
-             (Array.to_list expected_output)
-             (Array.to_list res))
-      then
-        let res =
-          String.concat
-            "; "
-            (Array.to_list @@ Array.map (fun s -> Scalar.to_string s) res)
-        in
-        let expected_output =
-          String.concat
-            "; "
-            ( Array.to_list
-            @@ Array.map (fun s -> Scalar.to_string s) expected_output )
-        in
-        Alcotest.failf
-          "Computed result: [%s]. Expected result: [%s]\n"
-          res
-          expected_output)
-    vectors
-
-let test_vectors_poseidon_orchard () =
+let test_vectors_poseidon128 () =
   let open Poseidon in
   let test_inputs =
-    [ ( [| "0"; "1"; "36893488147419103232" |],
-        "9294224303572826231334390170707418973776412638020053350998514035066722916288"
-      ) ]
+    [| "bb67ed265bf1db490ded2e1ede55c0d14c55521509dc73f9c354e98ab76c9625";
+       "7e74220084d75e10c89e9435d47bb5b8075991b2e29be3b84421dac3b1ee6007";
+       "5ce5481a4d78cca03498f72761da1b9f1d2aa8fb300be39f0e4fe2534f9d4308";
+       "b1e710e3c4a8c35154b0ce4e4f4af6f498ebd79f8e7cdf3150372c7501be250b";
+       "33c9e2025f86b5d82149f1ab8e20a168fc3d99d09b48cbce0286db8752cc3306";
+       "e98206bfdce791e4e5144079b997d4fc25006194b35655f0e48490b26e24ea35";
+       "86d2a95cc552de8d5bb20bd4a407fee5ffdc314e93dfe6b2dc792bc71fd8cc2d";
+       "4edd8307ce28a8c70963d20a7bc28df1e1720bbbc93878a18bd07fad7d51fa15";
+       "eabc7a296704a68aa01f95adc85f6dd758b175745336d8fc795a17984024b21e";
+       "cfc108673c93df305e31c283b9c767b7097ae4e174a223e0c24b15a67b701a3a"
+    |]
   in
-  List.iter
-    (fun (inputs, expected_output) ->
-      let inputs = Array.map (fun x -> Scalar.of_string x) inputs in
-      let ctxt = Hash.init () in
-      let ctxt = Hash.digest ctxt inputs in
-      let v = Hash.get ctxt in
-      let exp_res = Scalar.of_string expected_output in
-      assert (Scalar.eq v exp_res))
-    test_inputs
+  let test_inputs =
+    Array.map (fun s -> Scalar.of_bytes_exn (Hex.to_bytes (`Hex s))) test_inputs
+  in
+  let inner points expected_res =
+    let ctxt = Hash.init () in
+    let ctxt = Hash.digest ctxt points in
+    let v = Hash.get ctxt in
+    let exp_res = Scalar.of_bytes_exn (Hex.to_bytes (`Hex expected_res)) in
+    if not (Scalar.eq v exp_res) then
+      Alcotest.failf
+        "Expected result %s, but computed %s"
+        Hex.(show (of_bytes (Scalar.to_bytes exp_res)))
+        Hex.(show (of_bytes (Scalar.to_bytes v)))
+  in
+  inner [||] "3cad8b2e06121cd27c6577e87d0386be4807f5a9c9515e0dd80cb6961317945a" ;
+  inner
+    (Array.sub test_inputs 0 3)
+    "8ac95ac433d0de78ea7aaf5075091ab4490cc7ac183bf97efc190eec9a015a3f" ;
+  inner
+    (Array.sub test_inputs 0 4)
+    "d59bd4fe7fb7941ffbfe34ef8aaa94f4d90bb2d0c7d1b0aa50674ec8515c7f19" ;
 
-let test_no_padding () =
-  List.iter
-    (fun _ ->
-      let x = Scalar.random () in
-      let ctxt = Poseidon.Hash.init () in
-      let ctxt = Poseidon.Hash.digest ctxt [| x |] in
-      let v = Poseidon.Hash.get ctxt in
+  inner
+    (Array.sub test_inputs 0 5)
+    "ac16f0eec1c9ddacdce21241e6fc72d1430b6f47eaf6a5caf7f4052890287155" ;
 
-      let ctxt = Poseidon.Hash.init ~input_length:2 () in
-      let ctxt = Poseidon.Hash.digest ctxt [| x; Scalar.one |] in
-      let v' = Poseidon.Hash.get ctxt in
-      assert (Scalar.eq v v'))
-    (List.init 10 (fun _i -> _i))
+  inner
+    (Array.sub test_inputs 0 6)
+    "5ad4b11f058b622cf4d9bdbb256745a6878e98615b65edc60d3f183df3f00a61" ;
+
+  inner
+    (Array.sub test_inputs 0 8)
+    "e633a1d2f4366743e0a641b0a8d84d4d1ac9107bf6849f443d28aa0432da481d" ;
+
+  inner
+    (Array.sub test_inputs 0 10)
+    "fc214ce126e686a08a607ee8a755a53a9c2afae186c2d282e488ad77003cac70"
 
 let () =
   Alcotest.run
@@ -106,15 +87,8 @@ let () =
     [ ( "Properties",
         [Alcotest.test_case "Perm is consistent" `Quick test_perm_is_consistent]
       );
-      ( "Test vectors for Hades Poseidon128",
+      ( "Test vectors for Poseidon128",
         [ Alcotest.test_case
-            "Test vectors from zcash-hackworks/zcash-test-vectors"
+            "Regression test vectors for poseidon128"
             `Quick
-            test_vectors_hades_orchard ] );
-      ( "No padding",
-        [Alcotest.test_case "Inputs of length 2" `Quick test_no_padding] )
-      (* ( "Test vectors for Poseidon Poseidon128",
-       *   [ Alcotest.test_case
-       *       "Test vectors from zcash-hackworks/zcash-test-vectors"
-       *       `Quick
-       *       test_vectors_poseidon_orchard ] ) *) ]
+            test_vectors_poseidon128 ] ) ]

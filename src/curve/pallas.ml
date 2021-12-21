@@ -169,23 +169,23 @@ let iso_map p =
     let xxx = Fq.(xx * x) in
     let x' =
       Fq.(
-        ( (csts_iso_map.(0) * xxx)
+        ((csts_iso_map.(0) * xxx)
         + (csts_iso_map.(1) * xx)
         + (csts_iso_map.(2) * x)
-        + csts_iso_map.(3) )
+        + csts_iso_map.(3))
         / (xx + (csts_iso_map.(4) * x) + csts_iso_map.(5)))
     in
     let y' =
       Fq.(
-        ( (csts_iso_map.(6) * xxx)
+        ((csts_iso_map.(6) * xxx)
         + (csts_iso_map.(7) * xx)
         + (csts_iso_map.(8) * x)
-        + csts_iso_map.(9) )
+        + csts_iso_map.(9))
         * y
-        / ( xxx
+        / (xxx
           + (csts_iso_map.(10) * xx)
           + (csts_iso_map.(11) * x)
-          + csts_iso_map.(12) ))
+          + csts_iso_map.(12)))
     in
     Affine.from_coordinates_exn ~x:x' ~y:y'
 

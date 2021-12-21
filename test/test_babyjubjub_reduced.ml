@@ -26,16 +26,16 @@ let test_random_points_not_on_curve () =
   (* of_bytes_opt *)
   assert (Option.is_none (Mec.Curve.BabyJubjubReduced.Affine.of_bytes_opt bytes)) ;
   (* of_bytes_exn *)
-  ( try
-      ignore (Mec.Curve.BabyJubjubReduced.Affine.of_bytes_exn bytes) ;
-      assert false
-    with
+  (try
+     ignore (Mec.Curve.BabyJubjubReduced.Affine.of_bytes_exn bytes) ;
+     assert false
+   with
   | Mec.Curve.BabyJubjubReduced.Affine.Not_on_curve _ -> ()
-  | _ -> assert false ) ;
+  | _ -> assert false) ;
   (* from_coordinates_opt *)
   assert (
     Option.is_none
-      (Mec.Curve.BabyJubjubReduced.Affine.from_coordinates_opt ~u ~v) ) ;
+      (Mec.Curve.BabyJubjubReduced.Affine.from_coordinates_opt ~u ~v)) ;
   (* from_coordinates_exn *)
   try
     ignore (Mec.Curve.BabyJubjubReduced.Affine.from_coordinates_exn ~u ~v) ;

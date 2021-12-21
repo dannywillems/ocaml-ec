@@ -352,9 +352,9 @@ module Unsafe : S = struct
           compress ~le64_to_cpu ctx buf !in_off ;
           in_off := !in_off + 128 ;
           in_len := !in_len - 128
-        done ) ;
+        done) ;
       blit buf !in_off ctx.buf ctx.buflen !in_len ;
-      ctx.buflen <- ctx.buflen + !in_len ) ;
+      ctx.buflen <- ctx.buflen + !in_len) ;
     ()
 
   let unsafe_feed_bytes = feed ~blit:By.blit ~le64_to_cpu:By.le64_to_cpu
@@ -402,7 +402,7 @@ module Unsafe : S = struct
     if len > 0 then (
       let block = By.make 128 '\x00' in
       blit key off block 0 len ;
-      unsafe_feed_bytes ctx block 0 128 ) ;
+      unsafe_feed_bytes ctx block 0 128) ;
     ctx
 
   let with_outlen_and_bytes_key ?personalisation outlen key off len =

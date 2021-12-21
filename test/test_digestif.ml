@@ -30,7 +30,7 @@ let rec repeat n f =
     f
   else (
     f () ;
-    repeat (n - 1) f )
+    repeat (n - 1) f)
 
 module Blake2b = Digestif.Make_BLAKE2B (struct
   let digest_size = 64

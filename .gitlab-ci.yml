@@ -7,9 +7,9 @@ stages:
 
 lint:
   stage: lint
-  image: ocaml/opam:debian-ocaml-4.11
+  image: ocaml/opam:debian-ocaml-4.12
   before_script:
-    - opam install ocamlformat.0.15.0 -y
+    - opam install ocamlformat.0.20.0 -y
   script:
     - dune build @fmt
   rules:

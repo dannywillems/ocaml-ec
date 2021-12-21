@@ -11,7 +11,7 @@
    test_iso_pallas_affine test_iterator test_jubjub
    test_jubjub_conversions_between_forms test_jubjub_weierstrass
    test_neptunus test_pallas_affine test_pallas_jacobian
-   test_pallas_projective test_pedersen_hash test_poseidon128
+   test_pallas_projective test_pedersen_hash test_orchard test_poseidon128
    test_poseidon252 test_redjubjub test_secp256k1_affine
    test_secp256k1_jacobian test_secp256k1_projective test_secp256r1_affine
    test_secp256r1_jacobian test_secp256r1_projective test_sinsemilla

@@ -15,7 +15,7 @@ lint:
   rules:
     - when: always
 
-.build-test: &build_definition
+.build-definition-debian: &build_definition_debian
   stage: build
   before_script:
     # Always update system package manager + setup OPAM env
@@ -33,13 +33,29 @@ lint:
   rules:
     - when: always
 
-build-ocaml-4.11:
-  <<: *build_definition
-  image: ocaml/opam:debian-ocaml-4.11
+build-ocaml-4.11-debian-10:
+  <<: *build_definition_debian
+  image: ocaml/opam:debian-10-ocaml-4.11
 
-build-ocaml-4.12:
-  <<: *build_definition
-  image: ocaml/opam:debian-ocaml-4.12
+build-ocaml-4.12-debian-10:
+  <<: *build_definition_debian
+  image: ocaml/opam:debian-10-ocaml-4.12
+
+build-ocaml-4.13-debian-10:
+  <<: *build_definition_debian
+  image: ocaml/opam:debian-10-ocaml-4.13
+
+build-ocaml-4.11-debian-11:
+  <<: *build_definition_debian
+  image: ocaml/opam:debian-11-ocaml-4.11
+
+build-ocaml-4.12-debian-11:
+  <<: *build_definition_debian
+  image: ocaml/opam:debian-11-ocaml-4.12
+
+build-ocaml-4.13-debian-11:
+  <<: *build_definition_debian
+  image: ocaml/opam:debian-11-ocaml-4.13
 
 doc:
   stage: doc

@@ -1,0 +1,23 @@
+(library
+ (name mec_curve_sig)
+ (public_name mec.CurveSig)
+ (modules ec_sig)
+ (libraries ff-sig))
+
+(library
+ (name mec_curve_utils)
+ (public_name mec.Curve.Utils)
+ (modules ec ec_pbt mec_curve_utils)
+ (libraries ff-sig alcotest mec_curve_sig)
+ (flags
+  (:standard -linkall)))
+
+(library
+ (name mec_curve)
+ (public_name mec.curve)
+ (libraries mec_curve_sig ff mec_curve_utils mec_digestif hex)
+ (flags
+  (:standard -open Mec_digestif -open Mec_curve_utils -open Mec_curve_sig))
+ (modules babyjubjub babyjubjub_reduced bandersnatch bls12_381 bn254
+   curve25519 curve448 jubjub pallas secp256k1 secp256r1 tweedledee
+   tweedledum vesta))

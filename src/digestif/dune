@@ -1,0 +1,4 @@
+(library
+ (name mec_digestif)
+ (public_name mec.digestif)
+ (libraries eqaf bigarray-compat))

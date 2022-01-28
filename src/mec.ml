@@ -1,3 +1,11 @@
+open Mec_curve
+open Mec_curve_sig
+open Mec_curve_utils
+open Mec_hash
+open Mec_digestif
+open Mec_signature
+open Mec_utils
+
 module Curve = struct
   module BabyJubjub = Babyjubjub
   module BabyJubjubReduced = Babyjubjub_reduced
@@ -15,7 +23,7 @@ module Curve = struct
   module Vesta = Vesta
 
   module Utils = struct
-    module PBT = Ec_pbt
+    module PBT = PBT
     module Functor = Ec
   end
 end

@@ -22,31 +22,39 @@
 (*                                                                           *)
 (*****************************************************************************)
 
-module Make (Param : sig
-  val generator : Jubjub.AffineEdwards.t
-end) =
-  Reddsa.MakeRedDSA
-    (Jubjub.AffineEdwards)
-    (struct
-      let length = 512
+open Mec_digestif
 
-      let generator = Param.generator
+(* Reference implementation:
+   https://github.com/zcash/librustzcash/blob/da431a0eb207f69c9b0631d7d02136d819e1bfd9/zcash_primitives/src/sapling/group_hash.rs
+*)
 
-      module Blake2b = Digestif.Make_BLAKE2B (struct
-        let digest_size = 64
-      end)
+(* https://github.com/zcash/librustzcash/blob/da431a0eb207f69c9b0631d7d02136d819e1bfd9/zcash_primitives/src/constants.rs#L12 *)
+let gh_first_block =
+  "096b36a5804bfacef1691e173c366a47ff5ba84a44f26ddd7e8d9f79d5b42df0"
 
-      let hash m =
-        let ctx =
-          Blake2b.init ~personalisation:(Bytes.of_string "Zcash_RedJubjubH") ()
-        in
-        let ctx = Blake2b.feed_bytes ctx m in
-        let res_hexa = Blake2b.to_hex (Blake2b.get ctx) in
-        let res_hexa_hex = `Hex res_hexa in
-        let res_bytes = Hex.to_bytes res_hexa_hex in
-        res_bytes
+module Blake2s = Digestif.Make_BLAKE2S (struct
+  let digest_size = 32
+end)
 
-      let to_compressed = Jubjub.AffineEdwards.to_compressed
+let group_hash message personalisation =
+  let h = Blake2s.init ~personalisation () in
+  let h = Blake2s.feed_string h gh_first_block in
+  let h = Blake2s.feed_bytes h message in
+  let hash_hex = `Hex Blake2s.(to_hex (get h)) in
+  let hash_hex = Hex.to_bytes hash_hex in
+  let p_opt = Jubjub.AffineEdwards.of_compressed_opt hash_hex in
+  match p_opt with
+  | None -> None
+  | Some p ->
+      let p = Jubjub.AffineEdwards.(mul p (Scalar.of_z cofactor)) in
+      if Jubjub.AffineEdwards.is_zero p then None else Some p
 
-      let of_compressed_opt = Jubjub.AffineEdwards.of_compressed_opt
-    end)
+let find_group_hash message personalisation =
+  let rec aux i =
+    let message =
+      Bytes.concat Bytes.empty [message; Bytes.make 1 (char_of_int i)]
+    in
+    let p = group_hash message personalisation in
+    match p with None -> aux (i + 1) | Some p -> p
+  in
+  aux 0

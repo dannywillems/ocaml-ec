@@ -1,3 +1,5 @@
+open Mec_curve_sig
+
 let rec repeat n f =
   if n <= 0 then
     let f () = () in

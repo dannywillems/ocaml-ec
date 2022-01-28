@@ -1,0 +1,12 @@
+(copy_files pedersen_hash/*{ml,mli})
+
+(copy_files poseidon/*{ml,mli})
+
+(copy_files sinsemilla/*{ml,mli})
+
+(library
+ (name mec_hash)
+ (public_name mec.hash)
+ (flags
+  (:standard -open Mec_curve_sig -open Mec_utils -open Mec_curve))
+ (libraries mec_curve mec_utils))

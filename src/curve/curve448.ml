@@ -1,5 +1,3 @@
-(*  *)
-
 (**
   https://datatracker.ietf.org/doc/html/rfc7748#section-4.2
 

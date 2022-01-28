@@ -1,0 +1,6 @@
+(library
+ (name mec_signature)
+ (public_name mec.signature)
+ (flags
+  (:standard -open Mec_curve -open Mec_curve_sig))
+ (libraries mec_curve_sig mec_curve))

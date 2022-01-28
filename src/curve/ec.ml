@@ -41,6 +41,8 @@
       and `not being in the prime subgroup`. This MUST change.
 *)
 
+open Mec_curve_sig
+
 module MakeJacobianWeierstrass
     (Fq : Ff_sig.PRIME)
     (Fp : Ff_sig.PRIME) (Params : sig

@@ -1,3 +1,5 @@
 (library
  (name mec_utils)
+ (instrumentation
+  (backend bisect_ppx))
  (public_name mec.utils))

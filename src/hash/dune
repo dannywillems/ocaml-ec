@@ -7,6 +7,8 @@
 (library
  (name mec_hash)
  (public_name mec.hash)
+ (instrumentation
+  (backend bisect_ppx))
  (flags
   (:standard -open Mec_curve_sig -open Mec_utils -open Mec_curve))
  (libraries mec_curve mec_utils))

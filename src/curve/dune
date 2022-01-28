@@ -1,11 +1,15 @@
 (library
  (name mec_curve_sig)
  (public_name mec.CurveSig)
+ (instrumentation
+  (backend bisect_ppx))
  (modules ec_sig)
  (libraries ff-sig))
 
 (library
  (name mec_curve_utils)
+ (instrumentation
+  (backend bisect_ppx))
  (public_name mec.Curve.Utils)
  (modules ec ec_pbt mec_curve_utils)
  (libraries ff-sig alcotest mec_curve_sig)
@@ -14,6 +18,8 @@
 
 (library
  (name mec_curve)
+ (instrumentation
+  (backend bisect_ppx))
  (public_name mec.curve)
  (libraries mec_curve_sig ff mec_curve_utils mec_digestif hex)
  (flags

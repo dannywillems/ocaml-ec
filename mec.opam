@@ -9,15 +9,16 @@ license: "MIT"
 depends: [
   "dune" {>= "2.7"}
   "zarith" {>= "1.9.1" & < "2.0.0"}
+  "eqaf"
+  "bigarray-compat"
+  "hex"
+  "ff-sig"
+  "ff"
+  "alcotest"
   # For digestif, see
   # https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44.
   # Digestif is forked to add personalisation
   # No version constraint upstream, hence not adding any
-  "eqaf"
-  "bigarray-compat"
-  "hex"
-  "ff"
-  "alcotest"
   "odoc" {with-doc}
   "bisect_ppx" { with-test & >= "2.5" }
 ]

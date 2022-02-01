@@ -4,4 +4,4 @@
   (backend bisect_ppx))
  (public_name mec)
  (libraries mec_curve_sig mec_curve_utils mec_curve mec_utils mec_hash
-   mec_signature))
+   mec_signature mec_permutation))

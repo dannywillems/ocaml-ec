@@ -1,0 +1,6 @@
+(library
+ (name mec_permutation)
+ (public_name mec.permutation)
+ (instrumentation
+  (backend bisect_ppx))
+ (libraries ff-sig))

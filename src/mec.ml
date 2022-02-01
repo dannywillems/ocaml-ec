@@ -2,6 +2,7 @@ open Mec_curve
 open Mec_curve_sig
 open Mec_curve_utils
 open Mec_hash
+open Mec_permutation
 open Mec_digestif
 open Mec_signature
 open Mec_utils
@@ -37,6 +38,10 @@ module Hash = struct
   module Neptunus = Neptunus
   module PedersenHash = Pedersen_hash
   module Sinsemilla = Sinsemilla
+end
+
+module Permutation = struct
+  module Hades = Hades
 end
 
 module Signature = struct

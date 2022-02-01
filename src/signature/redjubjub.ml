@@ -22,8 +22,6 @@
 (*                                                                           *)
 (*****************************************************************************)
 
-open Mec_digestif
-
 module Make (Param : sig
   val generator : Jubjub.AffineEdwards.t
 end) =
@@ -34,7 +32,7 @@ end) =
 
       let generator = Param.generator
 
-      module Blake2b = Digestif.Make_BLAKE2B (struct
+      module Blake2b = Mec_digestif.Make_BLAKE2B (struct
         let digest_size = 64
       end)
 

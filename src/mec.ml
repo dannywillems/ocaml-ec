@@ -3,7 +3,6 @@ open Mec_curve_sig
 open Mec_curve_utils
 open Mec_hash
 open Mec_permutation
-open Mec_digestif
 open Mec_signature
 open Mec_utils
 
@@ -55,7 +54,7 @@ module Protocol = struct
   end
 end
 
-module Digestif = Digestif
+module Digestif = Mec_digestif
 
 module Utils = struct
   module Iterator = Iterator

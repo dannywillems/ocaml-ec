@@ -1,3 +1,12 @@
+(**
+   This is a fork from {{:https://github.com/mirage/digestif } Digestif },
+   commit 891907675ead09b5e1c5de28c24246a0e411a546, adding personalisation to
+   Blake2.
+
+   When {{: https://github.com/mirage/digestif/issues/111 } this issue } is
+   solved, this fork can be removed.
+*)
+
 type bigstring =
   ( char,
     Bigarray_compat.int8_unsigned_elt,

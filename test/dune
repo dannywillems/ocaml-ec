@@ -1,5 +1,13 @@
 (copy_files res/test_vector_pedersen_hash.ml)
 
+(copy_files curve/*{.ml})
+
+(copy_files hash/*{.ml})
+
+(copy_files signature/*{.ml})
+
+(copy_files utils/*{.ml})
+
 (tests
  (names test_babyjubjub test_babyjubjub_reduced
    test_bandersnatch_affine_montgomery test_bandersnatch_affine_weierstrass

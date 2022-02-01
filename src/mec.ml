@@ -41,6 +41,7 @@ end
 
 module Permutation = struct
   module Hades = Hades
+  module Marvellous = Marvellous
 end
 
 module Signature = struct

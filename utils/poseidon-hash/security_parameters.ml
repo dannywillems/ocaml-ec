@@ -13,15 +13,13 @@ let zip l1 l2 =
   List.flatten l
 
 (* Return the number of sbox. This is the cost function used to get the minimal
-   parameter, i.e. we want to lower the number of s_box
-*)
+   parameter, i.e. we want to lower the number of s_box *)
 let compute_cost r_f r_p width = (width * r_f) + r_p
 
 (* The equations are based on the details given in the paper
-   https://eprint.iacr.org/2019/458.pdf, Attack Details. The idea is to brute force
-   and take the smalleest values of r_f and r_p which verifies the equations in
-   section 5.5
-*)
+   https://eprint.iacr.org/2019/458.pdf, Attack Details. The idea is to brute
+   force and take the smalleest values of r_f and r_p which verifies the
+   equations in section 5.5 *)
 let check_round_values_security (p : Z.t) (width : int) (r_f : int) (r_p : int)
     (alpha : int) (security_level : int) =
   let n = Z.log2 p in
@@ -35,16 +33,14 @@ let check_round_values_security (p : Z.t) (width : int) (r_f : int) (r_p : int)
     (* Statistical attack, 5.5.1 *)
     let r_f_statistical = if security_level <= cond_right then 6. else 10. in
     (* Interpolation attack, 5.5.2. Substracting r_p because we have R = r_f +
-       r_p and we want a condition on r_f
-    *)
+       r_p and we want a condition on r_f *)
     let r_f_interpolation =
       ceil (flog_b_x f_alpha 2. *. fmin security_level n)
       +. ceil (flog_b_x f_alpha f_width)
       -. float_of_int r_p
     in
-    (* Groebner 1 attack, 5.5.3. Substracting r_p because we have R = r_f +
-       r_p and we want a condition on r_f
-    *)
+    (* Groebner 1 attack, 5.5.3. Substracting r_p because we have R = r_f + r_p
+       and we want a condition on r_f *)
     let r_f_groebner_1 =
       flog_b_x f_alpha 2.
       *. min (float_of_int security_level /. 3.) (f_n /. 2.)
@@ -58,7 +54,8 @@ let check_round_values_security (p : Z.t) (width : int) (r_f : int) (r_p : int)
         *. flog_b_x f_alpha 2.
         /. float_of_int (width + 1)
       in
-      (* FIXME: Z.log2 p is not correct because we might have some decimals. Can give wrong values!!! *)
+      (* FIXME: Z.log2 p is not correct because we might have some decimals. Can
+         give wrong values!!! *)
       let v2 = flog_b_x f_alpha 2. *. (float_of_int @@ Z.log2up p) in
       min v1 v2
     in

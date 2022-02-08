@@ -2,7 +2,7 @@ open Mec_curve
 open Mec_curve_sig
 open Mec_curve_utils
 open Mec_hash
-open Mec_digestif
+open Mec_permutation
 open Mec_signature
 open Mec_utils
 
@@ -39,6 +39,11 @@ module Hash = struct
   module Sinsemilla = Sinsemilla
 end
 
+module Permutation = struct
+  module Hades = Hades
+  module Marvellous = Marvellous
+end
+
 module Signature = struct
   module RedDSA = Reddsa
   module RedJubjub = Redjubjub
@@ -50,7 +55,7 @@ module Protocol = struct
   end
 end
 
-module Digestif = Digestif
+module Digestif = Mec_digestif
 
 module Utils = struct
   module Iterator = Iterator

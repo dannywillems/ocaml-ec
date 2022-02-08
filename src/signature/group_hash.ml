@@ -22,8 +22,6 @@
 (*                                                                           *)
 (*****************************************************************************)
 
-open Mec_digestif
-
 (* Reference implementation:
    https://github.com/zcash/librustzcash/blob/da431a0eb207f69c9b0631d7d02136d819e1bfd9/zcash_primitives/src/sapling/group_hash.rs
 *)
@@ -32,7 +30,7 @@ open Mec_digestif
 let gh_first_block =
   "096b36a5804bfacef1691e173c366a47ff5ba84a44f26ddd7e8d9f79d5b42df0"
 
-module Blake2s = Digestif.Make_BLAKE2S (struct
+module Blake2s = Mec_digestif.Make_BLAKE2S (struct
   let digest_size = 32
 end)
 

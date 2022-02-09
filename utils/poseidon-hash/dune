@@ -18,3 +18,10 @@
  (libraries zarith core ff digestif hex)
  (preprocess
   (pps ppx_jane)))
+
+(executable
+ (name linear_trick_optimisation)
+ (modules linear_trick_optimisation)
+ (libraries zarith core ff ff-sig digestif hex mec)
+ (preprocess
+  (pps ppx_jane)))

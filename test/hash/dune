@@ -1,0 +1,4 @@
+(tests
+ (names test_neptunus test_orchard test_pedersen_hash test_poseidon128
+   test_poseidon252 test_sinsemilla)
+ (libraries mec ff))

@@ -1,12 +1,9 @@
 open Mec_curve_sig
 
-let rec repeat n f =
-  if n <= 0 then
-    let f () = () in
-    f
-  else (
+let rec repeat n f () =
+  if n > 0 then (
     f () ;
-    repeat (n - 1) f)
+    repeat (n - 1) f ())
 
 module MakeEquality (G : Ec_sig.BASE) = struct
   (** Verify the equality is correct with the value zero *)

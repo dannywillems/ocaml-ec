@@ -42,6 +42,7 @@ end
 module Permutation = struct
   module Hades = Hades
   module Marvellous = Marvellous
+  module HadesLinearOptimisation = Hades_linear_optimisation
 end
 
 module Signature = struct
@@ -59,4 +60,5 @@ module Digestif = Mec_digestif
 
 module Utils = struct
   module Iterator = Iterator
+  module LinearAlgebra = Linear_algebra
 end

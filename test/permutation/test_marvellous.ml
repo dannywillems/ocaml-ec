@@ -1,4 +1,4 @@
-module Parameters : Mec_permutation.Marvellous.PARAMETERS = struct
+module Parameters : Mec.Permutation.Marvellous.PARAMETERS = struct
   let width = 3
 
   let rounds = 14
@@ -21,7 +21,7 @@ module Scalar = Ff.MakeFp (struct
       "52435875175126190479447740508185965837690552500527637822603658699938581184513"
 end)
 
-module Permutation = Mec_permutation.Marvellous.Make (Parameters) (Scalar)
+module Permutation = Mec.Permutation.Marvellous.Make (Parameters) (Scalar)
 
 let test_vectors_from_reference_implementation () =
   let values =

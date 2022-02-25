@@ -1,15 +1,3 @@
-(copy_files res/test_vector_pedersen_hash.ml)
-
-(copy_files curve/*{.ml})
-
-(copy_files hash/*{.ml})
-
-(copy_files permutation/*{.ml})
-
-(copy_files signature/*{.ml})
-
-(copy_files utils/*{.ml})
-
 (tests
  (names test_babyjubjub test_babyjubjub_reduced
    test_bandersnatch_affine_montgomery test_bandersnatch_affine_weierstrass
@@ -17,16 +5,13 @@
    test_bls12_381_projective test_bn254_affine test_bn254_jacobian
    test_bn254_projective test_curve25519_affine_edwards
    test_curve25519_conversions_between_forms test_curve25519_montgomery
-   test_curve448 test_digestif test_ec_functor test_find_group_hash
-   test_iso_pallas_affine test_iterator test_jubjub
+   test_curve448 test_ec_functor test_iso_pallas_affine test_jubjub
    test_jubjub_conversions_between_forms test_jubjub_weierstrass
-   test_marvellous test_neptunus test_pallas_affine test_pallas_jacobian
-   test_pallas_projective test_pedersen_hash test_orchard test_poseidon128
-   test_poseidon252 test_redjubjub test_secp256k1_affine
-   test_secp256k1_jacobian test_secp256k1_projective test_secp256r1_affine
-   test_secp256r1_jacobian test_secp256r1_projective test_sinsemilla
+   test_pallas_affine test_pallas_jacobian test_pallas_projective
+   test_secp256k1_affine test_secp256k1_jacobian test_secp256k1_projective
+   test_secp256r1_affine test_secp256r1_jacobian test_secp256r1_projective
    test_tweedledee_affine test_tweedledee_jacobian test_tweedledee_projective
    test_tweedledum_affine test_tweedledum_jacobian test_tweedledum_projective
    test_vesta_affine test_vesta_jacobian test_vesta_projective)
- (libraries mec)
+ (libraries mec ff)
  (package mec))

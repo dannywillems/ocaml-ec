@@ -24,13 +24,10 @@
 
 module Digestif = Mec.Digestif
 
-let rec repeat n f =
-  if n <= 0 then
-    let f () = () in
-    f
-  else (
+let rec repeat n f () =
+  if n > 0 then (
     f () ;
-    repeat (n - 1) f)
+    repeat (n - 1) f ())
 
 module Blake2b = Digestif.Make_BLAKE2B (struct
   let digest_size = 64

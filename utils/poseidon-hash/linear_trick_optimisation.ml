@@ -17,8 +17,6 @@ let naive_implementation alpha rf rp width =
   let mds_add_partial = rp * (width * (width - 1)) in
   let arc_add_partial = rp * width in
 
-  Printf.printf "Partial add batch %d\n" (mds_add_partial + arc_add_partial) ;
-
   let mds_mul = mds_mul_full + mds_mul_partial in
   let mds_add = mds_add_full + mds_add_partial in
   let arc_add = arc_add_full + arc_add_partial in
@@ -27,7 +25,7 @@ let naive_implementation alpha rf rp width =
   let add = mds_add + arc_add in
   (add, mul)
 
-let linear_trick alpha batch_size rf rp width =
+let linear_skip alpha batch_size rf rp width =
   let nb_mul_per_exp = Z.log2 alpha + 1 in
   let width_square = width * width in
 
@@ -188,32 +186,48 @@ let command =
         let alpha = compute_alpha field_size in
         let naive_add, naive_mul = naive_implementation alpha r_f r_p width in
         let opt_add, opt_mul, _add_mem =
-          linear_trick alpha batch_size r_f r_p width
+          linear_skip alpha batch_size r_f r_p width
         in
+        Printf.printf
+          "Settings\n\
+          \  width = %d\n\
+          \  %d full rounds\n\
+          \  %d partial rounds\n\
+          \  field size = %s\n\
+          \  batch size = %d (i.e skipped partial rounds = %d)\n"
+          width
+          r_f
+          r_p
+          (Z.to_string field_size)
+          batch_size
+          (batch_size - 1) ;
         Printf.printf
           "Naive implementation - %d add ; %d mul\n"
           naive_add
           naive_mul ;
         Printf.printf
-          "Linear trick implementation - %d add ; %d mul\n"
+          "Linear skip implementation - %d add ; %d mul\n"
           opt_add
           opt_mul ;
         Printf.printf
           "Gain/Loss - %d add ; %d mul\n"
           (naive_add - opt_add)
           (naive_mul - opt_mul) ;
-        (* We retrieve the ARC. *)
+        (* We retrieve the ARC *)
         let nb_arc = (r_p + r_f) * width in
         let arc = read_file (module Fp) ark_poseidon128_filename nb_arc in
-        (* We format the MDS in a matrix. *)
+        (* We format the MDS in a matrix *)
         let nb_mds = width * width in
         let mds = read_file (module Fp) mds_poseidon128_filename nb_mds in
         let mds =
           Array.init width (fun i ->
               Array.init width (fun j -> mds.((i * width) + j)))
         in
-        let constants, unbatched_arc =
-          Mec.Permutation.Hades_linear_optimisation.compute_updated_constants
+        let ( _arc_full_round_start,
+              _constants,
+              _unbatched_arc,
+              _arc_full_round_end ) =
+          Mec.Permutation.HadesLinearOptimisation.compute_updated_constants
             (module Fp)
             r_p
             r_f
@@ -222,13 +236,6 @@ let command =
             arc
             mds
         in
-        Printf.printf
-          "Nb batched coefficients and ark: %d\n"
-          (Array.length constants) ;
-        Array.iter (fun x -> print_endline @@ Fp.to_string x) constants ;
-        print_endline "---------------\n\n" ;
-        Printf.printf "Nb unbatched ark: %d\n" (Array.length unbatched_arc) ;
-        Array.iter (fun x -> print_endline @@ Fp.to_string x) unbatched_arc ;
-        print_endline "---------------\n\n")
+        ())
 
 let () = Core.Command.run ~version:"1.0" ~build_info:"dune exec" command

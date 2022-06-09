@@ -3,7 +3,7 @@
 **DO NOT USE IN PRODUCTION**
 
 
-**Mec*** provides elliptic curve and finite field based cryptographic primitives and protocols.
+**Mec** provides elliptic curve and finite field based cryptographic primitives and protocols.
 
 The library characteristics are:
 - written purely in OCaml. No C or assembly code

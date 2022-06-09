@@ -7,18 +7,18 @@
 
 The library characteristics are:
 - written purely in OCaml. No C or assembly code
-- implementations are modulars, focusing on readability of the parameters for
-  the different instantiations of the primitives
+- implementations are modular, focusing on parameters readability for
+  the different primitive instantiations
 - can be used to generate test vectors
-- can be used to create new instantiations of primitives
-- can be compiled in JavaScript to be run in web-browsers, if the performance is not key
+- can be used to create new primitive instantiations
+- can be compiled in JavaScript to be run in web-browsers, if the performance is not important
 - provides tools to generate secure parameters, like for Poseidon hash function
 - can be used to prototype primitives or protocols
 
 Do not use this library if:
-- performance is key. Mec is not meant to be efficient, and maybe will never be.
+- performance is important. Mec is not meant to be efficient, and maybe will never be.
 - you want to compare the performance between different cryptographic
-  primitives. As performance is not key in the implementation, it won't make
+  primitives. As performance is not important in the implementation, it won't make
   sense to compare.
 
 Here some suggestions of libraries you can use to get better performances:
@@ -40,8 +40,7 @@ Here some suggestions of libraries you can use to get better performances:
 - signature (`Mec.Signature`) focuses on implementing EC or field signature schemes.
 
 - protocols (`Mec.Protocols`) implements different protocols using the
-  cryptographic primitives. At the moment, this section is poor but might grow
-  depending on the time I have.
+  cryptographic primitives. At the moment, this section is poor.
 
 
 ## Install and use

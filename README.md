@@ -2,6 +2,7 @@
 
 **DO NOT USE IN PRODUCTION**
 
+
 **Mec*** provides elliptic curve and finite field based cryptographic primitives and protocols.
 
 The library characteristics are:
@@ -33,7 +34,7 @@ Here some suggestions of libraries you can use to get better performances:
   conversions are provided.
 
 - hash (`Mec.Hash`) focuses on implementing EC or field based hash functions
-  like Poseidon, Sinsemilla, Pedersenh. We tend to add instances found in
+  like Poseidon, Sinsemilla, Pedersen. We tend to add instances found in
   projects like Dusk, Zcash and others.
   
 - signature (`Mec.Signature`) focuses on implementing EC or field signature schemes.
@@ -45,7 +46,9 @@ Here some suggestions of libraries you can use to get better performances:
 
 ## Install and use
 
-There is no plan to release a version of Mec right now as it is not meant to be used in production. There will maybe be releases from time to time. If not, it is recommended to pin to a certain commit, or master.
+There is no plan to release a version of Mec right now as it is not meant to be
+used in production. There will maybe be releases from time to time. If not, it
+is recommended to pin to a certain commit, or master.
 
 ```shell
 opam pin add mec.dev git+https://gitlab.com/dannywillems/ocaml-ec\#master --no-action

@@ -1,7 +1,7 @@
 opam-version: "2.0"
 authors: [ "Danny Willems <be.danny.willems@gmail.com>" ]
 maintainer: [ "Danny Willems <be.danny.willems@gmail.com>" ]
-synopsis: "MEC library"
+synopsis: "Mec - Mini Elliptic Curve library"
 homepage: "https://gitlab.com/dannywillems/ocaml-ec"
 dev-repo: "git+https://gitlab.com/dannywillems/ocaml-ec.git"
 bug-reports: "https://gitlab.com/dannywillems/ocaml-ec/issues"
@@ -18,7 +18,7 @@ depends: [
   # For digestif, see
   # https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44.
   # Digestif is forked to add personalisation
-  # No version constraint upstream, hence not adding any
+  # No version constraint upstream, therefore not adding any
   "odoc" {with-doc}
   "bisect_ppx" { with-test & >= "2.5" }
 ]

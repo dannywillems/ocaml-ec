@@ -13,8 +13,8 @@ depends: [
   "eqaf"
   "bigarray-compat"
   "hex" {>= "1.3.0"}
-  "ff-sig" {>= "0.6.0"}
-  "ff" {>= "0.6.0"}
+  "ff-sig" {>= "0.6.0" & < "0.7.0"}
+  "ff" {>= "0.6.0" & < "0.7.0"}
   "alcotest"
   # For digestif, see
   # https://github.com/mirage/digestif/blob/344f54f55937df66897995bcea417534ece69ca3/digestif.opam#L44.

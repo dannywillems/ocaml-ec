@@ -1,4 +1,4 @@
-# Mec - Mini Elliptic Curve library
+# Mec - Modular Experimental Cryptography library
 
 **DO NOT USE IN PRODUCTION**
 

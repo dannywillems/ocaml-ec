@@ -14,6 +14,7 @@ module Curve = struct
   module BLS12_381 = Bls12_381
   module Curve25519 = Curve25519
   module Curve448 = Curve448
+  module Grumpkin = Grumpkin
   module Jubjub = Jubjub
   module Pallas = Pallas
   module Secp256k1 = Secp256k1

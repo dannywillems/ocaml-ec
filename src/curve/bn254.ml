@@ -14,13 +14,13 @@
 module Fq = Ff.MakeFp (struct
   let prime_order =
     Z.of_string
-      "0x2523648240000001BA344D80000000086121000000000013A700000000000013"
+      "21888242871839275222246405745257275088696311157297823662689037894645226208583"
 end)
 
 module Fp = Ff.MakeFp (struct
   let prime_order =
     Z.of_string
-      "0x2523648240000001BA344D8000000007FF9F800000000010A10000000000000D"
+      "21888242871839275222246405745257275088548364400416034343698204186575808495617"
 end)
 
 module Projective =
@@ -28,7 +28,7 @@ module Projective =
     (struct
       let a = Fq.zero
 
-      let b = Fq.of_z (Z.of_int 2)
+      let b = Fq.of_z (Z.of_int 3)
 
       let cofactor = Z.one
 
@@ -38,11 +38,8 @@ module Projective =
       let bytes_generator =
         Bytes.concat
           Bytes.empty
-          [ Fq.(
-              to_bytes
-                (of_string
-                   "0x2523648240000001BA344D80000000086121000000000013A700000000000012"));
-            Fq.(to_bytes (of_string "1"));
+          [ Fq.(to_bytes (of_string "1"));
+            Fq.(to_bytes (of_string "2"));
             Fq.(to_bytes one) ]
     end)
 
@@ -51,7 +48,7 @@ module Jacobian =
     (struct
       let a = Fq.zero
 
-      let b = Fq.of_z (Z.of_int 2)
+      let b = Fq.of_z (Z.of_int 3)
 
       let cofactor = Z.one
 
@@ -61,11 +58,8 @@ module Jacobian =
       let bytes_generator =
         Bytes.concat
           Bytes.empty
-          [ Fq.(
-              to_bytes
-                (of_string
-                   "0x2523648240000001BA344D80000000086121000000000013A700000000000012"));
-            Fq.(to_bytes (of_string "1"));
+          [ Fq.(to_bytes (of_string "1"));
+            Fq.(to_bytes (of_string "2"));
             Fq.(to_bytes one) ]
     end)
 
@@ -74,7 +68,7 @@ module Affine =
     (struct
       let a = Fq.zero
 
-      let b = Fq.of_z (Z.of_int 2)
+      let b = Fq.of_z (Z.of_int 3)
 
       let cofactor = Z.one
 
@@ -84,11 +78,7 @@ module Affine =
       let bytes_generator =
         Bytes.concat
           Bytes.empty
-          [ Fq.(
-              to_bytes
-                (of_string
-                   "0x2523648240000001BA344D80000000086121000000000013A700000000000012"));
-            Fq.(to_bytes (of_string "1")) ]
+          [Fq.(to_bytes (of_string "1")); Fq.(to_bytes (of_string "2"))]
     end)
 
 let from_affine_weierstrass_to_jacobian_weierstrass p =

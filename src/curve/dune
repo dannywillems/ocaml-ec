@@ -25,5 +25,5 @@
  (flags
   (:standard -open Mec_digestif -open Mec_curve_utils -open Mec_curve_sig))
  (modules babyjubjub babyjubjub_reduced bandersnatch bls12_381 bn254
-   curve25519 curve448 jubjub pallas secp256k1 secp256r1 tweedledee
+   curve25519 curve448 grumpkin jubjub pallas secp256k1 secp256r1 tweedledee
    tweedledum vesta))

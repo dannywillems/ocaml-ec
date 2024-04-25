@@ -36,7 +36,7 @@ Here some suggestions of libraries you can use to get better performances:
 - hash (`Mec.Hash`) focuses on implementing EC or field based hash functions
   like Poseidon, Sinsemilla, Pedersen. We tend to add instances found in
   projects like Dusk, Zcash and others.
-  
+
 - signature (`Mec.Signature`) focuses on implementing EC or field signature schemes.
 
 - protocols (`Mec.Protocols`) implements different protocols using the

@@ -50,7 +50,7 @@ used in production. There will maybe be releases from time to time. If not, it
 is recommended to pin to a certain commit, or master.
 
 ```shell
-opam pin add mec.dev git+https://gitlab.com/dannywillems/ocaml-ec\#master --no-action
+opam pin add mec.dev git+https://github.com/dannywillems/ocaml-ec\#master --no-action
 opam install mec.dev
 ```
 
